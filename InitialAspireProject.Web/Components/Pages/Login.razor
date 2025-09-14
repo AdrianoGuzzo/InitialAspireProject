@@ -1,7 +1,8 @@
 @page "/login"
 @using System.ComponentModel.DataAnnotations
-@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @using InitialAspireProject.Web.Components
+@using InitialAspireProject.Web.Services
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @inject NavigationManager NavigationManager
 @inject ILoginService LoginService
 @inject ProtectedLocalStorage localStorage
@@ -81,15 +82,25 @@
 </div>
 
 @code {
-    private string message;
+    private string? message;
     [SupplyParameterFromForm]
-    private LoginModel loginModel { get; set; }
+    private LoginModel? loginModel { get; set; }
     private ResponseToken? responseToken { get; set; }
 
     protected override void OnInitialized() => loginModel ??= new();
 
     private async Task HandleLogin()
     {
+        if (string.IsNullOrEmpty(loginModel?.Username)) {
+             message = "O usuário é obrigatório.";
+            return;
+        }
+
+        if (string.IsNullOrEmpty(loginModel?.Password)) {
+            message = "A senha é obrigatória.";
+            return;            
+        }
+
         responseToken = await LoginService.LoginAsync(loginModel.Username, loginModel.Password);
 
         if (responseToken is null)

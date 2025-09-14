@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using System.Net.Mime;
 
 namespace InitialAspireProject.ApiIdentity
 {

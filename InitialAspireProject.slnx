@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="InitialAspireProject.ApiCore/InitialAspireProject.ApiCore.csproj" />
   <Project Path="InitialAspireProject.ApiIdentity/InitialAspireProject.ApiIdentity.csproj" />
   <Project Path="InitialAspireProject.AppHost/InitialAspireProject.AppHost.csproj" />
   <Project Path="InitialAspireProject.ServiceDefaults/InitialAspireProject.ServiceDefaults.csproj" />

@@ -1,9 +1,10 @@
 @page "/weather"
+@using InitialAspireProject.Web.Services
 @attribute [StreamRendering(true)]
 @attribute [OutputCache(Duration = 5)]
 @attribute [Authorize]
 
-@inject WeatherApiClient WeatherApi
+@inject WeatherApiService WeatherApi
 
 <PageTitle>Weather - Initial Aspire Project</PageTitle>
 

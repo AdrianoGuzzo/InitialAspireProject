@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Sdk Name="Aspire.AppHost.Sdk" Version="9.4.0" />
 
@@ -11,6 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\InitialAspireProject.ApiCore\InitialAspireProject.ApiCore.csproj" />
     <ProjectReference Include="..\InitialAspireProject.ApiIdentity\InitialAspireProject.ApiIdentity.csproj" />
     <ProjectReference Include="..\InitialAspireProject.Web\InitialAspireProject.Web.csproj" />
   </ItemGroup>

@@ -1,4 +1,4 @@
-namespace InitialAspireProject.ApiIdentity;
+namespace InitialAspireProject.ApiCore.Domain;
 
 public class WeatherForecast
 {

@@ -2,30 +2,18 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using System.Net.Http.Headers;
 
-namespace InitialAspireProject.Web;
-
-
-public class WeatherApiClient(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
+namespace InitialAspireProject.Web.Services;
+public class WeatherApiService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
 {
     [Authorize]
     public async Task<WeatherForecast[]> GetWeatherAsync(int maxItems = 10, CancellationToken cancellationToken = default)
     {
-        // Obter o token de acesso do contexto HTTP
-        var httpContext = httpContextAccessor.HttpContext;
-        if (httpContext != null)
-        {
-            var accessToken = await httpContext.GetTokenAsync("access_token");
-            if (!string.IsNullOrEmpty(accessToken))
-            {
-                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-            }
-        }
 
         List<WeatherForecast>? forecasts = null;
 
         try
         {
-            await foreach (var forecast in httpClient.GetFromJsonAsAsyncEnumerable<WeatherForecast>("/api/weather", cancellationToken))
+            await foreach (var forecast in httpClient.GetFromJsonAsAsyncEnumerable<WeatherForecast>("/WeatherForecast", cancellationToken))
             {
                 if (forecasts?.Count >= maxItems)
                 {
@@ -40,7 +28,6 @@ public class WeatherApiClient(HttpClient httpClient, IHttpContextAccessor httpCo
         }
         catch (HttpRequestException ex)
         {
-            // Log do erro ou tratamento específico
             Console.WriteLine($"Erro ao chamar API: {ex.Message}");
             return [];
         }

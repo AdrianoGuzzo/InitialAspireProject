@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
-builder.AddRedisOutputCache("cache");
+builder.AddRedisOutputCache("CacheRedis");
 
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthStateProvider>();
@@ -18,38 +18,37 @@ builder.Services.AddHttpClient();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddDistributedMemoryCache();
-    builder.Services.AddSession(options =>
-    {
+builder.Services.AddSession(options =>
+{
     options.Cookie.HttpOnly = true;
-options.Cookie.IsEssential = true;
-options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.IsEssential = true;
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
 });
-    
-    builder.Services
-    .AddAuthentication("Cookies")
-        .AddCookie("Cookies", options =>
-        {
+
+builder.Services
+.AddAuthentication("Cookies")
+    .AddCookie("Cookies", options =>
+    {
         options.LoginPath = "/";
         options.AccessDeniedPath = "/forbidden";
         options.Cookie.HttpOnly = true;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-options.SlidingExpiration = true;
-});
+        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+        options.SlidingExpiration = true;
+    });
 
 
-    // Add services to the container.
 builder.Services.AddRazorComponents()
 .AddInteractiveServerComponents();
 
-    builder.Services.AddHttpClient<ILoginService, LoginService>(client =>
-    {    
-client.BaseAddress = new("https+http://ApiIdentity");
+builder.Services.AddHttpClient<ILoginService, LoginService>(client =>
+{
+    client.BaseAddress = new("https+http://ApiIdentity");
 });
-    
-        builder.Services.AddHttpClient<WeatherApiClient>(client =>
-        {     
-    client.BaseAddress = new("https+http://apiservice");
-    });
+
+builder.Services.AddHttpClient<WeatherApiService>(client =>
+{
+    client.BaseAddress = new("https+http://ApiCore");
+});
 
 var app = builder.Build();
 

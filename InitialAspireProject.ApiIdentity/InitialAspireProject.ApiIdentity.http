@@ -1,0 +1,6 @@
+@InitialAspireProject.ApiIdentity_HostAddress = http://localhost:5233
+
+GET {{InitialAspireProject.ApiIdentity_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,0 +1,30 @@
+@page "/protected"
+@attribute [Authorize]
+@attribute [StreamRendering]
+
+<PageTitle>Página Protegida</PageTitle>
+
+<h1>Página Protegida</h1>
+
+<div class="alert alert-success">
+    <h4>Acesso autorizado!</h4>
+    <p>Esta página só pode ser acessada por usuários autenticados.</p>
+    <p><strong>Usuário:</strong> @User?.Identity?.Name</p>
+    <p><strong>Autenticado:</strong> @User?.Identity?.IsAuthenticated</p>
+</div>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationState { get; set; }
+    
+    private System.Security.Claims.ClaimsPrincipal? User { get; set; }
+    
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthenticationState != null)
+        {
+            var authState = await AuthenticationState;
+            User = authState.User;
+        }
+    }
+}

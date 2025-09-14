@@ -1,0 +1,41 @@
+﻿@using InitialAspireProject.Web.Components.Pages
+@using System.Security.Claims
+@inject AuthenticationStateProvider AuthStateProvider
+
+<CascadingAuthenticationState>
+    @if (contextUser?.Identity?.IsAuthenticated ?? false)
+    {
+        <!-- Usuário autenticado → renderizar router -->
+        <Router AppAssembly="@typeof(Program).Assembly">
+            <Found Context="routeData">
+                <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(Layout.MainLayout)">
+                    <NotAuthorized>
+                        <p>Você não tem acesso à essa página.</p>
+                    </NotAuthorized>
+                </AuthorizeRouteView>
+                <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+            </Found>
+            <NotFound>
+                <LayoutView Layout="@typeof(Layout.MainLayout)">
+                    <p>Página não encontrada.</p>
+                </LayoutView>
+            </NotFound>
+        </Router>
+    }
+    else
+    {
+        <!-- Usuário NÃO autenticado → mostrar Login fora do router -->
+        <Login />
+    }
+</CascadingAuthenticationState>
+
+@code {
+    private ClaimsPrincipal? contextUser;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authProvider = (JwtAuthStateProvider)AuthStateProvider;
+        var authenticationState = await authProvider.GetAuthenticationStateAsync();
+        contextUser = authenticationState.User;
+    }
+}

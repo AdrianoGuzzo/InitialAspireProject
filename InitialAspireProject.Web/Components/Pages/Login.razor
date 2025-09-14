@@ -1,0 +1,67 @@
+﻿@page "/login"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject NavigationManager NavigationManager
+@inject ILoginService LoginService
+@inject ProtectedLocalStorage localStorage
+@inject HttpClient httpClient
+@inject AuthenticationStateProvider AuthStateProvider
+
+<h3>Login</h3>
+
+<EditForm Model="loginModel" OnValidSubmit="HandleLogin" FormName="LoginForm">
+	<DataAnnotationsValidator />
+	<ValidationSummary />
+
+	<div class="form-group">
+		<label>Usuário:</label>
+		<InputText @bind-Value="loginModel.Username" class="form-control" />
+		<ValidationMessage For="@(() => loginModel.Username)" />
+	</div>
+
+	<div class="form-group">
+		<label>Senha:</label>
+		<InputText @bind-Value="loginModel.Password" type="password" class="form-control" />
+		<ValidationMessage For="@(() => loginModel.Password)" />
+	</div>
+
+	<button type="submit" class="btn btn-primary">Entrar</button>
+</EditForm>
+
+@if (!string.IsNullOrEmpty(message))
+{
+	<p class="text-danger">@message</p>
+}
+
+@code {
+	private string message;
+	[SupplyParameterFromForm]
+	private LoginModel loginModel { get; set; }
+	private ResponseToken? responseToken { get; set; }
+
+	protected override void OnInitialized() => loginModel ??= new();
+
+	private async Task HandleLogin()
+	{
+		responseToken = await LoginService.LoginAsync(loginModel.Username, loginModel.Password);
+
+		if (responseToken is null)
+		{
+			message = "Usuário ou senha inválidos.";
+			return;
+		}
+
+		var authProvider = (JwtAuthStateProvider)AuthStateProvider;
+		await authProvider.MarkUserAsAuthenticated(responseToken.Token);
+
+		// Redireciona ou atualiza a UI
+		NavigationManager.NavigateTo("/");
+	}	
+
+	public record LoginModel
+	{
+		
+		public string? Username { get; set; }
+		public string? Password { get; set; }
+	}
+}

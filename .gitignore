@@ -1,0 +1,46 @@
+# Build
+[Bb]in/
+[Oo]bj/
+
+# Runtime
+*.dll
+*.exe
+*.log
+*.sql
+*.db
+*.db-shm
+*.db-wal
+
+# User-specific
+*.user
+*.suo
+*.userprefs
+*.pidb
+*.svclog
+
+# Cache
+*.pdb
+*.cache
+*.bak
+*.backup
+*.tmp
+*.temp
+
+# Visual Studio
+.vs/
+*.csproj.user
+
+# Packages
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+
+# Aspire specifics (containers, infra stuff)
+.env
+docker-compose.override.yml
+**/data/
+
+# OS
+.DS_Store
+Thumbs.db

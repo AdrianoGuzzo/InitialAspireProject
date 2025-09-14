@@ -1,10 +1,8 @@
-using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
-
 namespace InitialAspireProject.Web.Services;
 
 public class ThemeService
 {
-    private string _currentTheme = "dark";
+    private string _currentTheme = "cerulean";
 
     public event Action? OnThemeChanged;
 
@@ -31,7 +29,7 @@ public class ThemeService
 
     public async Task InitializeAsync()
     {
-        var result = "dark";
+        var result = "cerulean";
         if (!string.IsNullOrEmpty(result) && AvailableThemes.ContainsKey(result))
         {
             _currentTheme = result;

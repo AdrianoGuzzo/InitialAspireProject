@@ -1,46 +1,141 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-	<div class="container-fluid">
-		<a class="navbar-brand" href="">InitialAspireProject</a>
-	</div>
+<!-- Brand Header -->
+<div class="navbar-brand-wrapper bg-primary p-3 text-center">
+    <a class="navbar-brand text-white text-decoration-none fw-bold" href="/">
+        <i class="bi bi-rocket-takeoff me-2"></i>
+        Initial Aspire Project
+    </a>
 </div>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+<!-- Mobile Toggle (Hidden by default, shown on mobile) -->
+<button class="btn btn-outline-light d-md-none m-2" type="button" 
+        onclick="document.querySelector('.nav-scrollable').classList.toggle('show')">
+    <i class="bi bi-list"></i>
+    <span class="ms-1">Menu</span>
+</button>
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-	<nav class="nav flex-column">
-		<div class="nav-item px-3">
-			<AuthorizeView>
-				<Authorized>
-					<div class="nav-item px-3">
-						<span class="nav-link">
-							<span class="bi bi-person-fill" aria-hidden="true"></span>
-							Olá, @context.User.Identity?.Name
-						</span>
-					</div>
-					<div class="nav-item px-3">
-						<a class="nav-link" href="/logout">
-							<span class="bi bi-box-arrow-right" aria-hidden="true"></span> Logout
-						</a>
-					</div>
-				</Authorized>
-			</AuthorizeView>
-		</div>
-		<div class="nav-item px-3">
-			<NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-				<span class="bi bi-house-door-fill" aria-hidden="true"></span> Home
-			</NavLink>
-		</div>
+<!-- Navigation Menu -->
+<div class="nav-scrollable flex-grow-1 overflow-auto">
+    <nav class="nav flex-column p-2">
+        
+        <!-- User Section -->
+        <AuthorizeView>
+            <Authorized>
+                <div class="nav-item mb-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body py-2 px-3">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-person-circle me-2 fs-4"></i>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold small">Bem-vindo!</div>
+                                    <div class="small text-truncate">@context.User.Identity?.Name</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </Authorized>
+            <NotAuthorized>
+                <div class="nav-item mb-3">
+                    <div class="card bg-warning text-dark">
+                        <div class="card-body py-2 px-3">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-person-x me-2 fs-4"></i>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold small">Não autenticado</div>
+                                    <a href="/login" class="small text-dark">Fazer login</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </NotAuthorized>
+        </AuthorizeView>
 
-		<div class="nav-item px-3">
-			<NavLink class="nav-link" href="counter">
-				<span class="bi bi-plus-square-fill" aria-hidden="true"></span> Counter
-			</NavLink>
-		</div>
+        <!-- Navigation Links -->
+        <div class="nav-item">
+            <h6 class="nav-header text-muted text-uppercase small fw-bold px-3 mb-2">
+                <i class="bi bi-compass me-1"></i>
+                Navegação
+            </h6>
+        </div>
 
-		<div class="nav-item px-3">
-			<NavLink class="nav-link" href="weather">
-				<span class="bi bi-list-nested" aria-hidden="true"></span> Weather
-			</NavLink>
-		</div>
-	</nav>
+        <div class="nav-item">
+            <a class="nav-link text-white d-flex align-items-center py-2 px-3 rounded" 
+                     href="/" >
+                <i class="bi bi-house-door me-2"></i>
+                Home
+            </a>
+        </div>
+
+        <div class="nav-item">
+            <a class="nav-link text-white d-flex align-items-center py-2 px-3 rounded" 
+                     href="counter">
+                <i class="bi bi-plus-square me-2"></i>
+                Counter
+            </a>
+        </div>
+
+        <div class="nav-item">
+            <a class="nav-link text-white d-flex align-items-center py-2 px-3 rounded" 
+                     href="weather">
+                <i class="bi bi-cloud-sun me-2"></i>
+                Weather
+            </a>
+        </div>
+
+        <div class="nav-item">
+            <a class="nav-link text-white d-flex align-items-center py-2 px-3 rounded" 
+                     href="themes">
+                <i class="bi bi-palette me-2"></i>
+                Temas
+            </a>
+        </div>
+
+        <!-- Divider -->
+        <hr class="border-secondary my-3">
+
+        <!-- Additional Section -->
+        <div class="nav-item">
+            <h6 class="nav-header text-muted text-uppercase small fw-bold px-3 mb-2">
+                <i class="bi bi-gear me-1"></i>
+                Sistema
+            </h6>
+        </div>
+
+        <AuthorizeView>
+            <Authorized>
+                <div class="nav-item">
+                    <a class="nav-link text-white d-flex align-items-center py-2 px-3 rounded" 
+                       href="/profile">
+                        <i class="bi bi-person-gear me-2"></i>
+                        Perfil
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link text-white d-flex align-items-center py-2 px-3 rounded" 
+                       href="/settings">
+                        <i class="bi bi-gear me-2"></i>
+                        Configurações
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link text-danger d-flex align-items-center py-2 px-3 rounded" 
+                       href="/logout">
+                        <i class="bi bi-box-arrow-right me-2"></i>
+                        Sair
+                    </a>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+    </nav>
+</div>
+
+<!-- Footer in Sidebar -->
+<div class="mt-auto p-3 border-top border-secondary">
+    <div class="text-center">
+        <small class="text-muted">
+            <i class="bi bi-info-circle me-1"></i>
+            v1.0.0
+        </small>
+    </div>
 </div>

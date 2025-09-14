@@ -12,20 +12,12 @@ var postgres = builder.AddPostgres("postgres")
 if (builder.Environment.IsDevelopment())
     postgres.WithHostPort(5432);
 
-var identityDb2 = postgres.AddDatabase("IdentityDb2");
-var identityDb = postgres.AddDatabase("identitydb");
-var apiDb = postgres.AddDatabase("apidb");
+var identityDb = postgres.AddDatabase("IdentityDb");
 
 var apiIdentity= builder.AddProject<Projects.InitialAspireProject_ApiIdentity>("ApiIdentity")
     .WithHttpHealthCheck("/health")
-    .WithReference(identityDb2)
-    .WaitFor(identityDb2); ;
-
-// Configurar o serviço de API com referência ao banco
-var apiService = builder.AddProject<Projects.InitialAspireProject_ApiService>("apiservice")
-    .WithHttpHealthCheck("/health")
     .WithReference(identityDb)
-    .WaitFor(postgres);
+    .WaitFor(identityDb); ;
 
 // Configurar o frontend web
 builder.AddProject<Projects.InitialAspireProject_Web>("webfrontend")
@@ -33,11 +25,7 @@ builder.AddProject<Projects.InitialAspireProject_Web>("webfrontend")
     .WithHttpHealthCheck("/health")
     .WithReference(cache)
     .WaitFor(cache)
-    .WithReference(apiService)
-    .WaitFor(apiService)
     .WithReference(apiIdentity)
     .WaitFor(apiIdentity);
-
-
 
 builder.Build().Run();

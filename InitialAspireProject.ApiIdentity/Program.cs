@@ -11,7 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 
 // Configurar PostgreSQL
-builder.AddNpgsqlDbContext<ApplicationDbContext>("identitydb2");
+builder.AddNpgsqlDbContext<ApplicationDbContext>("identitydb");
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -82,6 +82,7 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     await context.Database.MigrateAsync();
+    await Seeder.SeedAsync(scope.ServiceProvider);
 }
 
 app.UseSwagger();

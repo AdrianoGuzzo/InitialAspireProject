@@ -1,10 +1,8 @@
 using Blazored.LocalStorage;
 using InitialAspireProject.Web;
 using InitialAspireProject.Web.Components;
+using InitialAspireProject.Web.Services;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,47 +12,48 @@ builder.AddRedisOutputCache("cache");
 
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthStateProvider>();
+builder.Services.AddScoped<ThemeService>();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddHttpClient();
 
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSession(options =>
-{
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-    options.IdleTimeout = TimeSpan.FromMinutes(30); // Token expira em 30min de inatividade
-});
-
-builder.Services
-    .AddAuthentication("Cookies") // aqui você define o esquema default
-    .AddCookie("Cookies", options =>
+    builder.Services.AddSession(options =>
     {
+    options.Cookie.HttpOnly = true;
+options.Cookie.IsEssential = true;
+options.IdleTimeout = TimeSpan.FromMinutes(30); // Token expira em 30min de inatividade
+});
+    
+    builder.Services
+    .AddAuthentication("Cookies") // aqui vocÃª define o esquema default
+        .AddCookie("Cookies", options =>
+        {
         options.LoginPath = "/login";
         options.AccessDeniedPath = "/forbidden";
         options.Cookie.HttpOnly = true;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-        options.SlidingExpiration = true;
-    });
-
-
-// Add services to the container.
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
-
-builder.Services.AddHttpClient<ILoginService, LoginService>(client =>
-{
-    // This URL uses "https+http://" to indicate HTTPS is preferred over HTTP.
-    // Learn more about service discovery scheme resolution at https://aka.ms/dotnet/sdschemes.
-    client.BaseAddress = new("https+http://ApiIdentity");
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+options.SlidingExpiration = true;
 });
 
-builder.Services.AddHttpClient<WeatherApiClient>(client =>
+
+    // Add services to the container.
+builder.Services.AddRazorComponents()
+.AddInteractiveServerComponents();
+
+    builder.Services.AddHttpClient<ILoginService, LoginService>(client =>
     {
+    // This URL uses "https+http://" to indicate HTTPS is preferred over HTTP.
+// Learn more about service discovery scheme resolution at https://aka.ms/dotnet/sdschemes.
+client.BaseAddress = new("https+http://ApiIdentity");
+});
+    
+        builder.Services.AddHttpClient<WeatherApiClient>(client =>
+        {
         // This URL uses "https+http://" to indicate HTTPS is preferred over HTTP.
-        // Learn more about service discovery scheme resolution at https://aka.ms/dotnet/sdschemes.
-        client.BaseAddress = new("https+http://apiservice");
+    // Learn more about service discovery scheme resolution at https://aka.ms/dotnet/sdschemes.
+    client.BaseAddress = new("https+http://apiservice");
     });
 
 var app = builder.Build();

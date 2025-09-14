@@ -1,67 +1,116 @@
-﻿@page "/login"
+@page "/login"
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using InitialAspireProject.Web.Components
 @inject NavigationManager NavigationManager
 @inject ILoginService LoginService
 @inject ProtectedLocalStorage localStorage
 @inject HttpClient httpClient
 @inject AuthenticationStateProvider AuthStateProvider
 
-<h3>Login</h3>
+<div class="container-fluid vh-100 d-flex align-items-center justify-content-center bg-light">
+    <!-- Theme Selector - Positioned absolutely -->
+    <div class="position-absolute top-0 end-0 m-3">
+        <ThemeSelector />
+    </div>
 
-<EditForm Model="loginModel" OnValidSubmit="HandleLogin" FormName="LoginForm">
-	<DataAnnotationsValidator />
-	<ValidationSummary />
+    <div class="row w-100 justify-content-center">
+        <div class="col-12 col-sm-8 col-md-6 col-lg-4 col-xl-3">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center py-3">
+                    <h4 class="mb-0">
+                        <i class="bi bi-person-circle me-2"></i>
+                        Login
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-muted text-center mb-4">Faça login para acessar o sistema</p>
 
-	<div class="form-group">
-		<label>Usuário:</label>
-		<InputText @bind-Value="loginModel.Username" class="form-control" />
-		<ValidationMessage For="@(() => loginModel.Username)" />
-	</div>
+                    <EditForm Model="loginModel" OnValidSubmit="HandleLogin" FormName="LoginForm">
+                        <DataAnnotationsValidator />
+                        
+                        <div class="mb-3">
+                            <label for="username" class="form-label">
+                                <i class="bi bi-person me-1"></i>
+                                Usuário
+                            </label>
+                            <InputText @bind-Value="loginModel.Username" 
+                                      id="username"
+                                      class="form-control" 
+                                      placeholder="Digite seu usuário" />
+                            <ValidationMessage For="@(() => loginModel.Username)" class="text-danger small" />
+                        </div>
 
-	<div class="form-group">
-		<label>Senha:</label>
-		<InputText @bind-Value="loginModel.Password" type="password" class="form-control" />
-		<ValidationMessage For="@(() => loginModel.Password)" />
-	</div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">
+                                <i class="bi bi-lock me-1"></i>
+                                Senha
+                            </label>
+                            <InputText @bind-Value="loginModel.Password" 
+                                      id="password"
+                                      type="password" 
+                                      class="form-control" 
+                                      placeholder="Digite sua senha" />
+                            <ValidationMessage For="@(() => loginModel.Password)" class="text-danger small" />
+                        </div>
 
-	<button type="submit" class="btn btn-primary">Entrar</button>
-</EditForm>
+                        <div class="d-grid gap-2 mb-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>
+                                Entrar
+                            </button>
+                        </div>
 
-@if (!string.IsNullOrEmpty(message))
-{
-	<p class="text-danger">@message</p>
-}
+                        <ValidationSummary class="text-danger" />
+                    </EditForm>
+
+                    @if (!string.IsNullOrEmpty(message))
+                    {
+                        <div class="alert alert-danger d-flex align-items-center mt-3" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <div>@message</div>
+                        </div>
+                    }
+                </div>
+                <div class="card-footer text-center text-muted py-3">
+                    <small>© 2024 Initial Aspire Project</small>
+                </div>
+            </div>            
+        </div>
+    </div>
+</div>
 
 @code {
-	private string message;
-	[SupplyParameterFromForm]
-	private LoginModel loginModel { get; set; }
-	private ResponseToken? responseToken { get; set; }
+    private string message;
+    [SupplyParameterFromForm]
+    private LoginModel loginModel { get; set; }
+    private ResponseToken? responseToken { get; set; }
 
-	protected override void OnInitialized() => loginModel ??= new();
+    protected override void OnInitialized() => loginModel ??= new();
 
-	private async Task HandleLogin()
-	{
-		responseToken = await LoginService.LoginAsync(loginModel.Username, loginModel.Password);
+    private async Task HandleLogin()
+    {
+        responseToken = await LoginService.LoginAsync(loginModel.Username, loginModel.Password);
 
-		if (responseToken is null)
-		{
-			message = "Usuário ou senha inválidos.";
-			return;
-		}
+        if (responseToken is null)
+        {
+            message = "Usuário ou senha inválidos.";
+            return;
+        }
 
-		var authProvider = (JwtAuthStateProvider)AuthStateProvider;
-		await authProvider.MarkUserAsAuthenticated(responseToken.Token);
+        var authProvider = (JwtAuthStateProvider)AuthStateProvider;
+        await authProvider.MarkUserAsAuthenticated(responseToken.Token);
 
-		// Redireciona ou atualiza a UI
-		NavigationManager.NavigateTo("/");
-	}	
+        // Redireciona ou atualiza a UI
+        NavigationManager.NavigateTo("/");
+    }
 
-	public record LoginModel
-	{
-		
-		public string? Username { get; set; }
-		public string? Password { get; set; }
-	}
+    public record LoginModel
+    {
+        [Required(ErrorMessage = "O usuário é obrigatório")]
+        public string? Username { get; set; }
+        
+        [Required(ErrorMessage = "A senha é obrigatória")]
+        public string? Password { get; set; }
+    }
 }

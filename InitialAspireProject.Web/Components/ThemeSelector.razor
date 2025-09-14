@@ -1,0 +1,86 @@
+@using InitialAspireProject.Web.Services
+@inject ThemeService ThemeService
+@inject IJSRuntime JSRuntime
+@implements IDisposable
+
+<div class="theme-selector">
+    <div class="dropdown">
+        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-palette me-1"></i>
+            Tema: @ThemeService.GetCurrentThemeInfo().Name
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+            <li><h6 class="dropdown-header">Escolha um tema</h6></li>
+            @foreach (var theme in ThemeService.AvailableThemes)
+            {
+                <li>
+                    <button class="dropdown-item d-flex align-items-center @(ThemeService.CurrentTheme == theme.Key ? "active" : "")" 
+                            @onclick="() => ChangeTheme(theme.Key)">
+                        <span class="badge bg-@theme.Value.BadgeColor me-2" style="width: 12px; height: 12px;"></span>
+                        <div>
+                            <div class="fw-medium">@theme.Value.Name</div>
+                            <small class="text-muted">@theme.Value.Description</small>
+                        </div>
+                        @if (ThemeService.CurrentTheme == theme.Key)
+                        {
+                            <i class="bi bi-check-lg ms-auto text-success"></i>
+                        }
+                    </button>
+                </li>
+            }
+        </ul>
+    </div>
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await ThemeService.InitializeAsync();
+        ThemeService.OnThemeChanged += StateHasChanged;
+        await UpdateThemeLink();
+    }
+
+    private async Task ChangeTheme(string themeKey)
+    {
+        await ThemeService.SetThemeAsync(themeKey);
+        await UpdateThemeLink();
+    }
+
+    private async Task UpdateThemeLink()
+    {
+        // var themeInfo = ThemeService.GetCurrentThemeInfo();
+        // await JSRuntime.InvokeVoidAsync("updateThemeLink", themeInfo.CssUrl);
+    }
+
+    public void Dispose()
+    {
+        ThemeService.OnThemeChanged -= StateHasChanged;
+    }
+}
+
+<style>
+    .theme-selector .dropdown-item {
+        padding: 0.75rem 1rem;
+        border: none;
+        background: none;
+        width: 100%;
+        text-align: left;
+    }
+
+    .theme-selector .dropdown-item:hover {
+        background-color: var(--bs-dropdown-link-hover-bg);
+    }
+
+    .theme-selector .dropdown-item.active {
+        background-color: var(--bs-primary);
+        color: white;
+    }
+
+    .theme-selector .dropdown-item.active .text-muted {
+        color: rgba(255, 255, 255, 0.75) !important;
+    }
+
+    .theme-selector .dropdown-menu {
+        min-width: 280px;
+    }
+</style>

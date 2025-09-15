@@ -39,16 +39,10 @@ builder.Services
 
 builder.Services.AddRazorComponents()
 .AddInteractiveServerComponents();
-
-builder.Services.AddHttpClient<ILoginService, LoginService>(client =>
-{
-    client.BaseAddress = new("https+http://ApiIdentity");
-});
-
-builder.Services.AddHttpClient<WeatherApiService>(client =>
-{
-    client.BaseAddress = new("https+http://ApiCore");
-});
+string apiIdentityUrl = "https+http://ApiIdentity";
+builder.Services.AddHttpClient<ILoginService, LoginService>(client => client.BaseAddress = new(apiIdentityUrl));
+builder.Services.AddHttpClient<IRegisterService, RegisterService>(client => client.BaseAddress = new(apiIdentityUrl));
+builder.Services.AddHttpClient<WeatherApiService>(client => client.BaseAddress = new("https+http://ApiCore"));
 
 var app = builder.Build();
 

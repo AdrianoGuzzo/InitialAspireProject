@@ -24,7 +24,7 @@ namespace InitialAspireProject.ApiIdentity.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
-            var user = new ApplicationUser { Email = model.Email, UserName = model.Email, FirstName = model.FullName };
+            var user = new ApplicationUser { Email = model.Email, UserName = model.Email, FullName = model.FullName };
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded) return BadRequest(result.Errors);
 
@@ -53,9 +53,9 @@ namespace InitialAspireProject.ApiIdentity.Controllers
         [HttpGet("profile")]
         public async Task<IActionResult> Profile()
         {
-            var user = await _userManager.FindByEmailAsync(User.Identity.Name);
+            var user = await _userManager.FindByEmailAsync(User?.Identity?.Name ?? "");
             var roles = await _userManager.GetRolesAsync(user);
-            return Ok(new { email = user.Email, fullName = user.FirstName, roles });
+            return Ok(new { email = user.Email, fullName = user.FullName, roles });
         }
 
         [Authorize(Roles = "Admin")]

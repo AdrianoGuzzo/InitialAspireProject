@@ -6,20 +6,18 @@ namespace InitialAspireProject.ApiIdentity
     {
         public static async Task SeedAsync(IServiceProvider serviceProvider)
         {
-            await CreateAdmin(serviceProvider);
+            await CreateUser(serviceProvider);
         }
-        private static async Task CreateAdmin(IServiceProvider serviceProvider)
+        private static async Task CreateUser(IServiceProvider serviceProvider)
         {
             using var scope = serviceProvider.CreateScope();
 
-            // 1. Crie o papel de administrador, se n�o existir
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-            if (!await roleManager.RoleExistsAsync("Admin"))
-            {
+            if (!await roleManager.RoleExistsAsync("Admin"))            
                 await roleManager.CreateAsync(new IdentityRole("Admin"));
-            }
+            if (!await roleManager.RoleExistsAsync("User"))
+                await roleManager.CreateAsync(new IdentityRole("User"));
 
-            // 2. Crie o usu�rio admin, se n�o existir
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             var adminEmail = "admin@localhost";
             var adminUser = await userManager.FindByEmailAsync(adminEmail);
@@ -27,6 +25,7 @@ namespace InitialAspireProject.ApiIdentity
             {
                 adminUser = new ApplicationUser
                 {
+                    FullName = "Admin User",
                     UserName = adminEmail,
                     Email = adminEmail,
                     EmailConfirmed = true

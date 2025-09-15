@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace InitialAspireProject.ApiCore.Migrations
 {
     [DbContext(typeof(CoreDbContext))]
-    [Migration("20250914205427_IdentityTables")]
-    partial class IdentityTables
+    [Migration("20250914235814_InitTables")]
+    partial class InitTables
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

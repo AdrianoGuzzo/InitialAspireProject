@@ -10,11 +10,6 @@
 @inject AuthenticationStateProvider AuthStateProvider
 
 <div class="container-fluid vh-100 d-flex align-items-center justify-content-center bg-light">
-    <!-- Theme Selector - Positioned absolutely -->
-    <div class="position-absolute top-0 end-0 m-3">
-        <ThemeSelector />
-    </div>
-
     <div class="row w-100 justify-content-center">
         <div class="col-12 col-sm-8 col-md-6 col-lg-4 col-xl-3">
             <div class="card shadow">
@@ -73,10 +68,18 @@
                         </div>
                     }
                 </div>
-                <div class="card-footer text-center text-muted py-3">
-                    <small>© 2024 Initial Aspire Project</small>
+                <div class="card-footer bg-light text-center py-3">
+                    <p class="mb-2 text-muted">
+                        <small>Não tem uma conta?</small>
+                    </p>
+                    <a href="/register" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-person-plus me-1"></i>
+                        Criar Conta
+                    </a>
+                    <hr class="my-3">
+                    <small class="text-muted">© 2024 Initial Aspire Project</small>
                 </div>
-            </div>            
+            </div>
         </div>
     </div>
 </div>
@@ -112,7 +115,6 @@
         var authProvider = (JwtAuthStateProvider)AuthStateProvider;
         await authProvider.MarkUserAsAuthenticated(responseToken.Token);
 
-        // Redireciona ou atualiza a UI
         NavigationManager.NavigateTo("/");
     }
 

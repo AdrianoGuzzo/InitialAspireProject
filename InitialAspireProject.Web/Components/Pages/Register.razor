@@ -1,0 +1,272 @@
+@page "/register"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using InitialAspireProject.Web.Components
+@using InitialAspireProject.Web.Services
+@inject IRegisterService RegisterService
+@inject NavigationManager Navigation
+
+
+
+<div class="container-fluid vh-100">
+	<div class="row h-100">
+		<!-- Left Side - Branding -->
+		<div class="col-lg-6 d-none d-lg-flex bg-primary text-white align-items-center justify-content-center">
+			<div class="text-center p-5">
+				<i class="bi bi-rocket-takeoff display-1 mb-4"></i>
+				<h1 class="display-4 fw-bold mb-4">Initial Aspire Project</h1>
+				<p class="lead mb-4">
+					Junte-se à nossa plataforma moderna construída com ASP.NET Core, Blazor e Bootstrap
+				</p>
+				<div class="row text-center mt-5">
+					<div class="col-4">
+						<i class="bi bi-shield-check display-6 mb-2"></i>
+						<div class="small">Seguro</div>
+					</div>
+					<div class="col-4">
+						<i class="bi bi-lightning-fill display-6 mb-2"></i>
+						<div class="small">Rápido</div>
+					</div>
+					<div class="col-4">
+						<i class="bi bi-palette-fill display-6 mb-2"></i>
+						<div class="small">Moderno</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Right Side - Register Form -->
+		<div class="col-lg-6 d-flex align-items-center justify-content-center">
+			<div class="w-100" style="max-width: 450px;">
+				<div class="card shadow-lg border-0">
+					<div class="card-header bg-white text-center py-4">
+						<div class="d-lg-none mb-3">
+							<i class="bi bi-rocket-takeoff text-primary display-4"></i>
+						</div>
+						<h2 class="h3 fw-bold text-dark mb-1">Criar Conta</h2>
+						<p class="text-muted mb-0">Preencha os dados para se cadastrar</p>
+					</div>
+
+					<div class="card-body p-4">			
+						@if (!string.IsNullOrEmpty(message))
+						{
+							<div class="alert alert-@(success ? "success" : "danger") d-flex align-items-center" role="alert">
+								<i class="bi @(success ? "bi-check-circle-fill" : "bi-exclamation-triangle-fill") me-2"></i>
+								<div>@message</div>
+							</div>
+						}
+
+						<EditForm Model="registerModel" OnValidSubmit="HandleRegister" FormName="RegisterForm">
+							<DataAnnotationsValidator />
+
+							<!-- Nome Completo -->
+							<div class="mb-3">
+								<label for="fullName" class="form-label fw-semibold">
+									<i class="bi bi-person me-1"></i>
+									Nome Completo
+								</label>
+								<InputText id="fullName" class="form-control form-control-lg"
+										   @bind-Value="registerModel.FullName"
+										   placeholder="Digite seu nome completo" />
+								<ValidationMessage For="@(() => registerModel.FullName)" class="text-danger small mt-1" />
+							</div>
+
+							<!-- Email -->
+							<div class="mb-3">
+								<label for="email" class="form-label fw-semibold">
+									<i class="bi bi-envelope me-1"></i>
+									Email
+								</label>
+								<InputText id="email" type="email" class="form-control form-control-lg"
+										   @bind-Value="registerModel.Email"
+										   placeholder="Digite seu email" />
+								<ValidationMessage For="@(() => registerModel.Email)" class="text-danger small mt-1" />
+							</div>
+
+							<!-- Senha -->
+							<div class="mb-3">
+								<label for="password" class="form-label fw-semibold">
+									<i class="bi bi-lock me-1"></i>
+									Senha
+								</label>
+								<div class="input-group">
+									<InputText id="password" type="@(showPassword ? "text" : "password")"
+											   class="form-control form-control-lg"
+											   @bind-Value="registerModel.Password"
+											   placeholder="Digite sua senha" />
+									<button class="btn btn-outline-secondary" type="button"
+											@onclick="TogglePasswordVisibility">
+										<i class="bi @(showPassword ? "bi-eye-slash" : "bi-eye")"></i>
+									</button>
+								</div>
+								<div class="form-text small">
+									<i class="bi bi-info-circle me-1"></i>
+									Mínimo 6 caracteres
+								</div>
+								<ValidationMessage For="@(() => registerModel.Password)" class="text-danger small mt-1" />
+							</div>
+
+							<!-- Confirmar Senha -->
+							<div class="mb-3">
+								<label for="confirmPassword" class="form-label fw-semibold">
+									<i class="bi bi-lock-fill me-1"></i>
+									Confirmar Senha
+								</label>
+								<div class="input-group">
+									<InputText id="confirmPassword" type="@(showConfirmPassword ? "text" : "password")"
+											   class="form-control form-control-lg"
+											   @bind-Value="registerModel.ConfirmPassword"
+											   placeholder="Confirme sua senha" />
+									<button class="btn btn-outline-secondary" type="button"
+											@onclick="ToggleConfirmPasswordVisibility">
+										<i class="bi @(showConfirmPassword ? "bi-eye-slash" : "bi-eye")"></i>
+									</button>
+								</div>
+								<ValidationMessage For="@(() => registerModel.ConfirmPassword)" class="text-danger small mt-1" />
+							</div>
+
+							<!-- Termos de Uso -->
+							<div class="mb-4">
+								<div class="form-check">
+									<InputCheckbox id="acceptTerms" class="form-check-input"
+												   @bind-Value="registerModel.AcceptTerms" />
+									<label class="form-check-label" for="acceptTerms">
+										Eu aceito os
+										<a href="/terms" target="_blank" class="text-decoration-none">
+											termos de uso
+										</a>
+										e a
+										<a href="/privacy" target="_blank" class="text-decoration-none">
+											política de privacidade
+										</a>
+									</label>
+								</div>
+								<ValidationMessage For="@(() => registerModel.AcceptTerms)" class="text-danger small mt-1" />
+							</div>
+
+							<!-- Botão de Cadastro -->
+							<div class="d-grid mb-3">
+								<button type="submit" class="btn btn-primary btn-lg" disabled="@isLoading">
+									@if (isLoading)
+									{
+										<span class="spinner-border spinner-border-sm me-2" role="status"></span>
+										<span>Criando conta...</span>
+									}
+									else
+									{
+										<i class="bi bi-person-plus me-2"></i>
+										<span>Criar Conta</span>
+									}
+								</button>
+							</div>
+						</EditForm>
+					</div>
+
+					<div class="card-footer bg-light text-center py-3">
+						<p class="mb-0 text-muted">
+							Já tem uma conta?
+							<a href="/login" class="text-decoration-none fw-semibold">
+								<i class="bi bi-box-arrow-in-right me-1"></i>
+								Fazer Login
+							</a>
+						</p>
+					</div>
+				</div>
+
+				<!-- Additional Info -->
+				<div class="text-center mt-4">
+					<small class="text-muted">
+						<i class="bi bi-shield-check me-1"></i>
+						Seus dados estão protegidos e seguros
+					</small>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@code {
+
+
+
+	[SupplyParameterFromForm]
+	private RegisterModel? registerModel { get; set; }
+
+	private bool success = false;
+	private string message = string.Empty;
+
+	private bool showPassword = false;
+	private bool showConfirmPassword = false;
+	private bool isLoading = false;
+
+	protected override void OnInitialized() => registerModel ??= new();
+
+	private async Task HandleRegister()
+	{
+		message = string.Empty;
+		isLoading = true;
+
+		try
+		{
+			if (registerModel == null)
+			{
+				message = "Dados de registro inválidos.";
+				return;
+			}
+			var result = await RegisterService.RegisterAsync(
+				registerModel.FullName,
+				registerModel.Email,
+				registerModel.Password);
+
+			success = result.Success;
+			message = result.Message ?? "Erro desconhecido ao criar conta.";
+
+		}
+		catch (Exception ex)
+		{
+			message = $"Erro ao criar conta: {ex.Message}";
+		}
+		finally
+		{
+			isLoading = false;
+		}
+	}
+
+	private void TogglePasswordVisibility()
+	{
+		showPassword = !showPassword;
+	}
+
+	private void ToggleConfirmPasswordVisibility()
+	{
+		showConfirmPassword = !showConfirmPassword;
+	}
+	public record RegisterModel
+	{
+		[Required(ErrorMessage = "O nome é obrigatório")]
+		[Display(Name = "Nome Completo")]
+		public string FullName { get; set; } = string.Empty;
+
+		[Required(ErrorMessage = "O email é obrigatório")]
+		[EmailAddress(ErrorMessage = "Email inválido")]
+		[Display(Name = "Email")]
+		public string Email { get; set; } = string.Empty;
+
+		[Required(ErrorMessage = "A senha é obrigatória")]
+		[StringLength(100, ErrorMessage = "A senha deve ter pelo menos {2} caracteres", MinimumLength = 6)]
+		[DataType(DataType.Password)]
+		[Display(Name = "Senha")]
+		public string Password { get; set; } = string.Empty;
+
+		[Required(ErrorMessage = "A confirmação de senha é obrigatória")]
+		[DataType(DataType.Password)]
+		[Display(Name = "Confirmar Senha")]
+		[Compare("Password", ErrorMessage = "A senha e a confirmação não coincidem")]
+		public string ConfirmPassword { get; set; } = string.Empty;
+
+		[Display(Name = "Aceito os termos de uso")]
+		[Range(typeof(bool), "true", "true", ErrorMessage = "Você deve aceitar os termos de uso")]
+		public bool AcceptTerms { get; set; }
+	}
+}

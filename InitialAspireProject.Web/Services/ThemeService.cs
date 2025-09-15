@@ -2,7 +2,7 @@ namespace InitialAspireProject.Web.Services;
 
 public class ThemeService
 {
-    private string _currentTheme = "cerulean";
+    private string _currentTheme = "dark";
 
     public event Action? OnThemeChanged;
 
@@ -29,7 +29,7 @@ public class ThemeService
 
     public async Task InitializeAsync()
     {
-        var result = "cerulean";
+        var result = "dark";
         if (!string.IsNullOrEmpty(result) && AvailableThemes.ContainsKey(result))
         {
             _currentTheme = result;

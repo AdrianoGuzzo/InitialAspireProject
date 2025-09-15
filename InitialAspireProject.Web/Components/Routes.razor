@@ -1,22 +1,81 @@
-﻿@using InitialAspireProject.Web.Components.Pages
+@using InitialAspireProject.Web.Components.Pages
 @using System.Security.Claims
 @inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Navigation
 
 <CascadingAuthenticationState>
-    @if (contextUser?.Identity?.IsAuthenticated ?? false)
+    @if (showRegister)
+    {
+        <Register />
+    }
+    else if (contextUser?.Identity?.IsAuthenticated ?? false)
     {
         <Router AppAssembly="@typeof(Program).Assembly">
             <Found Context="routeData">
                 <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(Layout.MainLayout)">
                     <NotAuthorized>
-                        <p>Você não tem acesso à essa página.</p>
+                        <div class="container mt-5">
+                            <div class="row justify-content-center">
+                                <div class="col-md-6">
+                                    <div class="card border-warning">
+                                        <div class="card-header bg-warning text-dark">
+                                            <h5 class="mb-0">
+                                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                                Acesso Negado
+                                            </h5>
+                                        </div>
+                                        <div class="card-body text-center">
+                                            <i class="bi bi-shield-x text-warning display-1 mb-3"></i>
+                                            <h4>Você não tem acesso a esta página</h4>
+                                            <p class="text-muted">
+                                                Esta página requer permissões especiais que você não possui.
+                                            </p>
+                                            <a href="/" class="btn btn-primary">
+                                                <i class="bi bi-house me-1"></i>
+                                                Voltar ao Início
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </NotAuthorized>
                 </AuthorizeRouteView>
                 <FocusOnNavigate RouteData="@routeData" Selector="h1" />
             </Found>
             <NotFound>
                 <LayoutView Layout="@typeof(Layout.MainLayout)">
-                    <p>Página não encontrada.</p>
+                    <div class="container mt-5">
+                        <div class="row justify-content-center">
+                            <div class="col-md-6">
+                                <div class="card border-danger">
+                                    <div class="card-header bg-danger text-white">
+                                        <h5 class="mb-0">
+                                            <i class="bi bi-exclamation-octagon-fill me-2"></i>
+                                            Página Não Encontrada
+                                        </h5>
+                                    </div>
+                                    <div class="card-body text-center">
+                                        <i class="bi bi-file-earmark-x text-danger display-1 mb-3"></i>
+                                        <h4>404 - Página não encontrada</h4>
+                                        <p class="text-muted">
+                                            A página que você está procurando não existe ou foi movida.
+                                        </p>
+                                        <div class="d-flex gap-2 justify-content-center">
+                                            <a href="/" class="btn btn-primary">
+                                                <i class="bi bi-house me-1"></i>
+                                                Início
+                                            </a>
+                                            <button class="btn btn-outline-secondary" onclick="history.back()">
+                                                <i class="bi bi-arrow-left me-1"></i>
+                                                Voltar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </LayoutView>
             </NotFound>
         </Router>
@@ -29,11 +88,41 @@
 
 @code {
     private ClaimsPrincipal? contextUser;
+    private bool showRegister = false;
 
     protected override async Task OnInitializedAsync()
     {
         var authProvider = (JwtAuthStateProvider)AuthStateProvider;
         var authenticationState = await authProvider.GetAuthenticationStateAsync();
         contextUser = authenticationState.User;
+        
+        // Verificar se a URL atual é /register
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        showRegister = uri.AbsolutePath.Equals("/register", StringComparison.OrdinalIgnoreCase);
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            Navigation.LocationChanged += OnLocationChanged;
+        }
+    }
+
+    private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        var uri = Navigation.ToAbsoluteUri(e.Location);
+        var newShowRegister = uri.AbsolutePath.Equals("/register", StringComparison.OrdinalIgnoreCase);
+        
+        if (newShowRegister != showRegister)
+        {
+            showRegister = newShowRegister;
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= OnLocationChanged;
     }
 }

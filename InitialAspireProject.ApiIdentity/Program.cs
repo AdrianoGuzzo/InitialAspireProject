@@ -1,4 +1,5 @@
 using InitialAspireProject.ApiIdentity;
+using InitialAspireProject.ApiIdentity.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

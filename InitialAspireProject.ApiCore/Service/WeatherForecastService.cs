@@ -1,8 +1,6 @@
 ﻿using InitialAspireProject.ApiCore.Domain;
 using InitialAspireProject.ApiCore.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
-using System.Threading.Tasks;
 
 namespace InitialAspireProject.ApiCore.Service
 {

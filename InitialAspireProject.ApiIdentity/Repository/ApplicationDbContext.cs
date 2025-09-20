@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-namespace InitialAspireProject.ApiIdentity;
+namespace InitialAspireProject.ApiIdentity.Repository;
 
 public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 {

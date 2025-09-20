@@ -1,6 +1,3 @@
-using Microsoft.AspNetCore.Identity.Data;
-using System.Net.Http;
-
 namespace InitialAspireProject.Web.Services
 {
     public interface IRegisterService

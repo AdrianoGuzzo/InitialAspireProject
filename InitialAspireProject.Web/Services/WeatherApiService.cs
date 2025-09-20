@@ -1,6 +1,4 @@
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-using System.Net.Http.Headers;
 
 namespace InitialAspireProject.Web.Services;
 public class WeatherApiService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace InitialAspireProject.ApiIdentity
+namespace InitialAspireProject.ApiIdentity.Repository
 {
     public class Seeder
     {

@@ -2,29 +2,29 @@ using Microsoft.Extensions.Hosting;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var cache = builder.AddRedis("CacheRedis");
+var cache = builder.AddRedis("cacheredis");
 
-var postgres = builder.AddPostgres("Postgres")
+var postgres = builder.AddPostgres("postgres")
     .WithDataVolume()
     .WithPgAdmin();
 
 if (builder.Environment.IsDevelopment())
     postgres.WithHostPort(5432);
 
-var identityDb = postgres.AddDatabase("IdentityDb");
-var coreDb = postgres.AddDatabase("CoreDb");
+var identityDb = postgres.AddDatabase("identitydb");
+var coreDb = postgres.AddDatabase("coredb");
 
-var apiCore = builder.AddProject<Projects.InitialAspireProject_ApiCore>("ApiCore")
+var apiCore = builder.AddProject<Projects.InitialAspireProject_ApiCore>("apicore")
     .WithHttpHealthCheck("/health")
     .WithReference(coreDb)
     .WaitFor(coreDb);
 
-var apiIdentity = builder.AddProject<Projects.InitialAspireProject_ApiIdentity>("ApiIdentity")
+var apiIdentity = builder.AddProject<Projects.InitialAspireProject_ApiIdentity>("apiidentity")
     .WithHttpHealthCheck("/health")
     .WithReference(identityDb)
     .WaitFor(identityDb);
 
-builder.AddProject<Projects.InitialAspireProject_Web>("Web")
+builder.AddProject<Projects.InitialAspireProject_Web>("web")
     .WithExternalHttpEndpoints()
     .WithHttpHealthCheck("/health")
     .WithReference(cache)

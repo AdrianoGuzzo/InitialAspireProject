@@ -10,7 +10,7 @@ internal class Program
 
         builder.AddServiceDefaults();
 
-        builder.AddNpgsqlDbContext<CoreDbContext>("CoreDb");
+        builder.AddNpgsqlDbContext<CoreDbContext>("coredb");
         builder.Services.AddScoped<WeatherForecastService>();
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();

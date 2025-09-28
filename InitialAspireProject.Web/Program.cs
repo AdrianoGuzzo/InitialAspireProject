@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
-builder.AddRedisOutputCache("CacheRedis");
+builder.AddRedisOutputCache("cacheredis");
 
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthStateProvider>();
@@ -39,10 +39,10 @@ builder.Services
 
 builder.Services.AddRazorComponents()
 .AddInteractiveServerComponents();
-string apiIdentityUrl = "https+http://ApiIdentity";
+string apiIdentityUrl = "https+http://apiidentity";
 builder.Services.AddHttpClient<ILoginService, LoginService>(client => client.BaseAddress = new(apiIdentityUrl));
 builder.Services.AddHttpClient<IRegisterService, RegisterService>(client => client.BaseAddress = new(apiIdentityUrl));
-builder.Services.AddHttpClient<WeatherApiService>(client => client.BaseAddress = new("https+http://ApiCore"));
+builder.Services.AddHttpClient<WeatherApiService>(client => client.BaseAddress = new("https+http://apicore"));
 
 var app = builder.Build();
 

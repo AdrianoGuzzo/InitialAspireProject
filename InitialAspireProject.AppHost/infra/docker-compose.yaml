@@ -1,0 +1,109 @@
+services:
+  compose-dashboard:
+    image: "mcr.microsoft.com/dotnet/nightly/aspire-dashboard:latest"
+    ports:
+      - "18888:18888"
+      - "18889:18889"
+    networks:
+      - "aspire"
+    environment:
+      - DOTNET_ASPIRE_DASHBOARD__AUTHENTICATION__ENABLED=false
+    restart: "always"
+  cacheredis:
+    image: "docker.io/library/redis:8.2"
+    command:
+      - "-c"
+      - "redis-server --requirepass $$REDIS_PASSWORD"
+    entrypoint:
+      - "/bin/sh"
+    environment:
+      REDIS_PASSWORD: "${CACHEREDIS_PASSWORD}"
+    expose:
+      - "6379"
+    networks:
+      - "aspire"
+  postgres:
+    image: "docker.io/library/postgres:17.6"
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: "scram-sha-256"
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256 --auth-local=scram-sha-256"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+    expose:
+      - "5432"
+    volumes:
+      - type: "volume"
+        target: "/var/lib/postgresql/data"
+        source: "initialaspireproject.apphost-f8273c7fc0-postgres-data"
+        read_only: false
+    networks:
+      - "aspire"
+  apicore:
+    image: "${APICORE_IMAGE}"
+    environment:
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES: "true"
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES: "true"
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: "in_memory"
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+      HTTP_PORTS: "${APICORE_PORT}"
+      ConnectionStrings__coredb: "Host=postgres;Port=5432;Username=postgres;Password=${POSTGRES_PASSWORD};Database=coredb"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://compose-dashboard:18889"
+      OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+      OTEL_SERVICE_NAME: "apicore"
+    expose:
+      - "${APICORE_PORT}"
+    depends_on:
+      postgres:
+        condition: "service_started"
+    networks:
+      - "aspire"
+  apiidentity:
+    image: "${APIIDENTITY_IMAGE}"
+    environment:
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES: "true"
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES: "true"
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: "in_memory"
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+      HTTP_PORTS: "${APIIDENTITY_PORT}"
+      ConnectionStrings__identitydb: "Host=postgres;Port=5432;Username=postgres;Password=${POSTGRES_PASSWORD};Database=identitydb"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://compose-dashboard:18889"
+      OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+      OTEL_SERVICE_NAME: "apiidentity"
+    expose:
+      - "${APIIDENTITY_PORT}"
+    depends_on:
+      postgres:
+        condition: "service_started"
+    networks:
+      - "aspire"
+  web:
+    image: "${WEB_IMAGE}"
+    environment:
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES: "true"
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES: "true"
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: "in_memory"
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+      HTTP_PORTS: "${WEB_PORT}"
+      ConnectionStrings__cacheredis: "cacheredis:6379,password=${CACHEREDIS_PASSWORD}"
+      services__apiidentity__http__0: "http://apiidentity:${APIIDENTITY_PORT}"
+      services__apicore__http__0: "http://apicore:${APICORE_PORT}"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://compose-dashboard:18889"
+      OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+      OTEL_SERVICE_NAME: "web"
+    ports:
+      - "${WEB_PORT}"
+    depends_on:
+      cacheredis:
+        condition: "service_started"
+      apiidentity:
+        condition: "service_started"
+      apicore:
+        condition: "service_started"
+    networks:
+      - "aspire"
+networks:
+  aspire:
+    driver: "bridge"
+volumes:
+  initialaspireproject.apphost-f8273c7fc0-postgres-data:
+    driver: "local"

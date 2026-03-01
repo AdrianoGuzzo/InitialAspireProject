@@ -33,7 +33,7 @@ builder.Services
         options.LoginPath = "/";
         options.AccessDeniedPath = "/forbidden";
         options.Cookie.HttpOnly = true;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
         options.SlidingExpiration = true;
     });
 

@@ -11,10 +11,10 @@ namespace InitialAspireProject.ApiCore.Service
             await context.WeatherForecast.AddRangeAsync(weatherForecasts.Select(WeatherForecastEntity.New));
             await context.SaveChangesAsync();
         }
-        public IEnumerable<WeatherForecast> GetList()
-        => context.WeatherForecast
-            .AsNoTracking()
-            .Select(wf => wf.ToDomain())
-            .ToList();
+        public async Task<IEnumerable<WeatherForecast>> GetListAsync()
+            => await context.WeatherForecast
+                .AsNoTracking()
+                .Select(wf => wf.ToDomain())
+                .ToListAsync();
     }
 }

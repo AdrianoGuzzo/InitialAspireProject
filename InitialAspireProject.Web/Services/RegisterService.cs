@@ -38,15 +38,15 @@ namespace InitialAspireProject.Web.Services
 
                 if (errorValidations is not null)
                 {
-                    string validationError = string.Join("/n", errorValidations.Select(x => x.Description).ToArray());
-                    logger.LogError(ex, $"{ex.Message}, {validationError}");
+                    string validationError = string.Join("\n", errorValidations.Select(x => x.Description).ToArray());
+                    logger.LogError(ex, "Registration validation failed: {Errors}", validationError);
                     return new RegisterResult
                     {
                         Success = false,
                         Message = validationError
                     };
                 }
-                logger.LogError(ex, $"{ex.Message}");
+                logger.LogError(ex, "Unexpected registration error: {Message}", ex.Message);
                 return new RegisterResult
                 {
                     Success = false,
@@ -63,7 +63,7 @@ namespace InitialAspireProject.Web.Services
     }
     public class ErrorValidation
     {
-        public string Code { get; set; }
+        public string? Code { get; set; }
         public string? Description { get; set; }
     }
 }

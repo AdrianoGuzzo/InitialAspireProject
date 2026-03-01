@@ -1,7 +1,9 @@
-﻿using InitialAspireProject.ApiIdentity.Repository;
+using InitialAspireProject.ApiIdentity.Repository;
+using InitialAspireProject.ApiIdentity.Repository.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace InitialAspireProject.ApiIdentity.Controllers
 {
@@ -22,6 +24,7 @@ namespace InitialAspireProject.ApiIdentity.Controllers
             _tokenService = tokenService;
         }
 
+        [EnableRateLimiting("auth")]
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
@@ -29,19 +32,19 @@ namespace InitialAspireProject.ApiIdentity.Controllers
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded) return BadRequest(result.Errors);
 
-            // Adiciona role padrão
-            await _userManager.AddToRoleAsync(user, "User");
+            await _userManager.AddToRoleAsync(user, RoleConstants.User);
 
             return Ok("User registered");
         }
 
+        [EnableRateLimiting("auth")]
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null) return Unauthorized("Invalid credentials");
 
-            var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
+            var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, lockoutOnFailure: true);
             if (!result.Succeeded) return Unauthorized("Invalid credentials");
 
             var roles = await _userManager.GetRolesAsync(user);
@@ -55,11 +58,12 @@ namespace InitialAspireProject.ApiIdentity.Controllers
         public async Task<IActionResult> Profile()
         {
             var user = await _userManager.FindByEmailAsync(User?.Identity?.Name ?? "");
+            if (user is null) return NotFound("User not found");
             var roles = await _userManager.GetRolesAsync(user);
             return Ok(new { email = user.Email, fullName = user.FullName, roles });
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = RoleConstants.Admin)]
         [HttpGet("admin-only")]
         public IActionResult AdminOnly()
         {

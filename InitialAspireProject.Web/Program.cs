@@ -11,6 +11,7 @@ builder.AddRedisOutputCache("cacheredis");
 
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthStateProvider>();
+builder.Services.AddScoped<JwtAuthStateProvider>();
 builder.Services.AddScoped<ThemeService>();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddHttpClient();
@@ -32,7 +33,7 @@ builder.Services
         options.LoginPath = "/";
         options.AccessDeniedPath = "/forbidden";
         options.Cookie.HttpOnly = true;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
         options.SlidingExpiration = true;
     });
 
@@ -49,13 +50,14 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
+
+app.UseSession();
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -68,7 +70,5 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 app.MapDefaultEndpoints();
-
-app.UseSession();
 
 app.Run();

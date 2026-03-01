@@ -1,4 +1,18 @@
 services:
+  dashboard:
+    image: mcr.microsoft.com/dotnet/nightly/aspire-dashboard:latest
+    ports:
+      - "18888:18888"
+      - "18889:18889"
+    environment:
+      DASHBOARD__FRONTEND__AUTHMODE: "BrowserToken"
+      DASHBOARD__FRONTEND__BROWSERTOKEN: ${DASHBOARD_TOKEN}
+      DASHBOARD__OTLP__AUTHMODE: "Unsecured"
+      ASPNETCORE_URLS: "http://+:18888;http://+:18889"
+    networks:
+      - app
+    restart: unless-stopped
+
   postgres:
     image: postgres:17.6
     environment:
@@ -36,9 +50,16 @@ services:
       Jwt__Key: ${JWT_KEY}
       Jwt__Issuer: ${JWT_ISSUER}
       Jwt__Audience: ${JWT_AUDIENCE}
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://dashboard:18889"
+      OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+      OTEL_SERVICE_NAME: "apiidentity"
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES: "true"
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES: "true"
+    volumes:
+      - apiidentity-keys:/app/dataprotection-keys
     depends_on:
-      postgres:
-        condition: service_healthy
+      - dashboard
+      - postgres
     networks:
       - app
     restart: unless-stopped
@@ -55,7 +76,16 @@ services:
       Jwt__Key: ${JWT_KEY}
       Jwt__Issuer: ${JWT_ISSUER}
       Jwt__Audience: ${JWT_AUDIENCE}
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://dashboard:18889"
+      OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+      OTEL_SERVICE_NAME: "apicore"
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES: "true"
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES: "true"
+    volumes:
+      - apicore-keys:/app/dataprotection-keys
     depends_on:
+      dashboard:
+        condition: service_started
       postgres:
         condition: service_healthy
     networks:
@@ -73,9 +103,17 @@ services:
       ConnectionStrings__cacheredis: "redis:6379,password=${REDIS_PASSWORD}"
       services__apiidentity__http__0: "http://apiidentity:8080"
       services__apicore__http__0: "http://apicore:8080"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://dashboard:18889"
+      OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+      OTEL_SERVICE_NAME: "web"
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES: "true"
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES: "true"
     ports:
       - "${WEB_PORT:-80}:8080"
+    volumes:
+      - web-keys:/app/dataprotection-keys
     depends_on:
+      - dashboard
       - apiidentity
       - apicore
       - redis
@@ -89,4 +127,10 @@ networks:
 
 volumes:
   postgres-data:
+    driver: local
+  web-keys:
+    driver: local
+  apiidentity-keys:
+    driver: local
+  apicore-keys:
     driver: local

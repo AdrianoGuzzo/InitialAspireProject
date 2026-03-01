@@ -1,11 +1,14 @@
-using Microsoft.AspNetCore.Authorization;
-
 namespace InitialAspireProject.Web.Services;
-public class WeatherApiService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
+
+public class WeatherApiService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor, ILogger<WeatherApiService> logger)
 {
-    [Authorize]
+    private const string TokenKey = "AuthToken";
+
     public async Task<WeatherForecast[]> GetWeatherAsync(int maxItems = 10, CancellationToken cancellationToken = default)
     {
+        var token = httpContextAccessor.HttpContext?.Session.GetString(TokenKey);
+        if (!string.IsNullOrEmpty(token))
+            httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
         List<WeatherForecast>? forecasts = null;
 
@@ -26,7 +29,7 @@ public class WeatherApiService(HttpClient httpClient, IHttpContextAccessor httpC
         }
         catch (HttpRequestException ex)
         {
-            Console.WriteLine($"Erro ao chamar API: {ex.Message}");
+            logger.LogError(ex, "Error calling weather API: {Message}", ex.Message);
             return [];
         }
 

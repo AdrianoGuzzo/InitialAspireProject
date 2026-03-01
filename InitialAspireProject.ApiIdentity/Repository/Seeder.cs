@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using InitialAspireProject.ApiIdentity.Repository.Constants;
+using Microsoft.AspNetCore.Identity;
 
 namespace InitialAspireProject.ApiIdentity.Repository
 {
@@ -13,10 +14,10 @@ namespace InitialAspireProject.ApiIdentity.Repository
             using var scope = serviceProvider.CreateScope();
 
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-            if (!await roleManager.RoleExistsAsync("Admin"))            
-                await roleManager.CreateAsync(new IdentityRole("Admin"));
-            if (!await roleManager.RoleExistsAsync("User"))
-                await roleManager.CreateAsync(new IdentityRole("User"));
+            if (!await roleManager.RoleExistsAsync(RoleConstants.Admin))
+                await roleManager.CreateAsync(new IdentityRole(RoleConstants.Admin));
+            if (!await roleManager.RoleExistsAsync(RoleConstants.User))
+                await roleManager.CreateAsync(new IdentityRole(RoleConstants.User));
 
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             var adminEmail = "admin@localhost";
@@ -30,11 +31,9 @@ namespace InitialAspireProject.ApiIdentity.Repository
                     Email = adminEmail,
                     EmailConfirmed = true
                 };
-                // Defina uma senha forte para o admin
                 await userManager.CreateAsync(adminUser, "Admin123$");
-                await userManager.AddToRoleAsync(adminUser, "Admin");
+                await userManager.AddToRoleAsync(adminUser, RoleConstants.Admin);
             }
-
         }
     }
 }

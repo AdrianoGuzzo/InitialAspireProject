@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
 using System.Text.Json;
@@ -8,11 +8,14 @@ namespace InitialAspireProject.Web
     public class JwtAuthStateProvider : AuthenticationStateProvider
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ILogger<JwtAuthStateProvider> _logger;
         private const string TokenKey = "AuthToken";
+        private const string AuthScheme = "jwt";
 
-        public JwtAuthStateProvider(IHttpContextAccessor httpContextAccessor)
+        public JwtAuthStateProvider(IHttpContextAccessor httpContextAccessor, ILogger<JwtAuthStateProvider> logger)
         {
             _httpContextAccessor = httpContextAccessor;
+            _logger = logger;
         }
 
         public async Task MarkUserAsAuthenticated(string token)
@@ -20,10 +23,9 @@ namespace InitialAspireProject.Web
             _httpContextAccessor.HttpContext?.Session.SetString(TokenKey, token);
 
             var claims = ParseClaimsFromJwt(token);
-            var identity = new ClaimsIdentity(claims, "Cookies");
+            var identity = new ClaimsIdentity(claims, AuthScheme);
             var user = new ClaimsPrincipal(identity);
 
-            // Cria cookie de autenticação
             await _httpContextAccessor.HttpContext!.SignInAsync("Cookies", user);
 
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(user)));
@@ -31,7 +33,6 @@ namespace InitialAspireProject.Web
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            // Busca o token da sessão
             var savedToken = _httpContextAccessor.HttpContext?.Session.GetString(TokenKey);
 
             if (string.IsNullOrWhiteSpace(savedToken))
@@ -40,14 +41,20 @@ namespace InitialAspireProject.Web
             try
             {
                 var claims = ParseClaimsFromJwt(savedToken);
-                var identity = new ClaimsIdentity(claims, "jwt");
+                var identity = new ClaimsIdentity(claims, AuthScheme);
                 var user = new ClaimsPrincipal(identity);
 
                 return new AuthenticationState(user);
             }
-            catch
+            catch (Exception ex) when (ex is FormatException || ex is JsonException || ex is IndexOutOfRangeException)
             {
-                // Token inválido, remove da sessão
+                _logger.LogWarning(ex, "Invalid JWT token found in session; removing it");
+                _httpContextAccessor.HttpContext?.Session.Remove(TokenKey);
+                return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error reading authentication state");
                 _httpContextAccessor.HttpContext?.Session.Remove(TokenKey);
                 return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
             }
@@ -55,19 +62,19 @@ namespace InitialAspireProject.Web
 
         public void NotifyUserAuthentication(string token)
         {
-            // Salva na sessão
             _httpContextAccessor.HttpContext?.Session.SetString(TokenKey, token);
 
             var claims = ParseClaimsFromJwt(token);
-            var identity = new ClaimsIdentity(claims, "jwt");
+            var identity = new ClaimsIdentity(claims, AuthScheme);
             var user = new ClaimsPrincipal(identity);
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(user)));
         }
 
-        public void NotifyUserLogout()
+        public async Task NotifyUserLogout()
         {
             _httpContextAccessor.HttpContext?.Session.Remove(TokenKey);
-            _httpContextAccessor.HttpContext?.SignOutAsync("Cookies");
+            if (_httpContextAccessor.HttpContext is not null)
+                await _httpContextAccessor.HttpContext.SignOutAsync("Cookies");
 
             var user = new ClaimsPrincipal(new ClaimsIdentity());
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(user)));
@@ -80,11 +87,26 @@ namespace InitialAspireProject.Web
 
         private IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
         {
-            var payload = jwt.Split('.')[1];
-            var jsonBytes = ParseBase64WithoutPadding(payload);
-            var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonBytes);
+            var parts = jwt.Split('.');
+            if (parts.Length != 3)
+                throw new FormatException("JWT does not have three parts");
 
-            return keyValuePairs.Select(kvp => new Claim(kvp.Key, kvp.Value.ToString()));
+            var jsonBytes = ParseBase64WithoutPadding(parts[1]);
+            var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonBytes)
+                ?? throw new JsonException("JWT payload could not be deserialized");
+
+            var claims = keyValuePairs.Select(kvp => new Claim(kvp.Key, kvp.Value.ToString()!)).ToList();
+
+            // Enforce token expiry
+            var expClaim = claims.FirstOrDefault(c => c.Type == "exp");
+            if (expClaim is not null && long.TryParse(expClaim.Value, out var exp))
+            {
+                var expiry = DateTimeOffset.FromUnixTimeSeconds(exp);
+                if (expiry < DateTimeOffset.UtcNow)
+                    throw new FormatException("JWT token has expired");
+            }
+
+            return claims;
         }
 
         private byte[] ParseBase64WithoutPadding(string base64)
@@ -97,5 +119,4 @@ namespace InitialAspireProject.Web
             return Convert.FromBase64String(base64);
         }
     }
-
 }

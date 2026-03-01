@@ -1,5 +1,6 @@
-﻿using InitialAspireProject.ApiCore.Domain;
+using InitialAspireProject.ApiCore.Domain;
 using InitialAspireProject.ApiCore.Service;
+using Microsoft.EntityFrameworkCore;
 
 namespace InitialAspireProject.ApiCore
 {
@@ -11,11 +12,14 @@ namespace InitialAspireProject.ApiCore
         }
         private static async Task CreateWeatherForecasts(IServiceProvider serviceProvider)
         {
-            string[] Summaries = new[]
-            {
+            string[] Summaries =
+            [
                 "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-            };
+            ];
             using var scope = serviceProvider.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<CoreDbContext>();
+            if (await dbContext.WeatherForecast.AnyAsync()) return;
+
             var weatherForecastEntities = Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
                 Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
@@ -25,7 +29,6 @@ namespace InitialAspireProject.ApiCore
 
             var weatherForecastService = scope.ServiceProvider.GetRequiredService<WeatherForecastService>();
             await weatherForecastService.SaveRangeAsync(weatherForecastEntities);
-
         }
     }
 }

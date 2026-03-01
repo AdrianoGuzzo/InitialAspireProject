@@ -1,6 +1,7 @@
 using InitialAspireProject.ApiCore;
 using InitialAspireProject.ApiCore.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -10,6 +11,10 @@ internal class Program
     private static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+
+        builder.Services.AddDataProtection()
+            .PersistKeysToFileSystem(new DirectoryInfo("/app/dataprotection-keys"))
+            .SetApplicationName("InitialAspireProject.ApiCore");
 
         builder.AddServiceDefaults();
 
@@ -60,7 +65,8 @@ internal class Program
             app.UseExceptionHandler("/error");
         }
 
-        app.UseHttpsRedirection();
+        if (app.Environment.IsDevelopment())
+            app.UseHttpsRedirection();
 
         app.UseAuthentication();
         app.UseAuthorization();

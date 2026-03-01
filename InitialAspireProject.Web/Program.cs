@@ -3,8 +3,13 @@ using InitialAspireProject.Web;
 using InitialAspireProject.Web.Components;
 using InitialAspireProject.Web.Services;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new System.IO.DirectoryInfo("/app/dataprotection-keys"))
+    .SetApplicationName("InitialAspireProject.Web");
 
 builder.AddServiceDefaults();
 builder.AddRedisOutputCache("cacheredis");
@@ -53,7 +58,8 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+if (app.Environment.IsDevelopment())
+    app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 

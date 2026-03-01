@@ -1,6 +1,7 @@
 using InitialAspireProject.ApiIdentity;
 using InitialAspireProject.ApiIdentity.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,10 @@ using System.Text;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo("/app/dataprotection-keys"))
+    .SetApplicationName("InitialAspireProject.ApiIdentity");
 
 builder.AddServiceDefaults();
 

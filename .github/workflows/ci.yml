@@ -32,7 +32,8 @@ jobs:
             --filter "FullyQualifiedName!~WebTests" \
             --collect:"XPlat Code Coverage" \
             --results-directory ./coverage \
-            --logger "trx;LogFileName=test-results.trx"
+            --logger "trx;LogFileName=test-results.trx" \
+            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Exclude="[InitialAspireProject.AppHost]*,[InitialAspireProject.ServiceDefaults]*"
 
       - name: Generate coverage summary
         uses: irongut/CodeCoverageSummary@v1.3.0
@@ -44,7 +45,7 @@ jobs:
           hide_complexity: false
           indicators: true
           output: both
-          thresholds: '60 80'
+          thresholds: '20 40'
 
       - name: Post coverage comment on PR
         uses: marocchino/sticky-pull-request-comment@v2

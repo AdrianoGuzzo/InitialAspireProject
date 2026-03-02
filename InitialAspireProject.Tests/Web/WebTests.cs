@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace InitialAspireProject.Tests;
+namespace InitialAspireProject.Tests.Web;
 
 public class WebTests
 {

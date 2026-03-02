@@ -79,7 +79,15 @@ ${diff}
 
 if (!claudeResponse.ok) {
   const errorBody = await claudeResponse.text();
-  throw new Error(`Claude API error ${claudeResponse.status}: ${errorBody}`);
+  // Parse the error to give a friendlier message (e.g. low credits, rate limit)
+  let reason = `HTTP ${claudeResponse.status}`;
+  try {
+    const parsed = JSON.parse(errorBody);
+    reason = parsed?.error?.message ?? reason;
+  } catch { /* ignore parse failures */ }
+  console.warn(`⚠️  Claude API unavailable: ${reason}`);
+  console.warn('Skipping review — the workflow will still pass.');
+  process.exit(0);
 }
 
 const claudeData = await claudeResponse.json();
@@ -111,7 +119,9 @@ const githubResponse = await fetch(
 
 if (!githubResponse.ok) {
   const errorBody = await githubResponse.text();
-  throw new Error(`GitHub API error ${githubResponse.status}: ${errorBody}`);
+  console.warn(`⚠️  Could not post GitHub comment (HTTP ${githubResponse.status}): ${errorBody}`);
+  console.warn('Review was generated but could not be posted — the workflow will still pass.');
+  process.exit(0);
 }
 
 console.log(`Review posted successfully to PR #${PR_NUMBER}.`);

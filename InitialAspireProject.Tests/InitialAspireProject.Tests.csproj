@@ -21,12 +21,14 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="xunit.v3" Version="3.2.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.20" />
     <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="Bogus" Version="35.6.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\InitialAspireProject.AppHost\InitialAspireProject.AppHost.csproj" />
+    <ProjectReference Include="..\InitialAspireProject.ApiCore\InitialAspireProject.ApiCore.csproj" />
     <ProjectReference Include="..\InitialAspireProject.ApiIdentity\InitialAspireProject.ApiIdentity.csproj" />
     <ProjectReference Include="..\InitialAspireProject.Web\InitialAspireProject.Web.csproj" />
   </ItemGroup>

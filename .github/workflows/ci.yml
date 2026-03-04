@@ -49,6 +49,7 @@ jobs:
           indicators: true
           output: both
           thresholds: '40 80'
+          fail_below_min: true
 
       - name: Post coverage comment on PR
         uses: marocchino/sticky-pull-request-comment@v2

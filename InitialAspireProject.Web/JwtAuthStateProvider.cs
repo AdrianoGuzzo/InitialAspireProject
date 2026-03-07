@@ -11,6 +11,7 @@ namespace InitialAspireProject.Web
         private readonly ILogger<JwtAuthStateProvider> _logger;
         private const string TokenKey = "AuthToken";
         private const string AuthScheme = "jwt";
+        private ClaimsPrincipal? _cachedUser;
 
         public JwtAuthStateProvider(IHttpContextAccessor httpContextAccessor, ILogger<JwtAuthStateProvider> logger)
         {
@@ -33,29 +34,37 @@ namespace InitialAspireProject.Web
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            var savedToken = _httpContextAccessor.HttpContext?.Session.GetString(TokenKey);
+            // HttpContext is null after the SignalR circuit starts; return cached state
+            if (_httpContextAccessor.HttpContext is null)
+                return new AuthenticationState(_cachedUser ?? new ClaimsPrincipal(new ClaimsIdentity()));
+
+            var savedToken = _httpContextAccessor.HttpContext.Session.GetString(TokenKey);
 
             if (string.IsNullOrWhiteSpace(savedToken))
+            {
+                _cachedUser = null;
                 return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+            }
 
             try
             {
                 var claims = ParseClaimsFromJwt(savedToken);
                 var identity = new ClaimsIdentity(claims, AuthScheme);
-                var user = new ClaimsPrincipal(identity);
-
-                return new AuthenticationState(user);
+                _cachedUser = new ClaimsPrincipal(identity);
+                return new AuthenticationState(_cachedUser);
             }
             catch (Exception ex) when (ex is FormatException || ex is JsonException || ex is IndexOutOfRangeException)
             {
                 _logger.LogWarning(ex, "Invalid JWT token found in session; removing it");
-                _httpContextAccessor.HttpContext?.Session.Remove(TokenKey);
+                _httpContextAccessor.HttpContext.Session.Remove(TokenKey);
+                _cachedUser = null;
                 return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Unexpected error reading authentication state");
-                _httpContextAccessor.HttpContext?.Session.Remove(TokenKey);
+                _httpContextAccessor.HttpContext.Session.Remove(TokenKey);
+                _cachedUser = null;
                 return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
             }
         }
@@ -72,6 +81,7 @@ namespace InitialAspireProject.Web
 
         public async Task NotifyUserLogout()
         {
+            _cachedUser = null;
             _httpContextAccessor.HttpContext?.Session.Remove(TokenKey);
             if (_httpContextAccessor.HttpContext is not null)
                 await _httpContextAccessor.HttpContext.SignOutAsync("Cookies");

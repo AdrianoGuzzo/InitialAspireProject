@@ -1,8 +1,11 @@
 @page "/login"
+@attribute [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+@layout Layout.EmptyLayout
 @using System.ComponentModel.DataAnnotations
 @using InitialAspireProject.Web.Components
 @using InitialAspireProject.Web.Services
 @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using Microsoft.AspNetCore.WebUtilities
 @inject NavigationManager NavigationManager
 @inject ILoginService LoginService
 @inject ProtectedLocalStorage localStorage
@@ -91,11 +94,18 @@
 
 @code {
     private string? message;
+    private string? returnUrl;
     [SupplyParameterFromForm]
     private LoginModel? loginModel { get; set; }
     private ResponseToken? responseToken { get; set; }
 
-    protected override void OnInitialized() => loginModel ??= new();
+    protected override void OnInitialized()
+    {
+        loginModel ??= new();
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        QueryHelpers.ParseQuery(uri.Query).TryGetValue("ReturnUrl", out var ret);
+        returnUrl = ret.ToString();
+    }
 
     private async Task HandleLogin()
     {
@@ -120,7 +130,8 @@
         var authProvider = (JwtAuthStateProvider)AuthStateProvider;
         await authProvider.MarkUserAsAuthenticated(responseToken.Token);
 
-        NavigationManager.NavigateTo("/");
+        var destination = !string.IsNullOrEmpty(returnUrl) ? returnUrl : "/";
+        NavigationManager.NavigateTo(destination);
     }
 
     public record LoginModel

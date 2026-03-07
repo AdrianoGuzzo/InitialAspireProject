@@ -69,7 +69,7 @@
 									Nome Completo
 								</label>
 								<InputText id="fullName" class="form-control form-control-lg"
-										   @bind-Value="registerModel.FullName"
+										   @bind-Value="registerModel!.FullName"
 										   placeholder="Digite seu nome completo" />
 								<ValidationMessage For="@(() => registerModel.FullName)" class="text-danger small mt-1" />
 							</div>
@@ -81,7 +81,7 @@
 									Email
 								</label>
 								<InputText id="email" type="email" class="form-control form-control-lg"
-										   @bind-Value="registerModel.Email"
+										   @bind-Value="registerModel!.Email"
 										   placeholder="Digite seu email" />
 								<ValidationMessage For="@(() => registerModel.Email)" class="text-danger small mt-1" />
 							</div>
@@ -95,7 +95,7 @@
 								<div class="input-group">
 									<InputText id="password" type="@(showPassword ? "text" : "password")"
 											   class="form-control form-control-lg"
-											   @bind-Value="registerModel.Password"
+											   @bind-Value="registerModel!.Password"
 											   placeholder="Digite sua senha" />
 									<button class="btn btn-outline-secondary" type="button"
 											@onclick="TogglePasswordVisibility">
@@ -118,7 +118,7 @@
 								<div class="input-group">
 									<InputText id="confirmPassword" type="@(showConfirmPassword ? "text" : "password")"
 											   class="form-control form-control-lg"
-											   @bind-Value="registerModel.ConfirmPassword"
+											   @bind-Value="registerModel!.ConfirmPassword"
 											   placeholder="Confirme sua senha" />
 									<button class="btn btn-outline-secondary" type="button"
 											@onclick="ToggleConfirmPasswordVisibility">
@@ -132,7 +132,7 @@
 							<div class="mb-4">
 								<div class="form-check">
 									<InputCheckbox id="acceptTerms" class="form-check-input"
-												   @bind-Value="registerModel.AcceptTerms" />
+												   @bind-Value="registerModel!.AcceptTerms" />
 									<label class="form-check-label" for="acceptTerms">
 										Eu aceito os
 										<a href="/terms" target="_blank" class="text-decoration-none">

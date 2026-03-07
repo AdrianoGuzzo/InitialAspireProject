@@ -1,0 +1,102 @@
+using MailKit.Net.Smtp;
+using MailKit.Security;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using MimeKit;
+
+namespace InitialAspireProject.ApiIdentity.Services
+{
+    public class SmtpEmailService : IEmailService
+    {
+        private readonly IConfiguration _configuration;
+        private readonly ILogger<SmtpEmailService> _logger;
+        private readonly Func<ISmtpClient> _clientFactory;
+
+        public SmtpEmailService(IConfiguration configuration, ILogger<SmtpEmailService> logger)
+            : this(configuration, logger, () => new MailKitSmtpClientWrapper()) { }
+
+        internal SmtpEmailService(IConfiguration configuration, ILogger<SmtpEmailService> logger, Func<ISmtpClient> clientFactory)
+        {
+            _configuration = configuration;
+            _logger = logger;
+            _clientFactory = clientFactory;
+        }
+
+        public async Task SendPasswordResetEmailAsync(string toEmail, string resetLink, CancellationToken ct = default)
+        {
+            // Aspire injects mailpit as ConnectionStrings__mailpit=smtp://host:port
+            // Fall back to individual Smtp:* settings when running outside Aspire
+            string host;
+            int port;
+            bool useSsl;
+
+            var mailpitCs = _configuration.GetConnectionString("mailpit");
+            if (!string.IsNullOrEmpty(mailpitCs))
+            {
+                // Aspire injects as "Endpoint=smtp://host:port" — extract the URI part
+                var uriString = mailpitCs.Contains("Endpoint=", StringComparison.OrdinalIgnoreCase)
+                    ? mailpitCs.Split("Endpoint=", StringSplitOptions.None)[1].Split(';')[0].Trim()
+                    : mailpitCs;
+                var uri = new Uri(uriString);
+                host = uri.Host;
+                port = uri.Port;
+                useSsl = uri.Scheme.Equals("smtps", StringComparison.OrdinalIgnoreCase);
+            }
+            else
+            {
+                host = _configuration["Smtp:Host"] is { Length: > 0 } h ? h : "localhost";
+                port = int.TryParse(_configuration["Smtp:Port"], out var p) ? p : 1025;
+                useSsl = bool.TryParse(_configuration["Smtp:UseSsl"], out var s) && s;
+            }
+
+            var fromAddress = _configuration["Smtp:FromAddress"] ?? "noreply@aspire.local";
+            var fromName = _configuration["Smtp:FromName"] ?? "Initial Aspire Project";
+
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress(fromName, fromAddress));
+            message.To.Add(new MailboxAddress(string.Empty, toEmail));
+            message.Subject = "Redefinição de senha";
+            message.Body = new TextPart("html")
+            {
+                Text = $"<p>Clique no link abaixo para redefinir sua senha:</p><p><a href=\"{resetLink}\">{resetLink}</a></p>"
+            };
+
+            var username = _configuration["Smtp:Username"];
+            var password = _configuration["Smtp:Password"];
+
+            try
+            {
+                using var client = _clientFactory();
+                await client.ConnectAsync(host, port, useSsl, ct);
+                if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password))
+                    await client.AuthenticateAsync(username, password, ct);
+                await client.SendAsync(message, ct);
+                await client.DisconnectAsync(true, ct);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException and not InvalidOperationException)
+            {
+                _logger.LogError(ex, "Failed to send password reset email to {Email}", toEmail);
+                throw new InvalidOperationException("Failed to send email.", ex);
+            }
+        }
+    }
+
+    internal sealed class MailKitSmtpClientWrapper : ISmtpClient
+    {
+        private readonly SmtpClient _client = new();
+
+        public Task ConnectAsync(string host, int port, bool useSsl, CancellationToken ct)
+            => _client.ConnectAsync(host, port, useSsl ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.Auto, ct);
+
+        public Task AuthenticateAsync(string username, string password, CancellationToken ct)
+            => _client.AuthenticateAsync(username, password, ct);
+
+        public Task SendAsync(MimeMessage message, CancellationToken ct)
+            => _client.SendAsync(message, ct);
+
+        public Task DisconnectAsync(bool quit, CancellationToken ct)
+            => _client.DisconnectAsync(quit, ct);
+
+        public void Dispose() => _client.Dispose();
+    }
+}

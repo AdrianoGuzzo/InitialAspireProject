@@ -48,6 +48,8 @@ builder.Services.AddRazorComponents()
 string apiIdentityUrl = "https+http://apiidentity";
 builder.Services.AddHttpClient<ILoginService, LoginService>(client => client.BaseAddress = new(apiIdentityUrl));
 builder.Services.AddHttpClient<IRegisterService, RegisterService>(client => client.BaseAddress = new(apiIdentityUrl));
+builder.Services.AddHttpClient<IForgotPasswordService, ForgotPasswordService>(client => client.BaseAddress = new(apiIdentityUrl));
+builder.Services.AddHttpClient<IResetPasswordService, ResetPasswordService>(client => client.BaseAddress = new(apiIdentityUrl));
 builder.Services.AddHttpClient<WeatherApiService>(client => client.BaseAddress = new("https+http://apicore"));
 
 var app = builder.Build();

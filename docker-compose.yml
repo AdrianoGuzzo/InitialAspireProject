@@ -50,6 +50,14 @@ services:
       Jwt__Key: ${JWT_KEY}
       Jwt__Issuer: ${JWT_ISSUER}
       Jwt__Audience: ${JWT_AUDIENCE}
+      Smtp__Host: ${SMTP_HOST}
+      Smtp__Port: ${SMTP_PORT:-587}
+      Smtp__UseSsl: ${SMTP_USE_SSL:-false}
+      Smtp__FromAddress: ${SMTP_FROM_ADDRESS:-noreply@aspire.local}
+      Smtp__FromName: ${SMTP_FROM_NAME:-Initial Aspire Project}
+      Smtp__Username: ${SMTP_USERNAME}
+      Smtp__Password: ${SMTP_PASSWORD}
+      App__BaseUrl: ${APP_BASE_URL}
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://dashboard:18889"
       OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
       OTEL_SERVICE_NAME: "apiidentity"

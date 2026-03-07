@@ -4,6 +4,7 @@ using InitialAspireProject.Web.Components;
 using InitialAspireProject.Web.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Localization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +13,9 @@ builder.Services.AddDataProtection()
     .SetApplicationName("InitialAspireProject.Web");
 
 builder.AddServiceDefaults();
+builder.AddLocalizationDefaults(["pt-BR", "en", "es"]);
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+    options.RequestCultureProviders.Insert(0, new CookieRequestCultureProvider()));
 builder.AddRedisOutputCache("cacheredis");
 
 builder.Services.AddBlazoredLocalStorage();
@@ -65,6 +69,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseStaticFiles();
 
+app.UseLocalizationDefaults();
+
 app.UseSession();
 
 app.UseAuthentication();
@@ -78,5 +84,14 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 app.MapDefaultEndpoints();
+
+app.MapGet("/set-culture", (string culture, string redirectUri, HttpContext ctx) =>
+{
+    ctx.Response.Cookies.Append(
+        CookieRequestCultureProvider.DefaultCookieName,
+        CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
+        new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1), IsEssential = true });
+    return Results.LocalRedirect(redirectUri);
+});
 
 app.Run();

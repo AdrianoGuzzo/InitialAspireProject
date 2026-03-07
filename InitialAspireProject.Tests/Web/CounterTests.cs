@@ -1,10 +1,21 @@
 using Bunit;
 using InitialAspireProject.Web.Components.Pages;
+using InitialAspireProject.Web.Resources;
+using Microsoft.Extensions.Localization;
+using Moq;
 
 namespace InitialAspireProject.Tests.Web;
 
 public class CounterTests : Bunit.TestContext
 {
+    public CounterTests()
+    {
+        var localizerMock = new Mock<IStringLocalizer<WebMessages>>();
+        localizerMock.Setup(l => l[It.IsAny<string>()])
+                     .Returns<string>(key => new LocalizedString(key, key));
+        Services.AddSingleton(localizerMock.Object);
+    }
+
     [Fact]
     public void Counter_InitialState_DisplaysZero()
     {

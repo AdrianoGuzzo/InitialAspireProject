@@ -35,7 +35,7 @@ This is a **.NET 9 Aspire** microservices solution with 6 projects (Aspire 13.1.
 - **ApiIdentity** — Auth service with ASP.NET Core Identity + JWT. Manages users, roles, and token issuance. Endpoints: `POST /auth/register`, `POST /auth/login`, `GET /auth/profile`, `GET /auth/admin-only`, `POST /auth/forgot-password`, `POST /auth/reset-password`.
 - **ApiCore** — Business API (currently WeatherForecast). Protected by JWT. Uses its own `coredb` PostgreSQL database. Swagger/OpenAPI via Swashbuckle.
 - **Web** — Blazor Server frontend. Authenticates via ASP.NET cookie session server-side; JWT is stored in `ISession` via `JwtAuthStateProvider`. Calls both APIs through typed HTTP clients.
-- **ServiceDefaults** — Shared extension methods applied to all services: OpenTelemetry, service discovery, HTTP resilience.
+- **ServiceDefaults** — Shared extension methods applied to all services: OpenTelemetry, service discovery, HTTP resilience, and localization (`AddLocalizationDefaults`, `UseLocalizationDefaults`).
 - **Tests** — Unit + integration tests. Uses xunit.v3, bUnit, Moq, Bogus. CI excludes `WebTests` (Aspire integration tests).
 
 ### Authentication Flow
@@ -87,3 +87,20 @@ This is a **.NET 9 Aspire** microservices solution with 6 projects (Aspire 13.1.
 - Email: `admin@localhost`
 - Password: `Admin123$`
 - Roles seeded: `Admin`, `User`
+
+### Globalization / i18n
+Supported cultures: **pt-BR** (default), **en**, **es**.
+
+**Backend (ApiIdentity):**
+- Resource files: `ApiIdentity/Resources/AuthMessages.resx` (pt-BR), `AuthMessages.en.resx`, `AuthMessages.es.resx`
+- `AuthController` and `SmtpEmailService` inject `IStringLocalizer<AuthMessages>` — all response strings and email content are localized
+- Culture resolved from `Accept-Language` header via `UseRequestLocalization` middleware
+
+**Frontend (Web):**
+- Resource files: `Web/Resources/WebMessages.resx` (pt-BR), `WebMessages.en.resx`, `WebMessages.es.resx`
+- `WebMessages.cs` is NOT an empty marker class — it exposes `public static string` properties backed by `ResourceManager`; these are required by `DataAnnotations` `ErrorMessageResourceType` for localized `ValidationMessage` output
+- `_Imports.razor` injects `IStringLocalizer<WebMessages> L` globally — all Razor components use `L["Key"]` without individual `@inject` declarations
+- `DataAnnotations` attributes on form models use `ErrorMessageResourceType = typeof(WebMessages), ErrorMessageResourceName = "Key"` (not `ErrorMessage = "..."`) so `ValidationMessage` components respect the active culture
+- Culture stored in a 1-year cookie (`.AspNetCore.Culture`) via `CookieRequestCultureProvider` registered as priority 0 in `Web/Program.cs`
+- `/set-culture?culture=en&redirectUri=/path` minimal API endpoint writes the cookie and redirects; links use `data-enhance-nav="false"` to force a full page load so the new circuit picks up the cookie
+- Language switcher dropdown in `NavMenu.razor` (sidebar footer)

@@ -1,6 +1,8 @@
+using InitialAspireProject.ApiIdentity.Resources;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using MimeKit;
 
@@ -11,14 +13,16 @@ namespace InitialAspireProject.ApiIdentity.Services
         private readonly IConfiguration _configuration;
         private readonly ILogger<SmtpEmailService> _logger;
         private readonly Func<ISmtpClient> _clientFactory;
+        private readonly IStringLocalizer<AuthMessages> _localizer;
 
-        public SmtpEmailService(IConfiguration configuration, ILogger<SmtpEmailService> logger)
-            : this(configuration, logger, () => new MailKitSmtpClientWrapper()) { }
+        public SmtpEmailService(IConfiguration configuration, ILogger<SmtpEmailService> logger, IStringLocalizer<AuthMessages> localizer)
+            : this(configuration, logger, localizer, () => new MailKitSmtpClientWrapper()) { }
 
-        internal SmtpEmailService(IConfiguration configuration, ILogger<SmtpEmailService> logger, Func<ISmtpClient> clientFactory)
+        internal SmtpEmailService(IConfiguration configuration, ILogger<SmtpEmailService> logger, IStringLocalizer<AuthMessages> localizer, Func<ISmtpClient> clientFactory)
         {
             _configuration = configuration;
             _logger = logger;
+            _localizer = localizer;
             _clientFactory = clientFactory;
         }
 
@@ -55,10 +59,10 @@ namespace InitialAspireProject.ApiIdentity.Services
             var message = new MimeMessage();
             message.From.Add(new MailboxAddress(fromName, fromAddress));
             message.To.Add(new MailboxAddress(string.Empty, toEmail));
-            message.Subject = "Redefinição de senha";
+            message.Subject = _localizer["EmailSubjectPasswordReset"].Value;
             message.Body = new TextPart("html")
             {
-                Text = $"<p>Clique no link abaixo para redefinir sua senha:</p><p><a href=\"{resetLink}\">{resetLink}</a></p>"
+                Text = string.Format(_localizer["EmailBodyPasswordReset"].Value, resetLink)
             };
 
             var username = _configuration["Smtp:Username"];

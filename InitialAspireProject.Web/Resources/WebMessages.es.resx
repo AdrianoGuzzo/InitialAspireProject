@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- Shared UI -->
+  <data name="Username" xml:space="preserve"><value>Usuario</value></data>
+  <data name="Email" xml:space="preserve"><value>Email</value></data>
+  <data name="Password" xml:space="preserve"><value>Contraseña</value></data>
+  <data name="ConfirmPassword" xml:space="preserve"><value>Confirmar Contraseña</value></data>
+  <data name="NewPassword" xml:space="preserve"><value>Nueva Contraseña</value></data>
+  <data name="ConfirmNewPassword" xml:space="preserve"><value>Confirmar Nueva Contraseña</value></data>
+  <data name="FullName" xml:space="preserve"><value>Nombre Completo</value></data>
+  <data name="Login" xml:space="preserve"><value>Iniciar Sesión</value></data>
+  <data name="LoginButton" xml:space="preserve"><value>Entrar</value></data>
+  <data name="CreateAccount" xml:space="preserve"><value>Crear Cuenta</value></data>
+  <data name="ForgotPasswordLink" xml:space="preserve"><value>¿Olvidaste tu contraseña?</value></data>
+  <data name="BackToLogin" xml:space="preserve"><value>Volver al Login</value></data>
+  <data name="Secure" xml:space="preserve"><value>Seguro</value></data>
+  <data name="Fast" xml:space="preserve"><value>Rápido</value></data>
+  <data name="Modern" xml:space="preserve"><value>Moderno</value></data>
+  <data name="Welcome" xml:space="preserve"><value>¡Bienvenido!</value></data>
+  <data name="NotAuthenticated" xml:space="preserve"><value>No autenticado</value></data>
+  <data name="DoLogin" xml:space="preserve"><value>Iniciar sesión</value></data>
+  <data name="Sending" xml:space="preserve"><value>Enviando...</value></data>
+  <data name="Loading" xml:space="preserve"><value>Cargando...</value></data>
+  <data name="Profile" xml:space="preserve"><value>Perfil</value></data>
+  <data name="Settings" xml:space="preserve"><value>Configuraciones</value></data>
+  <data name="Language" xml:space="preserve"><value>Idioma</value></data>
+  <data name="Logout" xml:space="preserve"><value>Salir</value></data>
+  <data name="Themes" xml:space="preserve"><value>Temas</value></data>
+  <data name="Navigation" xml:space="preserve"><value>Navegación</value></data>
+  <data name="System" xml:space="preserve"><value>Sistema</value></data>
+  <data name="ViewWeather" xml:space="preserve"><value>Ver el Tiempo</value></data>
+
+  <!-- Validation -->
+  <data name="UsernameRequired" xml:space="preserve"><value>El usuario es requerido</value></data>
+  <data name="PasswordRequired" xml:space="preserve"><value>La contraseña es requerida</value></data>
+  <data name="NameRequired" xml:space="preserve"><value>El nombre es requerido</value></data>
+  <data name="EmailRequired" xml:space="preserve"><value>El email es requerido</value></data>
+  <data name="InvalidEmail" xml:space="preserve"><value>Email inválido</value></data>
+  <data name="PasswordMinLength" xml:space="preserve"><value>La contraseña debe tener al menos {2} caracteres</value></data>
+  <data name="PasswordMin8" xml:space="preserve"><value>La contraseña debe tener al menos 8 caracteres</value></data>
+  <data name="ConfirmPasswordRequired" xml:space="preserve"><value>La confirmación de contraseña es requerida</value></data>
+  <data name="PasswordMismatch" xml:space="preserve"><value>Las contraseñas no coinciden</value></data>
+  <data name="MustAcceptTerms" xml:space="preserve"><value>Debes aceptar los términos de uso</value></data>
+  <data name="NewPasswordRequired" xml:space="preserve"><value>La nueva contraseña es requerida</value></data>
+
+  <!-- Login page -->
+  <data name="LoginSubtitle" xml:space="preserve"><value>Inicie sesión para acceder al sistema</value></data>
+  <data name="UsernamePlaceholder" xml:space="preserve"><value>Ingrese su usuario</value></data>
+  <data name="PasswordPlaceholder" xml:space="preserve"><value>Ingrese su contraseña</value></data>
+  <data name="NoAccount" xml:space="preserve"><value>¿No tienes una cuenta?</value></data>
+  <data name="InvalidCredentialsMsg" xml:space="preserve"><value>Usuario o contraseña inválidos.</value></data>
+
+  <!-- Register page -->
+  <data name="RegisterBrandingText" xml:space="preserve"><value>Únete a nuestra plataforma moderna construida con ASP.NET Core, Blazor y Bootstrap</value></data>
+  <data name="RegisterSubtitle" xml:space="preserve"><value>Complete los datos para registrarse</value></data>
+  <data name="FullNamePlaceholder" xml:space="preserve"><value>Ingrese su nombre completo</value></data>
+  <data name="EmailPlaceholder" xml:space="preserve"><value>Ingrese su email</value></data>
+  <data name="PasswordHint6" xml:space="preserve"><value>Mínimo 6 caracteres</value></data>
+  <data name="AcceptTermsPrefix" xml:space="preserve"><value>Acepto los</value></data>
+  <data name="TermsOfUse" xml:space="preserve"><value>términos de uso</value></data>
+  <data name="And" xml:space="preserve"><value>y la</value></data>
+  <data name="PrivacyPolicy" xml:space="preserve"><value>política de privacidad</value></data>
+  <data name="CreatingAccount" xml:space="preserve"><value>Creando cuenta...</value></data>
+  <data name="AlreadyHaveAccount" xml:space="preserve"><value>¿Ya tienes una cuenta?</value></data>
+  <data name="DataSecure" xml:space="preserve"><value>Tus datos están protegidos y seguros</value></data>
+  <data name="InvalidRegistrationData" xml:space="preserve"><value>Datos de registro inválidos.</value></data>
+  <data name="UnknownErrorCreatingAccount" xml:space="preserve"><value>Error desconocido al crear cuenta.</value></data>
+  <data name="ErrorCreatingAccount" xml:space="preserve"><value>Error al crear cuenta: {0}</value></data>
+
+  <!-- ForgotPassword page -->
+  <data name="ForgotPasswordBrandingText" xml:space="preserve"><value>Recupera el acceso a tu cuenta de forma segura</value></data>
+  <data name="ForgotPasswordTitle" xml:space="preserve"><value>¿Olvidaste tu contraseña?</value></data>
+  <data name="ForgotPasswordSubtitle" xml:space="preserve"><value>Ingresa tu email para recibir un enlace de restablecimiento</value></data>
+  <data name="ForgotPasswordSuccessMessage" xml:space="preserve"><value>Si tu correo está registrado, recibirás un enlace para restablecer tu contraseña en breve.</value></data>
+  <data name="SendResetLink" xml:space="preserve"><value>Enviar enlace de restablecimiento</value></data>
+  <data name="RememberedPassword" xml:space="preserve"><value>¿Recordaste tu contraseña?</value></data>
+
+  <!-- ResetPassword page -->
+  <data name="ResetPasswordBrandingText" xml:space="preserve"><value>Establece una nueva contraseña para tu cuenta</value></data>
+  <data name="ResetPasswordTitle" xml:space="preserve"><value>Restablecer Contraseña</value></data>
+  <data name="ResetPasswordSubtitle" xml:space="preserve"><value>Ingresa tu nueva contraseña abajo</value></data>
+  <data name="InvalidResetLink" xml:space="preserve"><value>Enlace de restablecimiento inválido o expirado. Solicita uno nuevo.</value></data>
+  <data name="PasswordResetSuccessMsg" xml:space="preserve"><value>¡Contraseña restablecida con éxito!</value></data>
+  <data name="NewPasswordPlaceholder" xml:space="preserve"><value>Ingresa la nueva contraseña</value></data>
+  <data name="PasswordHint8" xml:space="preserve"><value>Mínimo 8 caracteres</value></data>
+  <data name="ConfirmNewPasswordPlaceholder" xml:space="preserve"><value>Confirma la nueva contraseña</value></data>
+  <data name="Resetting" xml:space="preserve"><value>Restableciendo...</value></data>
+
+  <!-- Home page -->
+  <data name="HomeBrandingText" xml:space="preserve"><value>Bienvenido a tu aplicación moderna construida con ASP.NET Core, Blazor y Bootstrap</value></data>
+  <data name="ExploreCounter" xml:space="preserve"><value>Explorar Counter</value></data>
+  <data name="AuthStatus" xml:space="preserve"><value>Estado de Autenticación</value></data>
+  <data name="WelcomeUser" xml:space="preserve"><value>¡Bienvenido, {0}!</value></data>
+  <data name="AuthenticatedMessage" xml:space="preserve"><value>Has iniciado sesión exitosamente.</value></data>
+  <data name="Authenticated" xml:space="preserve"><value>Autenticado</value></data>
+  <data name="ViewUserDetails" xml:space="preserve"><value>Ver Detalles del Usuario</value></data>
+  <data name="UserClaims" xml:space="preserve"><value>Claims del Usuario:</value></data>
+  <data name="Type" xml:space="preserve"><value>Tipo</value></data>
+  <data name="Value" xml:space="preserve"><value>Valor</value></data>
+  <data name="LimitedAccess" xml:space="preserve"><value>Acceso Limitado</value></data>
+  <data name="NotAuthenticatedUser" xml:space="preserve"><value>No estás autenticado</value></data>
+  <data name="NotAuthenticatedMessage" xml:space="preserve"><value>Para acceder a todos los recursos, inicia sesión con tus credenciales.</value></data>
+  <data name="AppFeatures" xml:space="preserve"><value>Características de la Aplicación</value></data>
+  <data name="ThemeSystemTitle" xml:space="preserve"><value>Sistema de Temas</value></data>
+  <data name="ThemeSystemDesc" xml:space="preserve"><value>Elige entre 10 temas diferentes de Bootstrap para personalizar la apariencia de la aplicación.</value></data>
+  <data name="ExploreThemes" xml:space="preserve"><value>Explorar Temas</value></data>
+  <data name="InteractiveCounterTitle" xml:space="preserve"><value>Contador Interactivo</value></data>
+  <data name="InteractiveCounterDesc" xml:space="preserve"><value>Demostración de componente Blazor interactivo con estadísticas en tiempo real.</value></data>
+  <data name="UseCounter" xml:space="preserve"><value>Usar Counter</value></data>
+  <data name="LoginRequired" xml:space="preserve"><value>Inicio de sesión requerido</value></data>
+  <data name="WeatherForecastTitle" xml:space="preserve"><value>Pronóstico del Tiempo</value></data>
+  <data name="WeatherDesc" xml:space="preserve"><value>Datos cargados de la API backend con caché y visualización moderna.</value></data>
+  <data name="TechStack" xml:space="preserve"><value>Stack Tecnológico</value></data>
+
+  <!-- Weather page -->
+  <data name="WeatherSubtitle" xml:space="preserve"><value>Datos cargados de la API backend</value></data>
+  <data name="LoadingWeather" xml:space="preserve"><value>Cargando pronóstico del tiempo...</value></data>
+  <data name="LoadingWeatherMessage" xml:space="preserve"><value>Espera mientras buscamos los datos más recientes</value></data>
+  <data name="FeelsLike" xml:space="preserve"><value>Sensación:</value></data>
+  <data name="WeeklySummary" xml:space="preserve"><value>Resumen de la Semana</value></data>
+  <data name="Max" xml:space="preserve"><value>Máxima</value></data>
+  <data name="Min" xml:space="preserve"><value>Mínima</value></data>
+  <data name="Average" xml:space="preserve"><value>Promedio</value></data>
+  <data name="Days" xml:space="preserve"><value>Días</value></data>
+  <data name="DetailedData" xml:space="preserve"><value>Datos Detallados</value></data>
+  <data name="Date" xml:space="preserve"><value>Fecha</value></data>
+  <data name="Condition" xml:space="preserve"><value>Condición</value></data>
+
+  <!-- Counter page -->
+  <data name="CounterSubtitle" xml:space="preserve"><value>Demostración de componente interactivo</value></data>
+  <data name="CurrentValue" xml:space="preserve"><value>Valor actual del contador</value></data>
+  <data name="Increment" xml:space="preserve"><value>Incrementar</value></data>
+  <data name="Decrement" xml:space="preserve"><value>Decrementar</value></data>
+  <data name="ClickToInteract" xml:space="preserve"><value>Haz clic en los botones para interactuar</value></data>
+  <data name="Statistics" xml:space="preserve"><value>Estadísticas</value></data>
+  <data name="TotalClicks" xml:space="preserve"><value>Total de Clics</value></data>
+  <data name="MaxValue" xml:space="preserve"><value>Valor Máximo</value></data>
+  <data name="MinValue" xml:space="preserve"><value>Valor Mínimo</value></data>
+</root>

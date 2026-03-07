@@ -16,9 +16,9 @@
                 <div>
                     <h1 class="display-4">
                         <i class="bi bi-cloud-sun me-3"></i>
-                        Previsão do Tempo
+                        @L["WeatherForecastTitle"]
                     </h1>
-                    <p class="lead text-muted">Dados carregados da API backend</p>
+                    <p class="lead text-muted">@L["WeatherSubtitle"]</p>
                 </div>
                 <div>
                     <span class="badge bg-info">
@@ -36,10 +36,10 @@
                         <div class="card">
                             <div class="card-body text-center py-5">
                                 <div class="spinner-border text-primary mb-3" role="status">
-                                    <span class="visually-hidden">Carregando...</span>
+                                    <span class="visually-hidden">@L["Loading"]</span>
                                 </div>
-                                <h5 class="card-title">Carregando previsão do tempo...</h5>
-                                <p class="text-muted">Aguarde enquanto buscamos os dados mais recentes</p>
+                                <h5 class="card-title">@L["LoadingWeather"]</h5>
+                                <p class="text-muted">@L["LoadingWeatherMessage"]</p>
                             </div>
                         </div>
                     </div>
@@ -65,7 +65,7 @@
                                     <div class="mb-3">
                                         <i class="@GetWeatherIcon(forecast.Summary) text-primary" style="font-size: 3rem;"></i>
                                     </div>
-                                    
+
                                     <!-- Temperature -->
                                     <div class="mb-3">
                                         <div class="display-6 fw-bold text-primary">
@@ -73,7 +73,7 @@
                                         </div>
                                         <small class="text-muted">(@forecast.TemperatureF°F)</small>
                                     </div>
-                                    
+
                                     <!-- Summary -->
                                     <div class="mb-2">
                                         <span class="badge @GetSummaryBadgeClass(forecast.Summary) fs-6">
@@ -84,7 +84,7 @@
                                 <div class="card-footer text-center">
                                     <small class="text-muted">
                                         <i class="bi bi-thermometer-half me-1"></i>
-                                        Sensação: @GetFeelsLike(forecast.TemperatureC)°C
+                                        @L["FeelsLike"] @GetFeelsLike(forecast.TemperatureC)°C
                                     </small>
                                 </div>
                             </div>
@@ -99,7 +99,7 @@
                             <div class="card-header">
                                 <h5 class="mb-0">
                                     <i class="bi bi-graph-up me-2"></i>
-                                    Resumo da Semana
+                                    @L["WeeklySummary"]
                                 </h5>
                             </div>
                             <div class="card-body">
@@ -107,24 +107,24 @@
                                     <div class="col-md-3 col-6 mb-3">
                                         <div class="border-end border-md-end-0 border-bottom border-md-bottom-0">
                                             <div class="h4 text-danger">@forecasts.Max(f => f.TemperatureC)°C</div>
-                                            <small class="text-muted">Máxima</small>
+                                            <small class="text-muted">@L["Max"]</small>
                                         </div>
                                     </div>
                                     <div class="col-md-3 col-6 mb-3">
                                         <div class="border-end border-md-end-0 border-bottom border-md-bottom-0">
                                             <div class="h4 text-info">@forecasts.Min(f => f.TemperatureC)°C</div>
-                                            <small class="text-muted">Mínima</small>
+                                            <small class="text-muted">@L["Min"]</small>
                                         </div>
                                     </div>
                                     <div class="col-md-3 col-6 mb-3">
                                         <div class="border-end border-md-end-0">
                                             <div class="h4 text-success">@Math.Round(forecasts.Average(f => f.TemperatureC), 1)°C</div>
-                                            <small class="text-muted">Média</small>
+                                            <small class="text-muted">@L["Average"]</small>
                                         </div>
                                     </div>
                                     <div class="col-md-3 col-6 mb-3">
                                         <div class="h4 text-warning">@forecasts.Length</div>
-                                        <small class="text-muted">Dias</small>
+                                        <small class="text-muted">@L["Days"]</small>
                                     </div>
                                 </div>
                             </div>
@@ -139,7 +139,7 @@
                             <div class="card-header">
                                 <h5 class="mb-0">
                                     <i class="bi bi-table me-2"></i>
-                                    Dados Detalhados
+                                    @L["DetailedData"]
                                 </h5>
                             </div>
                             <div class="card-body">
@@ -149,7 +149,7 @@
                                             <tr>
                                                 <th scope="col">
                                                     <i class="bi bi-calendar3 me-1"></i>
-                                                    Data
+                                                    @L["Date"]
                                                 </th>
                                                 <th scope="col" aria-label="Temperature in Celsius">
                                                     <i class="bi bi-thermometer-half me-1"></i>
@@ -161,7 +161,7 @@
                                                 </th>
                                                 <th scope="col">
                                                     <i class="bi bi-cloud me-1"></i>
-                                                    Condição
+                                                    @L["Condition"]
                                                 </th>
                                             </tr>
                                         </thead>
@@ -247,7 +247,7 @@
 
     private int GetFeelsLike(int temperature)
     {
-        // Simulação simples de sensação térmica
+        // Simple heat index simulation
         return temperature + Random.Shared.Next(-3, 4);
     }
 }

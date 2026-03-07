@@ -1,12 +1,14 @@
 using InitialAspireProject.ApiIdentity;
 using InitialAspireProject.ApiIdentity.Controllers;
 using InitialAspireProject.ApiIdentity.Repository;
+using InitialAspireProject.ApiIdentity.Resources;
 using InitialAspireProject.ApiIdentity.Services;
 using InitialAspireProject.Tests.Builders;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
@@ -40,6 +42,9 @@ public class AuthControllerPasswordResetTests
 
         var tokenService = new TokenService(config);
         emailMock ??= new Mock<IEmailService>();
+        var localizer = new Mock<IStringLocalizer<AuthMessages>>();
+        localizer.Setup(l => l[It.IsAny<string>()])
+                 .Returns<string>(key => new LocalizedString(key, key));
 
         var controller = new AuthController(
             userManagerMock.Object,
@@ -47,7 +52,8 @@ public class AuthControllerPasswordResetTests
             tokenService,
             emailMock.Object,
             config,
-            NullLogger<AuthController>.Instance);
+            NullLogger<AuthController>.Instance,
+            localizer.Object);
 
         return (userManagerMock, signInManagerMock, emailMock, controller);
     }

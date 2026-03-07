@@ -1,3 +1,4 @@
+@inject NavigationManager Nav
 <!-- Brand Header -->
 <div class="navbar-brand-wrapper bg-primary p-3 text-center">
     <a class="navbar-brand text-white text-decoration-none fw-bold" href="/">
@@ -7,7 +8,7 @@
 </div>
 
 <!-- Mobile Toggle (Hidden by default, shown on mobile) -->
-<button class="btn btn-outline-light d-md-none m-2" type="button" 
+<button class="btn btn-outline-light d-md-none m-2" type="button"
         onclick="document.querySelector('.nav-scrollable').classList.toggle('show')">
     <i class="bi bi-list"></i>
     <span class="ms-1">Menu</span>
@@ -16,7 +17,7 @@
 <!-- Navigation Menu -->
 <div class="nav-scrollable flex-grow-1 overflow-auto">
     <nav class="nav flex-column p-2">
-        
+
         <!-- User Section -->
         <AuthorizeView>
             <Authorized>
@@ -26,7 +27,7 @@
                             <div class="d-flex align-items-center">
                                 <i class="bi bi-person-circle me-2 fs-4"></i>
                                 <div class="flex-grow-1">
-                                    <div class="fw-bold small">Bem-vindo!</div>
+                                    <div class="fw-bold small">@L["Welcome"]</div>
                                     <div class="small text-truncate">@context.User.Identity?.Name</div>
                                 </div>
                             </div>
@@ -41,8 +42,8 @@
                             <div class="d-flex align-items-center">
                                 <i class="bi bi-person-x me-2 fs-4"></i>
                                 <div class="flex-grow-1">
-                                    <div class="fw-bold small">Não autenticado</div>
-                                    <a href="/login" class="small text-dark">Fazer login</a>
+                                    <div class="fw-bold small">@L["NotAuthenticated"]</div>
+                                    <a href="/login" class="small text-dark">@L["DoLogin"]</a>
                                 </div>
                             </div>
                         </div>
@@ -55,12 +56,12 @@
         <div class="nav-item">
             <h6 class="nav-header text-muted text-uppercase small fw-bold px-3 mb-2">
                 <i class="bi bi-compass me-1"></i>
-                Navegação
+                @L["Navigation"]
             </h6>
         </div>
 
         <div class="nav-item">
-            <a class="nav-link text-white d-flex align-items-center py-2 px-3 rounded" 
+            <a class="nav-link text-white d-flex align-items-center py-2 px-3 rounded"
                      href="/" >
                 <i class="bi bi-house-door me-2"></i>
                 Home
@@ -68,7 +69,7 @@
         </div>
 
         <div class="nav-item">
-            <a class="nav-link text-white d-flex align-items-center py-2 px-3 rounded" 
+            <a class="nav-link text-white d-flex align-items-center py-2 px-3 rounded"
                      href="counter">
                 <i class="bi bi-plus-square me-2"></i>
                 Counter
@@ -76,7 +77,7 @@
         </div>
 
         <div class="nav-item">
-            <a class="nav-link text-white d-flex align-items-center py-2 px-3 rounded" 
+            <a class="nav-link text-white d-flex align-items-center py-2 px-3 rounded"
                      href="weather">
                 <i class="bi bi-cloud-sun me-2"></i>
                 Weather
@@ -84,10 +85,10 @@
         </div>
 
         <div class="nav-item">
-            <a class="nav-link text-white d-flex align-items-center py-2 px-3 rounded" 
+            <a class="nav-link text-white d-flex align-items-center py-2 px-3 rounded"
                      href="themes">
                 <i class="bi bi-palette me-2"></i>
-                Temas
+                @L["Themes"]
             </a>
         </div>
 
@@ -98,31 +99,31 @@
         <div class="nav-item">
             <h6 class="nav-header text-muted text-uppercase small fw-bold px-3 mb-2">
                 <i class="bi bi-gear me-1"></i>
-                Sistema
+                @L["System"]
             </h6>
         </div>
 
         <AuthorizeView>
             <Authorized>
                 <div class="nav-item">
-                    <a class="nav-link text-white d-flex align-items-center py-2 px-3 rounded" 
+                    <a class="nav-link text-white d-flex align-items-center py-2 px-3 rounded"
                        href="/profile">
                         <i class="bi bi-person-gear me-2"></i>
-                        Perfil
+                        @L["Profile"]
                     </a>
                 </div>
                 <div class="nav-item">
-                    <a class="nav-link text-white d-flex align-items-center py-2 px-3 rounded" 
+                    <a class="nav-link text-white d-flex align-items-center py-2 px-3 rounded"
                        href="/settings">
                         <i class="bi bi-gear me-2"></i>
-                        Configurações
+                        @L["Settings"]
                     </a>
                 </div>
                 <div class="nav-item">
-                    <a class="nav-link text-danger d-flex align-items-center py-2 px-3 rounded" 
+                    <a class="nav-link text-danger d-flex align-items-center py-2 px-3 rounded"
                        href="/logout">
                         <i class="bi bi-box-arrow-right me-2"></i>
-                        Sair
+                        @L["Logout"]
                     </a>
                 </div>
             </Authorized>
@@ -130,8 +131,23 @@
     </nav>
 </div>
 
+<!-- Language Switcher -->
+<div class="p-2 border-top border-secondary">
+    <div class="dropdown">
+        <button class="btn btn-sm btn-outline-light dropdown-toggle w-100" type="button" data-bs-toggle="dropdown">
+            <i class="bi bi-translate me-1"></i>
+            @L["Language"]
+        </button>
+        <ul class="dropdown-menu dropdown-menu-dark w-100">
+            <li><a class="dropdown-item" data-enhance-nav="false" href="/set-culture?culture=pt-BR&redirectUri=@Uri.EscapeDataString("/" + Nav.ToBaseRelativePath(Nav.Uri))">🇧🇷 Português</a></li>
+            <li><a class="dropdown-item" data-enhance-nav="false" href="/set-culture?culture=en&redirectUri=@Uri.EscapeDataString("/" + Nav.ToBaseRelativePath(Nav.Uri))">🇺🇸 English</a></li>
+            <li><a class="dropdown-item" data-enhance-nav="false" href="/set-culture?culture=es&redirectUri=@Uri.EscapeDataString("/" + Nav.ToBaseRelativePath(Nav.Uri))">🇪🇸 Español</a></li>
+        </ul>
+    </div>
+</div>
+
 <!-- Footer in Sidebar -->
-<div class="mt-auto p-3 border-top border-secondary">
+<div class="p-3 border-top border-secondary">
     <div class="text-center">
         <small class="text-muted">
             <i class="bi bi-info-circle me-1"></i>

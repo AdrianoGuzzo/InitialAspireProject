@@ -17,6 +17,7 @@ internal class Program
             .SetApplicationName("InitialAspireProject.ApiCore");
 
         builder.AddServiceDefaults();
+        builder.AddLocalizationDefaults(["pt-BR", "en", "es"]);
 
         builder.AddNpgsqlDbContext<CoreDbContext>("coredb");
         builder.Services.AddScoped<WeatherForecastService>();
@@ -68,6 +69,7 @@ internal class Program
         if (app.Environment.IsDevelopment())
             app.UseHttpsRedirection();
 
+        app.UseLocalizationDefaults();
         app.UseAuthentication();
         app.UseAuthorization();
 

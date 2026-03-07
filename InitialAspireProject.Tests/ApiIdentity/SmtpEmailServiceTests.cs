@@ -1,5 +1,7 @@
+using InitialAspireProject.ApiIdentity.Resources;
 using InitialAspireProject.ApiIdentity.Services;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging.Abstractions;
 using MimeKit;
 using Moq;
@@ -36,7 +38,13 @@ public class SmtpEmailServiceTests
         smtpClientMock.Setup(x => x.DisconnectAsync(It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
-        var service = new SmtpEmailService(config, NullLogger<SmtpEmailService>.Instance, () => smtpClientMock.Object);
+        var localizer = new Mock<IStringLocalizer<AuthMessages>>();
+        localizer.Setup(l => l["EmailBodyPasswordReset"])
+                 .Returns(new LocalizedString("EmailBodyPasswordReset", "<a href='{0}'>{0}</a>"));
+        localizer.Setup(l => l[It.Is<string>(k => k != "EmailBodyPasswordReset")])
+                 .Returns<string>(key => new LocalizedString(key, key));
+
+        var service = new SmtpEmailService(config, NullLogger<SmtpEmailService>.Instance, localizer.Object, () => smtpClientMock.Object);
         return (smtpClientMock, service);
     }
 

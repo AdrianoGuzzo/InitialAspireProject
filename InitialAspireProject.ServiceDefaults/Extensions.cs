@@ -1,5 +1,7 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
@@ -103,6 +105,29 @@ public static class Extensions
             .AddCheck("self", () => HealthCheckResult.Healthy(), ["live"]);
 
         return builder;
+    }
+
+    public static IHostApplicationBuilder AddLocalizationDefaults(
+        this IHostApplicationBuilder builder,
+        string[] supportedCultures)
+    {
+        builder.Services.AddLocalization();
+        builder.Services.Configure<RequestLocalizationOptions>(options =>
+        {
+            var cultures = supportedCultures.Select(c => new CultureInfo(c)).ToArray();
+            options.DefaultRequestCulture = new RequestCulture(supportedCultures[1]);
+            options.SupportedCultures = cultures;
+            options.SupportedUICultures = cultures;
+            options.RequestCultureProviders =
+                [new AcceptLanguageHeaderRequestCultureProvider()];
+        });
+        return builder;
+    }
+
+    public static WebApplication UseLocalizationDefaults(this WebApplication app)
+    {
+        app.UseRequestLocalization();
+        return app;
     }
 
     public static WebApplication MapDefaultEndpoints(this WebApplication app)

@@ -19,20 +19,20 @@
 				<i class="bi bi-rocket-takeoff display-1 mb-4"></i>
 				<h1 class="display-4 fw-bold mb-4">Initial Aspire Project</h1>
 				<p class="lead mb-4">
-					Junte-se à nossa plataforma moderna construída com ASP.NET Core, Blazor e Bootstrap
+					@L["RegisterBrandingText"]
 				</p>
 				<div class="row text-center mt-5">
 					<div class="col-4">
 						<i class="bi bi-shield-check display-6 mb-2"></i>
-						<div class="small">Seguro</div>
+						<div class="small">@L["Secure"]</div>
 					</div>
 					<div class="col-4">
 						<i class="bi bi-lightning-fill display-6 mb-2"></i>
-						<div class="small">Rápido</div>
+						<div class="small">@L["Fast"]</div>
 					</div>
 					<div class="col-4">
 						<i class="bi bi-palette-fill display-6 mb-2"></i>
-						<div class="small">Moderno</div>
+						<div class="small">@L["Modern"]</div>
 					</div>
 				</div>
 			</div>
@@ -46,11 +46,11 @@
 						<div class="d-lg-none mb-3">
 							<i class="bi bi-rocket-takeoff text-primary display-4"></i>
 						</div>
-						<h2 class="h3 fw-bold text-dark mb-1">Criar Conta</h2>
-						<p class="text-muted mb-0">Preencha os dados para se cadastrar</p>
+						<h2 class="h3 fw-bold text-dark mb-1">@L["CreateAccount"]</h2>
+						<p class="text-muted mb-0">@L["RegisterSubtitle"]</p>
 					</div>
 
-					<div class="card-body p-4">			
+					<div class="card-body p-4">
 						@if (!string.IsNullOrEmpty(message))
 						{
 							<div class="alert alert-@(success ? "success" : "danger") d-flex align-items-center" role="alert">
@@ -66,11 +66,11 @@
 							<div class="mb-3">
 								<label for="fullName" class="form-label fw-semibold">
 									<i class="bi bi-person me-1"></i>
-									Nome Completo
+									@L["FullName"]
 								</label>
 								<InputText id="fullName" class="form-control form-control-lg"
 										   @bind-Value="registerModel!.FullName"
-										   placeholder="Digite seu nome completo" />
+										   placeholder="@L["FullNamePlaceholder"]" />
 								<ValidationMessage For="@(() => registerModel.FullName)" class="text-danger small mt-1" />
 							</div>
 
@@ -78,11 +78,11 @@
 							<div class="mb-3">
 								<label for="email" class="form-label fw-semibold">
 									<i class="bi bi-envelope me-1"></i>
-									Email
+									@L["Email"]
 								</label>
 								<InputText id="email" type="email" class="form-control form-control-lg"
 										   @bind-Value="registerModel!.Email"
-										   placeholder="Digite seu email" />
+										   placeholder="@L["EmailPlaceholder"]" />
 								<ValidationMessage For="@(() => registerModel.Email)" class="text-danger small mt-1" />
 							</div>
 
@@ -90,13 +90,13 @@
 							<div class="mb-3">
 								<label for="password" class="form-label fw-semibold">
 									<i class="bi bi-lock me-1"></i>
-									Senha
+									@L["Password"]
 								</label>
 								<div class="input-group">
 									<InputText id="password" type="@(showPassword ? "text" : "password")"
 											   class="form-control form-control-lg"
 											   @bind-Value="registerModel!.Password"
-											   placeholder="Digite sua senha" />
+											   placeholder="@L["PasswordPlaceholder"]" />
 									<button class="btn btn-outline-secondary" type="button"
 											@onclick="TogglePasswordVisibility">
 										<i class="bi @(showPassword ? "bi-eye-slash" : "bi-eye")"></i>
@@ -104,7 +104,7 @@
 								</div>
 								<div class="form-text small">
 									<i class="bi bi-info-circle me-1"></i>
-									Mínimo 6 caracteres
+									@L["PasswordHint6"]
 								</div>
 								<ValidationMessage For="@(() => registerModel.Password)" class="text-danger small mt-1" />
 							</div>
@@ -113,13 +113,13 @@
 							<div class="mb-3">
 								<label for="confirmPassword" class="form-label fw-semibold">
 									<i class="bi bi-lock-fill me-1"></i>
-									Confirmar Senha
+									@L["ConfirmPassword"]
 								</label>
 								<div class="input-group">
 									<InputText id="confirmPassword" type="@(showConfirmPassword ? "text" : "password")"
 											   class="form-control form-control-lg"
 											   @bind-Value="registerModel!.ConfirmPassword"
-											   placeholder="Confirme sua senha" />
+											   placeholder="@L["ConfirmPassword"]" />
 									<button class="btn btn-outline-secondary" type="button"
 											@onclick="ToggleConfirmPasswordVisibility">
 										<i class="bi @(showConfirmPassword ? "bi-eye-slash" : "bi-eye")"></i>
@@ -134,13 +134,13 @@
 									<InputCheckbox id="acceptTerms" class="form-check-input"
 												   @bind-Value="registerModel!.AcceptTerms" />
 									<label class="form-check-label" for="acceptTerms">
-										Eu aceito os
+										@L["AcceptTermsPrefix"]
 										<a href="/terms" target="_blank" class="text-decoration-none">
-											termos de uso
+											@L["TermsOfUse"]
 										</a>
-										e a
+										@L["And"]
 										<a href="/privacy" target="_blank" class="text-decoration-none">
-											política de privacidade
+											@L["PrivacyPolicy"]
 										</a>
 									</label>
 								</div>
@@ -153,12 +153,12 @@
 									@if (isLoading)
 									{
 										<span class="spinner-border spinner-border-sm me-2" role="status"></span>
-										<span>Criando conta...</span>
+										<span>@L["CreatingAccount"]</span>
 									}
 									else
 									{
 										<i class="bi bi-person-plus me-2"></i>
-										<span>Criar Conta</span>
+										<span>@L["CreateAccount"]</span>
 									}
 								</button>
 							</div>
@@ -167,10 +167,10 @@
 
 					<div class="card-footer bg-light text-center py-3">
 						<p class="mb-0 text-muted">
-							Já tem uma conta?
+							@L["AlreadyHaveAccount"]
 							<a href="/login" class="text-decoration-none fw-semibold">
 								<i class="bi bi-box-arrow-in-right me-1"></i>
-								Fazer Login
+								@L["Login"]
 							</a>
 						</p>
 					</div>
@@ -180,7 +180,7 @@
 				<div class="text-center mt-4">
 					<small class="text-muted">
 						<i class="bi bi-shield-check me-1"></i>
-						Seus dados estão protegidos e seguros
+						@L["DataSecure"]
 					</small>
 				</div>
 			</div>
@@ -213,7 +213,7 @@
 		{
 			if (registerModel == null)
 			{
-				message = "Dados de registro inválidos.";
+				message = L["InvalidRegistrationData"].Value;
 				return;
 			}
 			var result = await RegisterService.RegisterAsync(
@@ -222,12 +222,12 @@
 				registerModel.Password);
 
 			success = result.Success;
-			message = result.Message ?? "Erro desconhecido ao criar conta.";
+			message = result.Message ?? L["UnknownErrorCreatingAccount"].Value;
 
 		}
 		catch (Exception ex)
 		{
-			message = $"Erro ao criar conta: {ex.Message}";
+			message = string.Format(L["ErrorCreatingAccount"].Value, ex.Message);
 		}
 		finally
 		{
@@ -246,29 +246,29 @@
 	}
 	public record RegisterModel
 	{
-		[Required(ErrorMessage = "O nome é obrigatório")]
+		[Required(ErrorMessageResourceType = typeof(WebMessages), ErrorMessageResourceName = "NameRequired")]
 		[Display(Name = "Nome Completo")]
 		public string FullName { get; set; } = string.Empty;
 
-		[Required(ErrorMessage = "O email é obrigatório")]
-		[EmailAddress(ErrorMessage = "Email inválido")]
+		[Required(ErrorMessageResourceType = typeof(WebMessages), ErrorMessageResourceName = "EmailRequired")]
+		[EmailAddress(ErrorMessageResourceType = typeof(WebMessages), ErrorMessageResourceName = "InvalidEmail")]
 		[Display(Name = "Email")]
 		public string Email { get; set; } = string.Empty;
 
-		[Required(ErrorMessage = "A senha é obrigatória")]
-		[StringLength(100, ErrorMessage = "A senha deve ter pelo menos {2} caracteres", MinimumLength = 6)]
+		[Required(ErrorMessageResourceType = typeof(WebMessages), ErrorMessageResourceName = "PasswordRequired")]
+		[StringLength(100, ErrorMessageResourceType = typeof(WebMessages), ErrorMessageResourceName = "PasswordMinLength", MinimumLength = 6)]
 		[DataType(DataType.Password)]
 		[Display(Name = "Senha")]
 		public string Password { get; set; } = string.Empty;
 
-		[Required(ErrorMessage = "A confirmação de senha é obrigatória")]
+		[Required(ErrorMessageResourceType = typeof(WebMessages), ErrorMessageResourceName = "ConfirmPasswordRequired")]
 		[DataType(DataType.Password)]
 		[Display(Name = "Confirmar Senha")]
-		[Compare("Password", ErrorMessage = "A senha e a confirmação não coincidem")]
+		[Compare("Password", ErrorMessageResourceType = typeof(WebMessages), ErrorMessageResourceName = "PasswordMismatch")]
 		public string ConfirmPassword { get; set; } = string.Empty;
 
 		[Display(Name = "Aceito os termos de uso")]
-		[Range(typeof(bool), "true", "true", ErrorMessage = "Você deve aceitar os termos de uso")]
+		[Range(typeof(bool), "true", "true", ErrorMessageResourceType = typeof(WebMessages), ErrorMessageResourceName = "MustAcceptTerms")]
 		public bool AcceptTerms { get; set; }
 	}
 }

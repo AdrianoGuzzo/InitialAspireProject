@@ -4,6 +4,8 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 var compose = builder.AddDockerComposeEnvironment("compose");
 
+var mailpit = builder.AddMailPit("mailpit");
+
 var cache = builder.AddRedis("cacheredis");
 
 var postgres = builder.AddPostgres("postgres")
@@ -29,16 +31,8 @@ var apiCore = builder.AddProject<Projects.InitialAspireProject_ApiCore>("apicore
     .WithReference(coreDb)
     .WaitFor(coreDb);
 
-var apiIdentity = builder.AddProject<Projects.InitialAspireProject_ApiIdentity>("apiidentity")
-    .PublishAsDockerComposeService((resource, service) =>
-    {
-        service.Name = "apiidentity";
-    })
-    .WithHttpHealthCheck("/health")
-    .WithReference(identityDb)
-    .WaitFor(identityDb);
-
-builder.AddProject<Projects.InitialAspireProject_Web>("web")
+// Declare web first so its HTTPS endpoint can be passed to apiIdentity for password reset links
+var web = builder.AddProject<Projects.InitialAspireProject_Web>("web")
     .PublishAsDockerComposeService((resource, service) =>
     {
         service.Name = "web";
@@ -46,8 +40,21 @@ builder.AddProject<Projects.InitialAspireProject_Web>("web")
     .WithExternalHttpEndpoints()
     .WithHttpHealthCheck("/health")
     .WithReference(cache)
-    .WaitFor(cache)
-    .WithReference(apiIdentity)
+    .WaitFor(cache);
+
+var apiIdentity = builder.AddProject<Projects.InitialAspireProject_ApiIdentity>("apiidentity")
+    .PublishAsDockerComposeService((resource, service) =>
+    {
+        service.Name = "apiidentity";
+    })
+    .WithHttpHealthCheck("/health")
+    .WithReference(identityDb)
+    .WaitFor(identityDb)
+    .WithReference(mailpit)
+    .WaitFor(mailpit)
+    .WithEnvironment("App__BaseUrl", web.GetEndpoint("https"));
+
+web.WithReference(apiIdentity)
     .WaitFor(apiIdentity)
     .WithReference(apiCore)
     .WaitFor(apiCore);

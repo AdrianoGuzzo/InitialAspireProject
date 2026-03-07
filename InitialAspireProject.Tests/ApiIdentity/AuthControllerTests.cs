@@ -3,11 +3,13 @@ using IdentitySignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 using InitialAspireProject.ApiIdentity;
 using InitialAspireProject.ApiIdentity.Controllers;
 using InitialAspireProject.ApiIdentity.Repository;
+using InitialAspireProject.ApiIdentity.Services;
 using InitialAspireProject.Tests.Builders;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
 namespace InitialAspireProject.Tests.ApiIdentity;
@@ -33,12 +35,19 @@ public class AuthControllerTests
             {
                 ["Jwt:Key"] = "super-secret-test-key-32-chars-ok!!",
                 ["Jwt:Issuer"] = "TestIssuer",
-                ["Jwt:Audience"] = "TestAudience"
+                ["Jwt:Audience"] = "TestAudience",
+                ["App:BaseUrl"] = "https://localhost:5001"
             })
             .Build();
 
         var tokenService = new TokenService(config);
-        var controller = new AuthController(userManagerMock.Object, signInManagerMock.Object, tokenService);
+        var controller = new AuthController(
+            userManagerMock.Object,
+            signInManagerMock.Object,
+            tokenService,
+            Mock.Of<IEmailService>(),
+            config,
+            NullLogger<AuthController>.Instance);
 
         return (userManagerMock, signInManagerMock, controller);
     }

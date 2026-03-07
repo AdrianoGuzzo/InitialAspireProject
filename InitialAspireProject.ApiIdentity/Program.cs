@@ -1,5 +1,6 @@
 using InitialAspireProject.ApiIdentity;
 using InitialAspireProject.ApiIdentity.Repository;
+using InitialAspireProject.ApiIdentity.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
@@ -36,6 +37,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     .AddDefaultTokenProviders();
 
 builder.Services.AddScoped<TokenService>();
+builder.Services.AddScoped<IEmailService, SmtpEmailService>();
 
 // Autenticação com JWT
 builder.Services.AddAuthentication(options =>

@@ -8,6 +8,14 @@
     {
         <Register />
     }
+    else if (showForgotPassword)
+    {
+        <ForgotPassword />
+    }
+    else if (showResetPassword)
+    {
+        <ResetPassword />
+    }
     else if (contextUser?.Identity?.IsAuthenticated ?? false)
     {
         <Router AppAssembly="@typeof(Program).Assembly">
@@ -89,16 +97,16 @@
 @code {
     private ClaimsPrincipal? contextUser;
     private bool showRegister = false;
+    private bool showForgotPassword = false;
+    private bool showResetPassword = false;
 
     protected override async Task OnInitializedAsync()
     {
         var authProvider = (JwtAuthStateProvider)AuthStateProvider;
         var authenticationState = await authProvider.GetAuthenticationStateAsync();
         contextUser = authenticationState.User;
-        
-        // Verificar se a URL atual é /register
-        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
-        showRegister = uri.AbsolutePath.Equals("/register", StringComparison.OrdinalIgnoreCase);
+
+        UpdatePathFlags(Navigation.Uri);
     }
 
     protected override void OnAfterRender(bool firstRender)
@@ -111,14 +119,16 @@
 
     private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
     {
-        var uri = Navigation.ToAbsoluteUri(e.Location);
-        var newShowRegister = uri.AbsolutePath.Equals("/register", StringComparison.OrdinalIgnoreCase);
-        
-        if (newShowRegister != showRegister)
-        {
-            showRegister = newShowRegister;
-            InvokeAsync(StateHasChanged);
-        }
+        UpdatePathFlags(e.Location);
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void UpdatePathFlags(string location)
+    {
+        var path = Navigation.ToAbsoluteUri(location).AbsolutePath;
+        showRegister = path.Equals("/register", StringComparison.OrdinalIgnoreCase);
+        showForgotPassword = path.Equals("/forgot-password", StringComparison.OrdinalIgnoreCase);
+        showResetPassword = path.StartsWith("/reset-password", StringComparison.OrdinalIgnoreCase);
     }
 
     public void Dispose()

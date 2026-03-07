@@ -35,7 +35,7 @@ builder.Services
 .AddAuthentication("Cookies")
     .AddCookie("Cookies", options =>
     {
-        options.LoginPath = "/";
+        options.LoginPath = "/login";
         options.AccessDeniedPath = "/forbidden";
         options.Cookie.HttpOnly = true;
         options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;

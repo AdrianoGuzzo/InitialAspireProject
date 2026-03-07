@@ -7,6 +7,6 @@
     protected override async Task OnInitializedAsync()
     {
         await AuthStateProvider.NotifyUserLogout();
-        Navigation.NavigateTo("/", forceLoad: true);
+        Navigation.NavigateTo("/login");
     }
 }

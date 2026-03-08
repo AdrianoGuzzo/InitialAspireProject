@@ -1,248 +1,202 @@
-# Projeto ASP.NET Core Aspire com IdentityServer e PostgreSQL
+# Initial Aspire Project
 
-Este projeto demonstra como configurar um sistema de autenticação completo usando ASP.NET Core Aspire, PostgreSQL, ASP.NET Core Identity.
+Um starter de microsserviços .NET 9 Aspire pronto para produção, com autenticação, autorização, redefinição de senha, globalização e observabilidade — pronto para clonar e estender.
 
 ## Arquitetura
 
-O projeto consiste em:
+Seis projetos orquestrados pelo .NET Aspire 13.1.2:
 
-1. **InitialAspireProject.AppHost** - Orquestrador do Aspire que gerencia todos os serviços
-2. **InitialAspireProject.ApiIdentity** - API protegida que também atua como IdentityServer
-3. **InitialAspireProject.Web** - Frontend web que consome a API protegida
-4. **PostgreSQL** - Banco de dados para armazenar usuários e dados do OpenIddict
-5. **Redis** - Cache distribuído
-6. **pgAdmin** - Interface web para gerenciar o PostgreSQL
+| Projeto | Função |
+|---|---|
+| **AppHost** | Orquestrador do Aspire — define todos os serviços, bancos de dados e infraestrutura |
+| **ApiIdentity** | Serviço de autenticação: ASP.NET Core Identity + emissão de JWT, redefinição de senha, e-mail |
+| **ApiCore** | API de negócio (WeatherForecast) — protegida por JWT |
+| **Web** | Frontend Blazor Server — sessão por cookie, clientes HTTP tipados, seletor de idioma |
+| **ServiceDefaults** | Extensões compartilhadas: OpenTelemetry, resiliência, descoberta de serviços, localização |
+| **Tests** | Testes unitários e de integração (xunit.v3, bUnit, Moq, Bogus) |
 
-## Funcionalidades Implementadas
+### Infraestrutura (desenvolvimento)
 
-### IdentityServer (API Service)
-- ✅ ASP.NET Core Identity para gerenciamento de usuários
-- ✅ PostgreSQL como banco de dados
-- ✅ API protegida com JWT Bearer tokens
+| Container | Finalidade |
+|---|---|
+| PostgreSQL | Dois bancos: `identitydb` (ASP.NET Identity) e `coredb` (dados de negócio) |
+| Redis | Cache de saída para o projeto Web |
+| Mailpit | Captura local de SMTP — intercepta todos os e-mails enviados em desenvolvimento |
+| pgAdmin | Interface web para o PostgreSQL |
 
-### API Protegida
-- ✅ Validação de tokens JWT
+---
 
-### Frontend Web
-- ✅ Integração com o IdentityServer
-- ✅ Chamadas autenticadas para a API
-- ✅ Endpoints de login/logout
+## Funcionalidades
 
-### Banco de Dados
-- ✅ PostgreSQL configurado via Aspire
-- ✅ Migrações do Entity Framework
-- ✅ Tabelas do ASP.NET Core Identity
+### Autenticação e Autorização
+- JWT Bearer tokens (validade de 1 hora) emitidos pelo ApiIdentity
+- ASP.NET Core Identity com bloqueio de conta (5 tentativas, bloqueio de 5 minutos)
+- Política de senha forte (mín. 8 caracteres, maiúscula, minúscula, dígito, não-alfanumérico)
+- Perfis: `Admin`, `User` — criados automaticamente na inicialização
+- Blazor Server armazena o JWT na **Sessão ASP.NET** (não no localStorage)
+- Cookie `SecurePolicy = Always`
+
+### Redefinição de Senha
+- `POST /auth/forgot-password` — anti-enumeração: sempre retorna uma mensagem genérica de sucesso
+- Token de identidade enviado por e-mail via MailKit (`SmtpEmailService`)
+- Link de redefinição: `{App:BaseUrl}/reset-password?email=...&token=...`
+- `POST /auth/reset-password` — valida o token e atualiza a senha
+
+### Globalização / i18n
+- Culturas suportadas: **pt-BR** (padrão), **en**, **es**
+- Backend: cabeçalho `Accept-Language` → `IStringLocalizer<AuthMessages>` em `AuthController` e `SmtpEmailService`
+- Frontend: cultura armazenada em cookie de 1 ano (`.AspNetCore.Culture`)
+- Endpoint `/set-culture?culture=en&redirectUri=/path` grava o cookie e redireciona
+- Seletor de idioma no menu lateral (NavMenu) — força recarga completa via `data-enhance-nav="false"`
+- Componentes `ValidationMessage` exibem erros na cultura ativa via `ErrorMessageResourceType = typeof(WebMessages)`
+- `IStringLocalizer<WebMessages> L` injetado globalmente em `_Imports.razor`
+
+### Observabilidade
+- Traces e métricas via OpenTelemetry configurados no ServiceDefaults
+- Aspire Dashboard (logs estruturados, traces, métricas) em `http://localhost:18888` no desenvolvimento
+
+### Segurança
+- Rate limiting (10 req/min) em `/auth/login` e `/auth/register`
+- Expiração do JWT verificada no lado do cliente pelo `JwtAuthStateProvider`
+- `UseSession` posicionado antes de `UseAuthentication` no pipeline de middleware
+
+---
 
 ## Como Executar
 
 ### Pré-requisitos
-- .NET 8.0 SDK
-- Docker (para PostgreSQL e Redis)
+- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (para PostgreSQL, Redis, Mailpit)
 
-### Passos
+### Executar
 
-1. **Restaurar dependências:**
-   ```bash
-   dotnet restore
-   ```
+```bash
+dotnet run --project InitialAspireProject.AppHost
+```
 
-2. **Executar o projeto:**
-   ```bash
-   dotnet run --project InitialAspireProject.AppHost
-   ```
+O Aspire inicia todos os serviços e abre o Dashboard. O frontend Web fica disponível na URL exibida no Dashboard.
 
-## Testando a Autenticação
+### Credenciais padrão
 
-### 1. Usuário de Teste
-O sistema cria automaticamente um usuário de teste:
-- **Email:** admin@localhost
-- **Senha:** Admin123$
+| Campo | Valor |
+|---|---|
+| E-mail | `admin@localhost` |
+| Senha | `Admin123$` |
+| Perfis | `Admin`, `User` |
 
-### 2. Fluxo de Autenticação
+As migrações do EF Core são aplicadas automaticamente na inicialização — nenhuma etapa manual é necessária.
 
-1. Acesse o frontend web
-2. Clique em "Login" ou acesse
-4. Use as credenciais de teste acima
-5. Após o login, você será redirecionado de volta ao frontend
-6. O frontend agora pode fazer chamadas autenticadas para a API
+### Build
 
-### Migrações
-As migrações são aplicadas automaticamente na inicialização da aplicação.
+```bash
+dotnet build
+```
 
-## Troubleshooting
+### Executar testes
 
-### Problemas Comuns
+```bash
+dotnet test
 
-1. **Erro de conexão com PostgreSQL:**
-   - Verifique se o Docker está rodando
-   - Aguarde alguns segundos para o PostgreSQL inicializar
-
-2. **Erro de certificado SSL:**
-   - Para desenvolvimento, os certificados são gerados automaticamente
-   - Use `dotnet dev-certs https --trust` se necessário
-
-### Logs
-Os logs detalhados estão disponíveis no Dashboard do Aspire e no console da aplicação.
-
-## Próximos Passos
-
-Para produção, considere:
-
-1. **Certificados:** Use certificados SSL válidos em vez dos certificados de desenvolvimento
-2. **Secrets:** Mova secrets para Azure Key Vault ou similar
-3. **Banco de Dados:** Configure backup e alta disponibilidade para PostgreSQL
-4. **Monitoramento:** Adicione Application Insights ou similar
-5. **Segurança:** Implemente rate limiting, CORS adequado, etc.
-
-## Recursos Adicionais
-
-- [Documentação do ASP.NET Core Aspire](https://learn.microsoft.com/en-us/dotnet/aspire/)
-- [Documentação do ASP.NET Core Identity](https://docs.microsoft.com/en-us/aspnet/core/security/authentication/identity)
+# Executar um teste específico
+dotnet test --filter "FullyQualifiedName~NomeDoTeste"
+```
 
 ---
 
-## Publicação via SSH com Docker Compose
+## Fluxo de Autenticação
 
-Este guia descreve o processo completo para publicar o projeto em um servidor Linux remoto via SSH usando Docker Compose, sem necessidade de um registro de imagens (as imagens são construídas direto no servidor).
+1. O usuário envia as credenciais para `POST /auth/login` (ApiIdentity) → recebe um JWT
+2. O Web armazena o JWT na **Sessão ASP.NET** via `JwtAuthStateProvider`
+3. O `JwtAuthStateProvider` interpreta os claims do JWT, verifica a expiração e fornece o `AuthenticationState` ao Blazor
+4. O `WeatherApiService` lê o token da sessão e o anexa como cabeçalho `Bearer` nas chamadas ao ApiCore
 
-### Pré-requisitos no servidor
+---
 
-- Linux (Ubuntu/Debian recomendado)
-- Docker instalado
-- Usuário com acesso ao Docker (`docker` group)
-- Acesso SSH configurado (preferencialmente com chave, sem senha)
+## Endpoints da API
 
-### 1. Configurar acesso SSH sem senha (uma única vez)
+### ApiIdentity
 
-No seu computador local, gere um par de chaves SSH e copie a chave pública para o servidor:
+| Método | Caminho | Auth | Descrição |
+|---|---|---|---|
+| POST | `/auth/register` | — | Registrar novo usuário |
+| POST | `/auth/login` | — | Login, retorna JWT |
+| GET | `/auth/profile` | JWT | Perfil do usuário atual |
+| GET | `/auth/admin-only` | JWT + perfil Admin | Endpoint exclusivo para Admin |
+| POST | `/auth/forgot-password` | — | Enviar e-mail de redefinição de senha |
+| POST | `/auth/reset-password` | — | Redefinir senha com token |
+
+### ApiCore
+
+| Método | Caminho | Auth | Descrição |
+|---|---|---|---|
+| GET | `/weatherforecast` | JWT | Dados de clima aleatórios |
+
+---
+
+## Variáveis de Ambiente (Produção)
+
+Copie `.env.example` para `.env` e preencha os valores antes de publicar:
+
+```env
+POSTGRES_PASSWORD=senha-forte
+REDIS_PASSWORD=senha-redis
+JWT_KEY=chave-secreta-com-no-minimo-32-caracteres
+JWT_ISSUER=https://seu-dominio.com
+JWT_AUDIENCE=https://seu-dominio.com
+WEB_PORT=8081
+DASHBOARD_TOKEN=token-secreto-do-dashboard
+SMTP_HOST=smtp.exemplo.com
+SMTP_PORT=587
+SMTP_USE_SSL=false
+SMTP_USERNAME=usuario@exemplo.com
+SMTP_PASSWORD=senha-smtp
+APP_BASE_URL=https://seu-dominio.com
+```
+
+---
+
+## Publicação em Produção (SSH + Docker Compose)
+
+### Configuração inicial no servidor (única vez)
 
 ```bash
+# 1. Configurar SSH sem senha
 ssh-keygen -t ed25519 -C "deploy"
 ssh-copy-id user@192.168.1.100
-```
 
-Teste o acesso:
-
-```bash
-ssh user@192.168.1.100 "echo ok"
-```
-
-### 2. Adicionar o usuário ao grupo Docker (uma única vez)
-
-Conecte-se ao servidor e adicione o usuário ao grupo `docker` para evitar `permission denied` ao executar comandos Docker sem `sudo`:
-
-```bash
-ssh user@192.168.1.100
-sudo usermod -aG docker $USER
+# 2. Adicionar usuário ao grupo docker no servidor
+ssh user@192.168.1.100 "sudo usermod -aG docker \$USER"
 # Faça logout e login novamente para aplicar
-exit
-```
 
-### 3. Criar o diretório da aplicação no servidor
-
-```bash
+# 3. Criar o diretório da aplicação
 ssh user@192.168.1.100 "mkdir -p ~/apps/initial-aspire"
-```
 
-### 4. Configurar as variáveis de ambiente no servidor
-
-Copie o arquivo de exemplo `.env.example` para `.env` no servidor e preencha os valores:
-
-```bash
+# 4. Copiar e configurar o arquivo .env
 scp .env.example user@192.168.1.100:~/apps/initial-aspire/.env
 ssh user@192.168.1.100 "nano ~/apps/initial-aspire/.env"
 ```
 
-Exemplo de `.env` preenchido:
-
-```env
-POSTGRES_PASSWORD=senha-forte-postgres
-REDIS_PASSWORD=senha-redis
-JWT_KEY=chave-secreta-com-no-minimo-32-caracteres
-JWT_ISSUER=http://192.168.15.106
-JWT_AUDIENCE=http://192.168.15.106
-WEB_PORT=8081
-DASHBOARD_TOKEN=token-secreto-do-dashboard
-```
-
-> O `JWT_ISSUER` e `JWT_AUDIENCE` devem ser o endereço IP ou domínio pelo qual o usuário acessa a aplicação.
-
-### 5. Enviar os arquivos do projeto para o servidor
-
-Como o `rsync` pode não estar disponível no ambiente local (ex: Git Bash no Windows), use `tar` via SSH:
+### Publicar
 
 ```bash
-cd /caminho/do/projeto
-
+# Enviar arquivos-fonte para o servidor (sem artefatos de build)
 tar czf - \
-  --exclude='*/bin' --exclude='*/obj' --exclude='*/.aspire' --exclude='*/infra' \
+  --exclude='*/bin' --exclude='*/obj' --exclude='*/.aspire' \
   InitialAspireProject.ApiCore \
   InitialAspireProject.ApiIdentity \
   InitialAspireProject.Web \
   InitialAspireProject.ServiceDefaults \
   docker-compose.yml \
   | ssh user@192.168.1.100 "tar xzf - -C ~/apps/initial-aspire"
+
+# Build e iniciar
+ssh user@192.168.1.100 "cd ~/apps/initial-aspire && docker compose build --parallel && docker compose up -d"
 ```
 
-> Execute esse comando sempre que quiser enviar atualizações de código para o servidor.
-
-### 6. Construir as imagens Docker no servidor
+### Atualizar após alterações no código
 
 ```bash
-ssh user@192.168.1.100 "cd ~/apps/initial-aspire && docker compose build --parallel"
-```
-
-Para reconstruir apenas um serviço específico (ex: após alterar só o `apicore`):
-
-```bash
-ssh user@192.168.1.100 "cd ~/apps/initial-aspire && docker compose build apicore"
-```
-
-### 7. Subir todos os serviços
-
-```bash
-ssh user@192.168.1.100 "cd ~/apps/initial-aspire && docker compose up -d"
-```
-
-Para reiniciar apenas os serviços alterados após uma atualização:
-
-```bash
-ssh user@192.168.1.100 "cd ~/apps/initial-aspire && docker compose up -d apicore apiidentity"
-```
-
-### 8. Verificar os serviços em execução
-
-```bash
-ssh user@192.168.1.100 "cd ~/apps/initial-aspire && docker compose ps"
-```
-
-### 9. Acompanhar os logs
-
-```bash
-# Todos os serviços
-ssh user@192.168.1.100 "cd ~/apps/initial-aspire && docker compose logs -f"
-
-# Serviço específico
-ssh user@192.168.1.100 "cd ~/apps/initial-aspire && docker compose logs --tail=50 apicore"
-```
-
-### 10. Acessar a aplicação
-
-Após subir os serviços, acesse pelo navegador:
-
-| Serviço | URL |
-|---|---|
-| Aplicação Web | `http://192.168.1.100:8081` (porta configurável via `WEB_PORT`) |
-| Dashboard Aspire (observabilidade) | `http://192.168.1.100:18888` |
-
-> O Dashboard exige o token configurado em `DASHBOARD_TOKEN` para fazer login.
-
-### 11. Atualizar o projeto após alterações no código
-
-Fluxo completo de atualização:
-
-```bash
-# 1. Enviar arquivos atualizados
+# Reenviar arquivos, reconstruir e reiniciar
 tar czf - \
   --exclude='*/bin' --exclude='*/obj' \
   InitialAspireProject.ApiCore \
@@ -252,24 +206,28 @@ tar czf - \
   docker-compose.yml \
   | ssh user@192.168.1.100 "tar xzf - -C ~/apps/initial-aspire"
 
-# 2. Reconstruir e reiniciar
 ssh user@192.168.1.100 "cd ~/apps/initial-aspire && docker compose build --parallel && docker compose up -d"
 ```
 
-### Estrutura dos serviços no Docker Compose
+### URLs dos serviços
+
+| Serviço | URL |
+|---|---|
+| Frontend Web | `http://ip-do-servidor:8081` (configurável via `WEB_PORT`) |
+| Aspire Dashboard | `http://ip-do-servidor:18888` (requer `DASHBOARD_TOKEN`) |
+
+### Serviços do Docker Compose
 
 | Serviço | Descrição |
 |---|---|
-| `dashboard` | Aspire Dashboard para observabilidade (OpenTelemetry) |
-| `postgres` | Banco de dados PostgreSQL 17 |
+| `postgres` | PostgreSQL 17 |
 | `redis` | Cache Redis |
-| `apiidentity` | API de autenticação (JWT, Identity) |
-| `apicore` | API de negócio (WeatherForecast) |
+| `apiidentity` | API de autenticação |
+| `apicore` | API de negócio |
 | `web` | Frontend Blazor Server |
+| `dashboard` | Aspire Dashboard (OpenTelemetry) |
 
 ### Volumes persistentes
-
-Os dados críticos são mantidos em volumes Docker nomeados para sobreviver a reinicializações de contêineres:
 
 | Volume | Conteúdo |
 |---|---|
@@ -277,3 +235,24 @@ Os dados críticos são mantidos em volumes Docker nomeados para sobreviver a re
 | `web-keys` | Chaves de Data Protection do Web |
 | `apiidentity-keys` | Chaves de Data Protection do ApiIdentity |
 | `apicore-keys` | Chaves de Data Protection do ApiCore |
+
+---
+
+## Troubleshooting
+
+**Erro de conexão com PostgreSQL** — verifique se o Docker está em execução e aguarde alguns segundos para o container ficar saudável.
+
+**Erro de certificado SSL** — execute `dotnet dev-certs https --trust` para confiar no certificado de desenvolvimento.
+
+**E-mails não chegando em desenvolvimento** — verifique o Mailpit (link exibido no Aspire Dashboard). Todo o tráfego SMTP é capturado lá em desenvolvimento.
+
+**Idioma não muda** — o seletor usa um redirecionamento completo via `/set-culture`. Se a página continuar no idioma antigo, verifique se os cookies estão habilitados e se o cookie `.AspNetCore.Culture` está sendo gravado.
+
+---
+
+## Recursos
+
+- [Documentação do .NET Aspire](https://learn.microsoft.com/pt-br/dotnet/aspire/)
+- [ASP.NET Core Identity](https://learn.microsoft.com/pt-br/aspnet/core/security/authentication/identity)
+- [Autenticação no Blazor Server](https://learn.microsoft.com/pt-br/aspnet/core/blazor/security/server/)
+- [Localização no ASP.NET Core](https://learn.microsoft.com/pt-br/aspnet/core/fundamentals/localization)

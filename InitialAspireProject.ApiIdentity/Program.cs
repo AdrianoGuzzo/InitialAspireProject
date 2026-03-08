@@ -18,6 +18,7 @@ builder.Services.AddDataProtection()
     .SetApplicationName("InitialAspireProject.ApiIdentity");
 
 builder.AddServiceDefaults();
+builder.AddLocalizationDefaults(["pt-BR", "en", "es"]);
 
 // Configurar PostgreSQL
 builder.AddNpgsqlDbContext<ApplicationDbContext>("identitydb");
@@ -131,6 +132,7 @@ else
 
 app.UseRouting();
 app.UseRateLimiter();
+app.UseLocalizationDefaults();
 app.UseAuthentication();
 app.UseAuthorization();
 

@@ -3,12 +3,14 @@ using IdentitySignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 using InitialAspireProject.ApiIdentity;
 using InitialAspireProject.ApiIdentity.Controllers;
 using InitialAspireProject.ApiIdentity.Repository;
+using InitialAspireProject.ApiIdentity.Resources;
 using InitialAspireProject.ApiIdentity.Services;
 using InitialAspireProject.Tests.Builders;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
@@ -41,13 +43,18 @@ public class AuthControllerTests
             .Build();
 
         var tokenService = new TokenService(config);
+        var localizer = new Mock<IStringLocalizer<AuthMessages>>();
+        localizer.Setup(l => l[It.IsAny<string>()])
+                 .Returns<string>(key => new LocalizedString(key, key));
+
         var controller = new AuthController(
             userManagerMock.Object,
             signInManagerMock.Object,
             tokenService,
             Mock.Of<IEmailService>(),
             config,
-            NullLogger<AuthController>.Instance);
+            NullLogger<AuthController>.Instance,
+            localizer.Object);
 
         return (userManagerMock, signInManagerMock, controller);
     }

@@ -13,25 +13,25 @@
                         <i class="bi bi-rocket-takeoff display-1 mb-3"></i>
                         <h1 class="display-4 fw-bold mb-3">Initial Aspire Project</h1>
                         <p class="lead mb-4">
-                            Bem-vindo à sua aplicação moderna construída com ASP.NET Core, Blazor e Bootstrap
+                            @L["HomeBrandingText"]
                         </p>
                         <AuthorizeView>
                             <Authorized>
                                 <div class="d-flex justify-content-center gap-3">
                                     <a href="/counter" class="btn btn-light btn-lg">
                                         <i class="bi bi-plus-square me-2"></i>
-                                        Explorar Counter
+                                        @L["ExploreCounter"]
                                     </a>
                                     <a href="/weather" class="btn btn-outline-light btn-lg">
                                         <i class="bi bi-cloud-sun me-2"></i>
-                                        Ver Clima
+                                        @L["ViewWeather"]
                                     </a>
                                 </div>
                             </Authorized>
                             <NotAuthorized>
                                 <a href="/login" class="btn btn-light btn-lg">
                                     <i class="bi bi-box-arrow-in-right me-2"></i>
-                                    Fazer Login
+                                    @L["Login"]
                                 </a>
                             </NotAuthorized>
                         </AuthorizeView>
@@ -49,7 +49,7 @@
                         <div class="card-header bg-success text-white">
                             <h5 class="mb-0">
                                 <i class="bi bi-person-check-fill me-2"></i>
-                                Status de Autenticação
+                                @L["AuthStatus"]
                             </h5>
                         </div>
                         <div class="card-body">
@@ -57,36 +57,36 @@
                                 <div class="col-md-6">
                                     <h6 class="text-success">
                                         <i class="bi bi-check-circle-fill me-2"></i>
-                                        Bem-vindo, @context.User.Identity?.Name!
+                                        @string.Format(L["WelcomeUser"].Value, context.User.Identity?.Name)
                                     </h6>
-                                    <p class="text-muted mb-0">Você está autenticado com sucesso no sistema.</p>
+                                    <p class="text-muted mb-0">@L["AuthenticatedMessage"]</p>
                                 </div>
                                 <div class="col-md-6 text-md-end">
                                     <span class="badge bg-success fs-6">
                                         <i class="bi bi-shield-check me-1"></i>
-                                        Autenticado
+                                        @L["Authenticated"]
                                     </span>
                                 </div>
                             </div>
 
                             <div class="mt-3">
-                                <button class="btn btn-outline-success btn-sm" type="button" data-bs-toggle="collapse" 
+                                <button class="btn btn-outline-success btn-sm" type="button" data-bs-toggle="collapse"
                                         data-bs-target="#claimsCollapse" aria-expanded="false">
                                     <i class="bi bi-info-circle me-1"></i>
-                                    Ver Detalhes do Usuário
+                                    @L["ViewUserDetails"]
                                 </button>
                                 <div class="collapse mt-3" id="claimsCollapse">
                                     <div class="card card-body bg-light">
                                         <h6 class="mb-3">
                                             <i class="bi bi-person-lines-fill me-2"></i>
-                                            Claims do Usuário:
+                                            @L["UserClaims"]
                                         </h6>
                                         <div class="table-responsive">
                                             <table class="table table-sm table-striped">
                                                 <thead>
                                                     <tr>
-                                                        <th>Tipo</th>
-                                                        <th>Valor</th>
+                                                        <th>@L["Type"]</th>
+                                                        <th>@L["Value"]</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -111,7 +111,7 @@
                         <div class="card-header bg-warning text-dark">
                             <h5 class="mb-0">
                                 <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                                Acesso Limitado
+                                @L["LimitedAccess"]
                             </h5>
                         </div>
                         <div class="card-body">
@@ -119,16 +119,16 @@
                                 <div class="col-md-8">
                                     <h6 class="text-warning">
                                         <i class="bi bi-person-x me-2"></i>
-                                        Você não está autenticado
+                                        @L["NotAuthenticatedUser"]
                                     </h6>
                                     <p class="text-muted mb-0">
-                                        Para acessar todos os recursos da aplicação, faça login com suas credenciais.
+                                        @L["NotAuthenticatedMessage"]
                                     </p>
                                 </div>
                                 <div class="col-md-4 text-md-end mt-3 mt-md-0">
                                     <a href="/login" class="btn btn-warning">
                                         <i class="bi bi-box-arrow-in-right me-2"></i>
-                                        Fazer Login
+                                        @L["Login"]
                                     </a>
                                 </div>
                             </div>
@@ -143,20 +143,20 @@
         <div class="col-12">
             <h2 class="text-center mb-4">
                 <i class="bi bi-stars me-2"></i>
-                Recursos da Aplicação
+                @L["AppFeatures"]
             </h2>
         </div>
         <div class="col-lg-4 col-md-6 mb-4">
             <div class="card h-100 shadow-sm">
                 <div class="card-body text-center">
                     <i class="bi bi-palette-fill text-primary display-4 mb-3"></i>
-                    <h5 class="card-title">Sistema de Temas</h5>
+                    <h5 class="card-title">@L["ThemeSystemTitle"]</h5>
                     <p class="card-text text-muted">
-                        Escolha entre 10 temas diferentes do Bootstrap para personalizar a aparência da aplicação.
+                        @L["ThemeSystemDesc"]
                     </p>
                     <a href="/themes" class="btn btn-outline-primary">
                         <i class="bi bi-palette me-1"></i>
-                        Explorar Temas
+                        @L["ExploreThemes"]
                     </a>
                 </div>
             </div>
@@ -165,21 +165,21 @@
             <div class="card h-100 shadow-sm">
                 <div class="card-body text-center">
                     <i class="bi bi-plus-square-fill text-success display-4 mb-3"></i>
-                    <h5 class="card-title">Contador Interativo</h5>
+                    <h5 class="card-title">@L["InteractiveCounterTitle"]</h5>
                     <p class="card-text text-muted">
-                        Demonstração de componente Blazor interativo com estatísticas em tempo real.
+                        @L["InteractiveCounterDesc"]
                     </p>
                     <AuthorizeView>
                         <Authorized>
                             <a href="/counter" class="btn btn-outline-success">
                                 <i class="bi bi-plus-square me-1"></i>
-                                Usar Counter
+                                @L["UseCounter"]
                             </a>
                         </Authorized>
                         <NotAuthorized>
                             <span class="text-muted">
                                 <i class="bi bi-lock me-1"></i>
-                                Login necessário
+                                @L["LoginRequired"]
                             </span>
                         </NotAuthorized>
                     </AuthorizeView>
@@ -190,21 +190,21 @@
             <div class="card h-100 shadow-sm">
                 <div class="card-body text-center">
                     <i class="bi bi-cloud-sun-fill text-info display-4 mb-3"></i>
-                    <h5 class="card-title">Previsão do Tempo</h5>
+                    <h5 class="card-title">@L["WeatherForecastTitle"]</h5>
                     <p class="card-text text-muted">
-                        Dados carregados de API backend com cache e visualização moderna.
+                        @L["WeatherDesc"]
                     </p>
                     <AuthorizeView>
                         <Authorized>
                             <a href="/weather" class="btn btn-outline-info">
                                 <i class="bi bi-cloud-sun me-1"></i>
-                                Ver Clima
+                                @L["ViewWeather"]
                             </a>
                         </Authorized>
                         <NotAuthorized>
                             <span class="text-muted">
                                 <i class="bi bi-lock me-1"></i>
-                                Login necessário
+                                @L["LoginRequired"]
                             </span>
                         </NotAuthorized>
                     </AuthorizeView>
@@ -219,7 +219,7 @@
                 <div class="card-header">
                     <h5 class="mb-0">
                         <i class="bi bi-stack me-2"></i>
-                        Stack Tecnológico
+                        @L["TechStack"]
                     </h5>
                 </div>
                 <div class="card-body">

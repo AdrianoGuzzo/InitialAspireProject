@@ -205,7 +205,7 @@ namespace InitialAspireProject.ApiIdentity.Controllers
 
             var roles = await _userManager.GetRolesAsync(user);
             var token = _tokenService.CreateToken(user, roles);
-            return Ok(new { token });
+            return Ok(new LoginResponse { Token = token });
         }
     }
 }

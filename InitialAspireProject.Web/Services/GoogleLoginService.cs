@@ -1,13 +1,15 @@
+using InitialAspireProject.Shared.Models;
+
 namespace InitialAspireProject.Web.Services
 {
     public interface IGoogleLoginService
     {
-        Task<ResponseToken?> GetJwtAsync(string email, string name);
+        Task<LoginResponse?> GetJwtAsync(string email, string name);
     }
 
     public class GoogleLoginService(HttpClient httpClient, IConfiguration configuration) : IGoogleLoginService
     {
-        public async Task<ResponseToken?> GetJwtAsync(string email, string name)
+        public async Task<LoginResponse?> GetJwtAsync(string email, string name)
         {
             var request = new HttpRequestMessage(HttpMethod.Post, "/auth/google-login");
             request.Headers.Add("X-Internal-Key", configuration["InternalApiKey"]);
@@ -17,7 +19,7 @@ namespace InitialAspireProject.Web.Services
             if (!response.IsSuccessStatusCode)
                 return null;
 
-            return await response.Content.ReadFromJsonAsync<ResponseToken>();
+            return await response.Content.ReadFromJsonAsync<LoginResponse>();
         }
     }
 }

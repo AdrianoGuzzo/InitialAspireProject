@@ -99,6 +99,13 @@ app.MapRazorComponents<App>()
 
 app.MapDefaultEndpoints();
 
+app.MapGet("/logout", async (HttpContext ctx) =>
+{
+    ctx.Session.Clear();
+    await ctx.SignOutAsync("Cookies");
+    return Results.LocalRedirect("/login");
+}).AllowAnonymous();
+
 app.MapGet("/set-culture", (string culture, string redirectUri, HttpContext ctx) =>
 {
     ctx.Response.Cookies.Append(

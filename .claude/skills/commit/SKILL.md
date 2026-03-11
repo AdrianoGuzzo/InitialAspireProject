@@ -152,7 +152,7 @@ git push
 
 ### 8. Generate PR description
 
-After pushing, generate a PR description in markdown and print it to the user.
+After pushing, generate a PR description in markdown
 
 Run `git diff main...HEAD` (or the base branch if different) to understand all changes in the branch, then produce:
 
@@ -172,6 +172,16 @@ Guidelines:
 - Summary bullets explain **why** the change was made, not just list files
 - Test plan items are specific and actionable (e.g. "Unauthenticated → `/weather` redirects to `/login?ReturnUrl=%2Fweather`")
 - Aim for 3–6 summary bullets
+
+To submit your changes for review, you must create a Pull Request using the GitHub CLI.
+
+After pushing your branch to the remote repository, run the following command:
+
+gh pr create
+
+This command will guide you through creating the Pull Request interactively, allowing you to select the base branch (main) and provide the title and description.
+
+Make sure the Pull Request targets the main branch.
 
 ------------------------------------------------------------------------
 

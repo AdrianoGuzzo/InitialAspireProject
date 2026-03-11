@@ -70,25 +70,22 @@
                             <i class="bi @(resendSuccess ? "bi-check-circle-fill" : emailNotConfirmed ? "bi-envelope-exclamation" : "bi-exclamation-triangle-fill") me-2"></i>
                             <div>
                                 @message
-                                @if (emailNotConfirmed && !resendSuccess)
-                                {
-                                    <div class="mt-2">
-                                        <EditForm Model="resendModel" OnValidSubmit="HandleResendActivation" FormName="ResendActivationForm">
-                                            <InputText @bind-Value="resendModel!.Email" type="hidden" />
-                                            <button type="submit" class="btn btn-sm btn-outline-warning" disabled="@isResending">
-                                                @if (isResending)
-                                                {
-                                                    <span class="spinner-border spinner-border-sm me-1" role="status"></span>
-                                                }
-                                                <i class="bi bi-envelope-arrow-up me-1"></i>
-                                                @L["ResendActivationLink"]
-                                            </button>
-                                        </EditForm>
-                                    </div>
-                                }
                             </div>
                         </div>
                     }
+
+                    <EditForm Model="resendModel" OnValidSubmit="HandleResendActivation" FormName="ResendActivationForm"
+                              style="@(emailNotConfirmed && !resendSuccess ? "" : "display:none")">
+                        <InputText @bind-Value="resendModel!.Email" type="hidden" />
+                        <button type="submit" class="btn btn-sm btn-outline-warning mt-2" disabled="@isResending">
+                            @if (isResending)
+                            {
+                                <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                            }
+                            <i class="bi bi-envelope-arrow-up me-1"></i>
+                            @L["ResendActivationLink"]
+                        </button>
+                    </EditForm>
                 </div>
                 <div class="card-footer bg-light text-center py-3">
                     <p class="mb-2 text-muted">
@@ -174,13 +171,21 @@
         var email = resendModel?.Email;
         if (string.IsNullOrEmpty(email)) return;
 
+        emailNotConfirmed = true;
         isResending = true;
         try
         {
-            await ConfirmEmailService.ResendActivationAsync(email);
-            resendSuccess = true;
-            emailNotConfirmed = false;
-            message = L["ResendActivationSuccess"].Value;
+            var result = await ConfirmEmailService.ResendActivationAsync(email);
+            if (result.Success)
+            {
+                resendSuccess = true;
+                emailNotConfirmed = false;
+                message = L["ResendActivationSuccess"].Value;
+            }
+            else
+            {
+                message = result.Message;
+            }
         }
         finally
         {

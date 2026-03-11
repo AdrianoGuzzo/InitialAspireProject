@@ -1,17 +1,17 @@
-﻿using Microsoft.AspNetCore.Identity.Data;
+﻿using InitialAspireProject.Shared.Models;
 
 namespace InitialAspireProject.Web.Services
 {
     public interface ILoginService
     {
-        Task<ResponseToken?> LoginAsync(string username, string password, CancellationToken cancellationToken = default);
+        Task<LoginResult> LoginAsync(string username, string password, CancellationToken cancellationToken = default);
     }
 
     public class LoginService(HttpClient httpClient) : ILoginService
     {
-        public async Task<ResponseToken?> LoginAsync(string username, string password, CancellationToken cancellationToken)
+        public async Task<LoginResult> LoginAsync(string username, string password, CancellationToken cancellationToken)
         {
-            var response = await httpClient.PostAsJsonAsync("/auth/login", new LoginRequest
+            var response = await httpClient.PostAsJsonAsync("/auth/login", new LoginModel
             {
                 Email = username,
                 Password = password
@@ -19,16 +19,21 @@ namespace InitialAspireProject.Web.Services
 
             if (!response.IsSuccessStatusCode)
             {
-                return null;
+                var errorBody = await response.Content.ReadFromJsonAsync<LoginErrorResponse>(cancellationToken: cancellationToken);
+                return new LoginResult { ErrorCode = errorBody?.Code };
             }
 
-            var loginResponse = await response.Content.ReadFromJsonAsync<ResponseToken>(cancellationToken: cancellationToken);
+            var loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>(cancellationToken: cancellationToken);
 
-            return await Task.FromResult(loginResponse);
+            return new LoginResult { Token = loginResponse };
         }
     }
-    public class ResponseToken
+
+    public class LoginResult
     {
-        public required string Token { get; set; }
+        public LoginResponse? Token { get; set; }
+        public string? ErrorCode { get; set; }
+        public bool Success => Token is not null;
+        public bool IsEmailNotConfirmed => ErrorCode == "EmailNotConfirmed";
     }
 }

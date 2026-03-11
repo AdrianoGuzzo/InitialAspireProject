@@ -41,7 +41,9 @@ public class SmtpEmailServiceTests
         var localizer = new Mock<IStringLocalizer<AuthMessages>>();
         localizer.Setup(l => l["EmailBodyPasswordReset"])
                  .Returns(new LocalizedString("EmailBodyPasswordReset", "<a href='{0}'>{0}</a>"));
-        localizer.Setup(l => l[It.Is<string>(k => k != "EmailBodyPasswordReset")])
+        localizer.Setup(l => l["EmailBodyActivation"])
+                 .Returns(new LocalizedString("EmailBodyActivation", "<a href='{0}'>Activate</a>"));
+        localizer.Setup(l => l[It.Is<string>(k => k != "EmailBodyPasswordReset" && k != "EmailBodyActivation")])
                  .Returns<string>(key => new LocalizedString(key, key));
 
         var service = new SmtpEmailService(config, NullLogger<SmtpEmailService>.Instance, localizer.Object, () => smtpClientMock.Object);
@@ -147,5 +149,64 @@ public class SmtpEmailServiceTests
         await service.SendPasswordResetEmailAsync("user@test.com", "https://example.com/reset", TestContext.Current.CancellationToken);
 
         smtpMock.Verify(x => x.ConnectAsync("localhost", 58796, false, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    // --- Activation Email ---
+
+    [Fact]
+    public async Task SendActivationEmail_SendsToCorrectRecipient()
+    {
+        var (smtpMock, service) = CreateService();
+        MimeMessage? captured = null;
+        smtpMock.Setup(x => x.SendAsync(It.IsAny<MimeMessage>(), It.IsAny<CancellationToken>()))
+            .Callback<MimeMessage, CancellationToken>((msg, _) => captured = msg)
+            .Returns(Task.CompletedTask);
+
+        await service.SendActivationEmailAsync("newuser@test.com", "https://example.com/confirm", TestContext.Current.CancellationToken);
+
+        Assert.NotNull(captured);
+        Assert.Contains(captured.To.Mailboxes, m => m.Address == "newuser@test.com");
+    }
+
+    [Fact]
+    public async Task SendActivationEmail_BodyContainsActivationLink()
+    {
+        var (smtpMock, service) = CreateService();
+        MimeMessage? captured = null;
+        smtpMock.Setup(x => x.SendAsync(It.IsAny<MimeMessage>(), It.IsAny<CancellationToken>()))
+            .Callback<MimeMessage, CancellationToken>((msg, _) => captured = msg)
+            .Returns(Task.CompletedTask);
+
+        const string activationLink = "https://example.com/confirm-email?email=user%40test.com&token=abc123";
+        await service.SendActivationEmailAsync("user@test.com", activationLink, TestContext.Current.CancellationToken);
+
+        Assert.NotNull(captured);
+        Assert.Contains(activationLink, captured.HtmlBody ?? captured.TextBody);
+    }
+
+    [Fact]
+    public async Task SendActivationEmail_SubjectIsActivation()
+    {
+        var (smtpMock, service) = CreateService();
+        MimeMessage? captured = null;
+        smtpMock.Setup(x => x.SendAsync(It.IsAny<MimeMessage>(), It.IsAny<CancellationToken>()))
+            .Callback<MimeMessage, CancellationToken>((msg, _) => captured = msg)
+            .Returns(Task.CompletedTask);
+
+        await service.SendActivationEmailAsync("user@test.com", "https://example.com/confirm", TestContext.Current.CancellationToken);
+
+        Assert.NotNull(captured);
+        Assert.Equal("EmailSubjectActivation", captured.Subject);
+    }
+
+    [Fact]
+    public async Task SendActivationEmail_SmtpException_ThrowsInvalidOperationException()
+    {
+        var (smtpMock, service) = CreateService();
+        smtpMock.Setup(x => x.ConnectAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new Exception("SMTP connection refused"));
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => service.SendActivationEmailAsync("user@test.com", "https://example.com/confirm", TestContext.Current.CancellationToken));
     }
 }

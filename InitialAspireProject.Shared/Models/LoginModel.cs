@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace InitialAspireProject.ApiIdentity
+namespace InitialAspireProject.Shared.Models
 {
-    public class RegisterModel
+    public record LoginModel
     {
         [Required]
         [EmailAddress]
@@ -10,12 +10,7 @@ namespace InitialAspireProject.ApiIdentity
         public required string Email { get; set; }
 
         [Required]
-        [MinLength(8)]
         [MaxLength(128)]
         public required string Password { get; set; }
-
-        [Required]
-        [MaxLength(100)]
-        public required string FullName { get; set; }
     }
 }

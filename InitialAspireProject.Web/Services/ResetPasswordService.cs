@@ -1,3 +1,5 @@
+using InitialAspireProject.Shared.Models;
+
 namespace InitialAspireProject.Web.Services
 {
     public interface IResetPasswordService
@@ -12,12 +14,12 @@ namespace InitialAspireProject.Web.Services
             ErrorValidation[]? errorValidations = null;
             try
             {
-                var response = await httpClient.PostAsJsonAsync("/auth/reset-password", new
+                var response = await httpClient.PostAsJsonAsync("/auth/reset-password", new ResetPasswordModel
                 {
-                    email,
-                    token,
-                    newPassword,
-                    confirmPassword
+                    Email = email,
+                    Token = token,
+                    NewPassword = newPassword,
+                    ConfirmPassword = confirmPassword
                 }, cancellationToken);
 
                 if (!response.IsSuccessStatusCode)

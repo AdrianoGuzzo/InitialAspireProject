@@ -11,6 +11,7 @@
 @inject ProtectedLocalStorage localStorage
 @inject HttpClient httpClient
 @inject AuthenticationStateProvider AuthStateProvider
+@inject IConfirmEmailService ConfirmEmailService
 
 <div class="container-fluid vh-100 d-flex align-items-center justify-content-center bg-light">
     <div class="row w-100 justify-content-center">
@@ -65,11 +66,26 @@
 
                     @if (!string.IsNullOrEmpty(message))
                     {
-                        <div class="alert alert-danger d-flex align-items-center mt-3" role="alert">
-                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                            <div>@message</div>
+                        <div class="alert alert-@(resendSuccess ? "success" : emailNotConfirmed ? "warning" : "danger") d-flex align-items-center mt-3" role="alert">
+                            <i class="bi @(resendSuccess ? "bi-check-circle-fill" : emailNotConfirmed ? "bi-envelope-exclamation" : "bi-exclamation-triangle-fill") me-2"></i>
+                            <div>
+                                @message
+                            </div>
                         </div>
                     }
+
+                    <EditForm Model="resendModel" OnValidSubmit="HandleResendActivation" FormName="ResendActivationForm"
+                              style="@(emailNotConfirmed && !resendSuccess ? "" : "display:none")">
+                        <InputText @bind-Value="resendModel!.Email" type="hidden" />
+                        <button type="submit" class="btn btn-sm btn-outline-warning mt-2" disabled="@isResending">
+                            @if (isResending)
+                            {
+                                <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                            }
+                            <i class="bi bi-envelope-arrow-up me-1"></i>
+                            @L["ResendActivationLink"]
+                        </button>
+                    </EditForm>
                 </div>
                 <div class="card-footer bg-light text-center py-3">
                     <div class="d-flex align-items-center my-2">
@@ -109,13 +125,17 @@
 @code {
     private string? message;
     private string? returnUrl;
+    private bool emailNotConfirmed = false;
+    private bool isResending = false;
+    private bool resendSuccess = false;
     [SupplyParameterFromForm]
     private LoginModel? loginModel { get; set; }
-    private ResponseToken? responseToken { get; set; }
-
+    [SupplyParameterFromForm(FormName = "ResendActivationForm")]
+    private ResendModel? resendModel { get; set; }
     protected override void OnInitialized()
     {
         loginModel ??= new();
+        resendModel ??= new();
         var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
         QueryHelpers.ParseQuery(uri.Query).TryGetValue("ReturnUrl", out var ret);
         returnUrl = ret.ToString();
@@ -123,6 +143,9 @@
 
     private async Task HandleLogin()
     {
+        emailNotConfirmed = false;
+        resendSuccess = false;
+
         if (string.IsNullOrEmpty(loginModel?.Username)) {
              message = L["UsernameRequired"].Value;
             return;
@@ -133,19 +156,55 @@
             return;
         }
 
-        responseToken = await LoginService.LoginAsync(loginModel.Username, loginModel.Password);
+        var result = await LoginService.LoginAsync(loginModel.Username, loginModel.Password);
 
-        if (responseToken is null)
+        if (result.IsEmailNotConfirmed)
+        {
+            emailNotConfirmed = true;
+            resendModel ??= new();
+            resendModel.Email = loginModel.Username;
+            message = L["EmailNotConfirmedMsg"].Value;
+            return;
+        }
+
+        if (!result.Success)
         {
             message = L["InvalidCredentialsMsg"].Value;
             return;
         }
 
         var authProvider = (JwtAuthStateProvider)AuthStateProvider;
-        await authProvider.MarkUserAsAuthenticated(responseToken.Token);
+        await authProvider.MarkUserAsAuthenticated(result.Token!.Token);
 
         var destination = !string.IsNullOrEmpty(returnUrl) ? returnUrl : "/";
         NavigationManager.NavigateTo(destination);
+    }
+
+    private async Task HandleResendActivation()
+    {
+        var email = resendModel?.Email;
+        if (string.IsNullOrEmpty(email)) return;
+
+        emailNotConfirmed = true;
+        isResending = true;
+        try
+        {
+            var result = await ConfirmEmailService.ResendActivationAsync(email);
+            if (result.Success)
+            {
+                resendSuccess = true;
+                emailNotConfirmed = false;
+                message = L["ResendActivationSuccess"].Value;
+            }
+            else
+            {
+                message = result.Message;
+            }
+        }
+        finally
+        {
+            isResending = false;
+        }
     }
 
     public record LoginModel
@@ -155,5 +214,10 @@
 
         [Required(ErrorMessageResourceType = typeof(WebMessages), ErrorMessageResourceName = "PasswordRequired")]
         public string? Password { get; set; }
+    }
+
+    public class ResendModel
+    {
+        public string? Email { get; set; }
     }
 }

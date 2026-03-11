@@ -147,4 +147,25 @@
   <data name="EmailBodyPasswordReset" xml:space="preserve">
     <value>&lt;p&gt;Clique no link abaixo para redefinir sua senha:&lt;/p&gt;&lt;p&gt;&lt;a href='{0}'&gt;Redefinir Senha&lt;/a&gt;&lt;/p&gt;</value>
   </data>
+  <data name="UserRegisteredCheckEmail" xml:space="preserve">
+    <value>Conta criada com sucesso! Verifique seu email para ativar sua conta.</value>
+  </data>
+  <data name="EmailNotConfirmed" xml:space="preserve">
+    <value>Seu email ainda não foi confirmado. Verifique sua caixa de entrada.</value>
+  </data>
+  <data name="EmailConfirmedSuccess" xml:space="preserve">
+    <value>Email confirmado com sucesso! Você já pode fazer login.</value>
+  </data>
+  <data name="InvalidActivationLink" xml:space="preserve">
+    <value>Link de ativação inválido ou expirado.</value>
+  </data>
+  <data name="EmailSubjectActivation" xml:space="preserve">
+    <value>Ative sua conta</value>
+  </data>
+  <data name="EmailBodyActivation" xml:space="preserve">
+    <value>&lt;p&gt;Clique no link abaixo para ativar sua conta:&lt;/p&gt;&lt;p&gt;&lt;a href='{0}'&gt;Ativar Conta&lt;/a&gt;&lt;/p&gt;</value>
+  </data>
+  <data name="ResendActivationGenericMessage" xml:space="preserve">
+    <value>Se o seu email estiver cadastrado e não confirmado, você receberá um novo link de ativação.</value>
+  </data>
 </root>

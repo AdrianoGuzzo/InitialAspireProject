@@ -22,7 +22,7 @@ public class RegisterServiceTests
         var result = await service.RegisterAsync("John Doe", "john@example.com", "Password123$", TestContext.Current.CancellationToken);
 
         Assert.True(result.Success);
-        Assert.Equal("Conta criada com sucesso!", result.Message);
+        Assert.Null(result.Message);
     }
 
     [Fact]

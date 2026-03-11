@@ -1,0 +1,133 @@
+@page "/confirm-email"
+@attribute [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+@layout Layout.EmptyLayout
+@using Microsoft.AspNetCore.WebUtilities
+@using InitialAspireProject.Web.Services
+@inject IConfirmEmailService ConfirmEmailService
+@inject NavigationManager NavigationManager
+
+<div class="container-fluid vh-100">
+	<div class="row h-100">
+		<!-- Left Side - Branding -->
+		<div class="col-lg-6 d-none d-lg-flex bg-primary text-white align-items-center justify-content-center">
+			<div class="text-center p-5">
+				<i class="bi bi-rocket-takeoff display-1 mb-4"></i>
+				<h1 class="display-4 fw-bold mb-4">Initial Aspire Project</h1>
+				<p class="lead mb-4">
+					@L["ConfirmEmailBrandingText"]
+				</p>
+				<div class="row text-center mt-5">
+					<div class="col-4">
+						<i class="bi bi-shield-check display-6 mb-2"></i>
+						<div class="small">@L["Secure"]</div>
+					</div>
+					<div class="col-4">
+						<i class="bi bi-lightning-fill display-6 mb-2"></i>
+						<div class="small">@L["Fast"]</div>
+					</div>
+					<div class="col-4">
+						<i class="bi bi-palette-fill display-6 mb-2"></i>
+						<div class="small">@L["Modern"]</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Right Side - Confirmation -->
+		<div class="col-lg-6 d-flex align-items-center justify-content-center">
+			<div class="w-100" style="max-width: 450px;">
+				<div class="card shadow-lg border-0">
+					<div class="card-header bg-white text-center py-4">
+						<div class="d-lg-none mb-3">
+							<i class="bi bi-rocket-takeoff text-primary display-4"></i>
+						</div>
+						<h2 class="h3 fw-bold text-dark mb-1">@L["ConfirmEmailTitle"]</h2>
+						<p class="text-muted mb-0">@L["ConfirmEmailSubtitle"]</p>
+					</div>
+
+					<div class="card-body p-4">
+						@if (invalidLink)
+						{
+							<div class="alert alert-danger d-flex align-items-center" role="alert">
+								<i class="bi bi-exclamation-triangle-fill me-2"></i>
+								<div>@L["InvalidActivationLink"]</div>
+							</div>
+						}
+						else if (success)
+						{
+							<div class="alert alert-success d-flex align-items-center" role="alert">
+								<i class="bi bi-check-circle-fill me-2"></i>
+								<div>@L["ConfirmEmailSuccess"]</div>
+							</div>
+							<div class="d-grid mt-3">
+								<a href="/login" class="btn btn-primary btn-lg">
+									<i class="bi bi-box-arrow-in-right me-2"></i>
+									@L["Login"]
+								</a>
+							</div>
+						}
+						else if (isLoading)
+						{
+							<div class="text-center py-4">
+								<div class="spinner-border text-primary mb-3" role="status"></div>
+								<p class="text-muted">@L["Confirming"]</p>
+							</div>
+						}
+						else
+						{
+							<div class="alert alert-danger d-flex align-items-center" role="alert">
+								<i class="bi bi-exclamation-triangle-fill me-2"></i>
+								<div>@errorMessage</div>
+							</div>
+						}
+					</div>
+
+					<div class="card-footer bg-light text-center py-3">
+						<p class="mb-0 text-muted">
+							<a href="/login" class="text-decoration-none fw-semibold">
+								<i class="bi bi-box-arrow-in-right me-1"></i>
+								@L["BackToLogin"]
+							</a>
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@code {
+	private string? email;
+	private string? token;
+	private bool invalidLink = false;
+	private bool success = false;
+	private bool isLoading = true;
+	private string? errorMessage;
+
+	protected override async Task OnInitializedAsync()
+	{
+		var uri = new Uri(NavigationManager.Uri);
+		var query = QueryHelpers.ParseQuery(uri.Query);
+
+		query.TryGetValue("email", out var emailValue);
+		query.TryGetValue("token", out var tokenValue);
+
+		email = emailValue.ToString();
+		token = tokenValue.ToString();
+
+		if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(token))
+		{
+			invalidLink = true;
+			isLoading = false;
+			return;
+		}
+
+		var result = await ConfirmEmailService.ConfirmEmailAsync(email, token);
+		if (result.Success)
+			success = true;
+		else
+			errorMessage = result.Message ?? L["ConfirmEmailError"].Value;
+
+		isLoading = false;
+	}
+}

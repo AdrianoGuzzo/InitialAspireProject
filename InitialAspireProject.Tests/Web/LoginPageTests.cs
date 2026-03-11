@@ -1,4 +1,5 @@
 using Bunit;
+using InitialAspireProject.Shared.Models;
 using InitialAspireProject.Web;
 using InitialAspireProject.Web.Components.Pages;
 using InitialAspireProject.Web.Resources;
@@ -27,6 +28,9 @@ public class LoginPageTests : Bunit.TestContext
 
         _loginServiceMock = new Mock<ILoginService>();
         Services.AddSingleton(_loginServiceMock.Object);
+
+        var confirmEmailServiceMock = new Mock<IConfirmEmailService>();
+        Services.AddSingleton(confirmEmailServiceMock.Object);
 
         // HttpClient (injected but unused in code-behind)
         Services.AddSingleton(new HttpClient());
@@ -104,7 +108,7 @@ public class LoginPageTests : Bunit.TestContext
     public void Login_InvalidCredentials_ShowsErrorMessage()
     {
         _loginServiceMock.Setup(s => s.LoginAsync(It.IsAny<string>(), It.IsAny<string>(), default))
-                         .ReturnsAsync((ResponseToken?)null);
+                         .ReturnsAsync(new LoginResult());
 
         var cut = RenderComponent<Login>();
 
@@ -124,7 +128,7 @@ public class LoginPageTests : Bunit.TestContext
         var token = $"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.{payload}.signature";
 
         _loginServiceMock.Setup(s => s.LoginAsync(It.IsAny<string>(), It.IsAny<string>(), default))
-                         .ReturnsAsync(new ResponseToken { Token = token });
+                         .ReturnsAsync(new LoginResult { Token = new LoginResponse { Token = token } });
 
         var cut = RenderComponent<Login>();
         var nav = Services.GetRequiredService<Bunit.TestDoubles.FakeNavigationManager>();

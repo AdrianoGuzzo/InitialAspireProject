@@ -29,10 +29,11 @@ dotnet restore
 
 ## Architecture
 
-This is a **.NET 9 Aspire** microservices solution with 6 projects (Aspire 13.1.2):
+This is a **.NET 9 Aspire** microservices solution with 7 projects (Aspire 13.1.2):
 
 - **AppHost** — Aspire orchestrator. Defines all services, infrastructure (PostgreSQL, Redis), and their dependencies. Start here to understand the system topology.
-- **ApiIdentity** — Auth service with ASP.NET Core Identity + JWT. Manages users, roles, and token issuance. Endpoints: `POST /auth/register`, `POST /auth/login`, `GET /auth/profile`, `GET /auth/admin-only`, `POST /auth/forgot-password`, `POST /auth/reset-password`.
+- **Shared** — Class library with communication DTOs (`InitialAspireProject.Shared.Models`) shared between ApiIdentity, Web, and Tests. Contains: `LoginModel`, `RegisterModel`, `ForgotPasswordModel`, `ResetPasswordModel`, `ConfirmEmailModel`, `LoginResponse`, `LoginErrorResponse`, `ErrorValidation`.
+- **ApiIdentity** — Auth service with ASP.NET Core Identity + JWT. Manages users, roles, and token issuance. Endpoints: `POST /auth/register`, `POST /auth/login`, `GET /auth/profile`, `GET /auth/admin-only`, `POST /auth/forgot-password`, `POST /auth/reset-password`, `POST /auth/confirm-email`, `POST /auth/resend-activation`.
 - **ApiCore** — Business API (currently WeatherForecast). Protected by JWT. Uses its own `coredb` PostgreSQL database. Swagger/OpenAPI via Swashbuckle.
 - **Web** — Blazor Server frontend. Authenticates via ASP.NET cookie session server-side; JWT is stored in `ISession` via `JwtAuthStateProvider`. Calls both APIs through typed HTTP clients.
 - **ServiceDefaults** — Shared extension methods applied to all services: OpenTelemetry, service discovery, HTTP resilience, and localization (`AddLocalizationDefaults`, `UseLocalizationDefaults`).
@@ -47,7 +48,10 @@ This is a **.NET 9 Aspire** microservices solution with 6 projects (Aspire 13.1.
 ### Service Communication
 - Services use Aspire **service discovery** — URLs like `https+http://apiidentity` resolve at runtime
 - `ServiceDefaults` configures `Microsoft.Extensions.Http.Resilience` for HTTP clients
-- Web registers four typed HTTP clients: `LoginService`, `RegisterService`, `ForgotPasswordService`, `ResetPasswordService` (all → `apiidentity`), and `WeatherApiService` (→ `apicore`)
+- Web registers five typed HTTP clients: `LoginService`, `RegisterService`, `ForgotPasswordService`, `ResetPasswordService`, `ConfirmEmailService` (all → `apiidentity`), and `WeatherApiService` (→ `apicore`)
+- All HTTP request/response DTOs live in `InitialAspireProject.Shared.Models` — Web services use these typed models (not anonymous objects) when calling APIs
+- Web-only result types (`RegisterResult`, `ForgotPasswordResult`, `ResetPasswordResult`, `ConfirmEmailResult`) live in `Web/Services/ServiceModels.cs`
+- `LoginResult` (with `Token`, `ErrorCode`, `Success`, `IsEmailNotConfirmed`) is defined in `Web/Services/LoginService.cs`
 
 ### Databases
 - **identitydb** — PostgreSQL, used by `ApiIdentity` (ASP.NET Core Identity tables)
@@ -71,7 +75,7 @@ This is a **.NET 9 Aspire** microservices solution with 6 projects (Aspire 13.1.
 ### Test structure
 - `Tests/ApiIdentity/` — AuthControllerTests, AuthControllerPasswordResetTests, SmtpEmailServiceTests, TokenServiceTests, SeederTests, ApplicationDbContextTests
 - `Tests/ApiCore/` — WeatherForecastControllerTests, WeatherForecastServiceTests, WeatherForecastDomainTests
-- `Tests/Web/` — JwtAuthStateProviderTests, WeatherApiServiceTests, LoginServiceTests, RegisterServiceTests, ForgotPasswordServiceTests, ResetPasswordServiceTests, ThemeServiceTests, CounterTests (bUnit)
+- `Tests/Web/` — Service tests: JwtAuthStateProviderTests, WeatherApiServiceTests, LoginServiceTests, RegisterServiceTests, ForgotPasswordServiceTests, ResetPasswordServiceTests, ConfirmEmailServiceTests, ThemeServiceTests, WebMessagesTests. Page tests (bUnit): CounterTests, LoginPageTests, RegisterPageTests, ForgotPasswordPageTests, ResetPasswordPageTests, HomePageTests, WeatherPageTests, LogoutPageTests. Integration: WebTests
 - `Tests/Builders/` — Test data builders using Bogus (ApplicationUser, LoginModel, RegisterModel, ForgotPasswordModel, ResetPasswordModel, WeatherForecast)
 
 ### Password Reset Flow
@@ -82,6 +86,18 @@ This is a **.NET 9 Aspire** microservices solution with 6 projects (Aspire 13.1.
 - `SmtpEmailService` uses `SecureSocketOptions.Auto` (STARTTLS on port 587, SSL on port 465)
 - In development, emails are captured by Mailpit (no real email sent)
 - In production, configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USE_SSL`, `SMTP_USERNAME`, `SMTP_PASSWORD`, and `APP_BASE_URL` in `.env`
+
+### Email Activation Flow
+1. User registers via `POST /auth/register` — account is created with `EmailConfirmed = false`
+2. ApiIdentity generates an email confirmation token via `UserManager.GenerateEmailConfirmationTokenAsync` and sends an activation email via `SmtpEmailService.SendActivationEmailAsync`
+3. Link format: `{App:BaseUrl}/confirm-email?email=...&token=...`
+4. User clicks the link → `ConfirmEmail.razor` page automatically calls `POST /auth/confirm-email` with email + token
+5. `AuthController.ConfirmEmail` validates the token via `UserManager.ConfirmEmailAsync` and activates the account
+6. Login is blocked for unconfirmed emails — returns `{ code: "EmailNotConfirmed", message: "..." }`
+7. Login page detects this and shows a warning with a "Resend activation link" button
+8. `POST /auth/resend-activation` generates a new token and re-sends the activation email (anti-enumeration: always returns generic message)
+- Seeded admin user has `EmailConfirmed = true` (unaffected)
+- In development, activation emails are captured by Mailpit
 
 ### Seeded test credentials
 - Email: `admin@localhost`

@@ -1,5 +1,6 @@
 using InitialAspireProject.ApiIdentity;
 using InitialAspireProject.ApiIdentity.Controllers;
+using InitialAspireProject.Shared.Models;
 using InitialAspireProject.ApiIdentity.Repository;
 using InitialAspireProject.ApiIdentity.Resources;
 using InitialAspireProject.ApiIdentity.Services;

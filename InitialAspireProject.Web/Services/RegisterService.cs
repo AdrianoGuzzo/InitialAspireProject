@@ -1,3 +1,5 @@
+using InitialAspireProject.Shared.Models;
+
 namespace InitialAspireProject.Web.Services
 {
     public interface IRegisterService
@@ -14,7 +16,7 @@ namespace InitialAspireProject.Web.Services
             try
             {
 
-                var response = await httpClient.PostAsJsonAsync("/auth/Register", new
+                var response = await httpClient.PostAsJsonAsync("/auth/Register", new RegisterModel
                 {
                     FullName = fullName,
                     Email = email,
@@ -30,7 +32,7 @@ namespace InitialAspireProject.Web.Services
                 return new RegisterResult
                 {
                     Success = true,
-                    Message = "Conta criada com sucesso!"
+                    Message = null
                 };
             }
             catch (Exception ex)

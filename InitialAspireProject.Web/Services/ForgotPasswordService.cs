@@ -1,3 +1,5 @@
+using InitialAspireProject.Shared.Models;
+
 namespace InitialAspireProject.Web.Services
 {
     public interface IForgotPasswordService
@@ -11,7 +13,7 @@ namespace InitialAspireProject.Web.Services
         {
             try
             {
-                await httpClient.PostAsJsonAsync("/auth/forgot-password", new { email }, cancellationToken);
+                await httpClient.PostAsJsonAsync("/auth/forgot-password", new ForgotPasswordModel { Email = email }, cancellationToken);
 
                 return new ForgotPasswordResult { Success = true };
             }

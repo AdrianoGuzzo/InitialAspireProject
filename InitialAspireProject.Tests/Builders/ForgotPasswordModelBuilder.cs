@@ -1,5 +1,5 @@
 using Bogus;
-using InitialAspireProject.ApiIdentity;
+using InitialAspireProject.Shared.Models;
 
 namespace InitialAspireProject.Tests.Builders;
 

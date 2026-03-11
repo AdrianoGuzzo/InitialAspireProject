@@ -2,6 +2,7 @@ using InitialAspireProject.ApiIdentity.Repository;
 using InitialAspireProject.ApiIdentity.Repository.Constants;
 using InitialAspireProject.ApiIdentity.Resources;
 using InitialAspireProject.ApiIdentity.Services;
+using InitialAspireProject.Shared.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -49,7 +50,19 @@ namespace InitialAspireProject.ApiIdentity.Controllers
 
             await _userManager.AddToRoleAsync(user, RoleConstants.User);
 
-            return Ok(_localizer["UserRegistered"].Value);
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var link = $"{_configuration["App:BaseUrl"]}/confirm-email?email={Uri.EscapeDataString(user.Email!)}&token={Uri.EscapeDataString(token)}";
+
+            try
+            {
+                await _emailService.SendActivationEmailAsync(user.Email!, link);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send activation email to {Email}", user.Email);
+            }
+
+            return Ok(_localizer["UserRegisteredCheckEmail"].Value);
         }
 
         [EnableRateLimiting("auth")]
@@ -57,7 +70,10 @@ namespace InitialAspireProject.ApiIdentity.Controllers
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
-            if (user == null) return Unauthorized(_localizer["InvalidCredentials"].Value);
+            if (user == null) return Unauthorized(new LoginErrorResponse { Code = "Unauthorized", Message = _localizer["InvalidCredentials"].Value });
+
+            if (!await _userManager.IsEmailConfirmedAsync(user))
+                return Unauthorized(new LoginErrorResponse { Code = "EmailNotConfirmed", Message = _localizer["EmailNotConfirmed"].Value });
 
             var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, lockoutOnFailure: true);
             if (!result.Succeeded) return Unauthorized(_localizer["InvalidCredentials"].Value);
@@ -65,7 +81,7 @@ namespace InitialAspireProject.ApiIdentity.Controllers
             var roles = await _userManager.GetRolesAsync(user);
             var token = _tokenService.CreateToken(user, roles);
 
-            return Ok(new { token });
+            return Ok(new LoginResponse { Token = token });
         }
 
         [Authorize]
@@ -83,6 +99,46 @@ namespace InitialAspireProject.ApiIdentity.Controllers
         public IActionResult AdminOnly()
         {
             return Ok(_localizer["AdminOnly"].Value);
+        }
+
+        [EnableRateLimiting("auth")]
+        [HttpPost("resend-activation")]
+        public async Task<IActionResult> ResendActivation([FromBody] ForgotPasswordModel model)
+        {
+            var genericMessage = _localizer["ResendActivationGenericMessage"].Value;
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null || await _userManager.IsEmailConfirmedAsync(user))
+                return Ok(genericMessage);
+
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var link = $"{_configuration["App:BaseUrl"]}/confirm-email?email={Uri.EscapeDataString(user.Email!)}&token={Uri.EscapeDataString(token)}";
+
+            try
+            {
+                await _emailService.SendActivationEmailAsync(user.Email!, link);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to resend activation email to {Email}", user.Email);
+            }
+
+            return Ok(genericMessage);
+        }
+
+        [EnableRateLimiting("auth")]
+        [HttpPost("confirm-email")]
+        public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailModel model)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+                return BadRequest(_localizer["InvalidRequest"].Value);
+
+            var result = await _userManager.ConfirmEmailAsync(user, model.Token);
+            if (!result.Succeeded)
+                return BadRequest(_localizer["InvalidActivationLink"].Value);
+
+            return Ok(_localizer["EmailConfirmedSuccess"].Value);
         }
 
         [EnableRateLimiting("auth")]

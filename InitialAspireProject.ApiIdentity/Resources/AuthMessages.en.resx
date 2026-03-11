@@ -144,4 +144,25 @@
   <data name="EmailBodyPasswordReset" xml:space="preserve">
     <value>&lt;p&gt;Click the link below to reset your password:&lt;/p&gt;&lt;p&gt;&lt;a href='{0}'&gt;Reset Password&lt;/a&gt;&lt;/p&gt;</value>
   </data>
+  <data name="UserRegisteredCheckEmail" xml:space="preserve">
+    <value>Account created successfully! Check your email to activate your account.</value>
+  </data>
+  <data name="EmailNotConfirmed" xml:space="preserve">
+    <value>Your email has not been confirmed yet. Please check your inbox.</value>
+  </data>
+  <data name="EmailConfirmedSuccess" xml:space="preserve">
+    <value>Email confirmed successfully! You can now log in.</value>
+  </data>
+  <data name="InvalidActivationLink" xml:space="preserve">
+    <value>Invalid or expired activation link.</value>
+  </data>
+  <data name="EmailSubjectActivation" xml:space="preserve">
+    <value>Activate your account</value>
+  </data>
+  <data name="EmailBodyActivation" xml:space="preserve">
+    <value>&lt;p&gt;Click the link below to activate your account:&lt;/p&gt;&lt;p&gt;&lt;a href='{0}'&gt;Activate Account&lt;/a&gt;&lt;/p&gt;</value>
+  </data>
+  <data name="ResendActivationGenericMessage" xml:space="preserve">
+    <value>If your email is registered and not yet confirmed, you will receive a new activation link.</value>
+  </data>
 </root>

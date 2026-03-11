@@ -28,31 +28,7 @@ namespace InitialAspireProject.ApiIdentity.Services
 
         public async Task SendPasswordResetEmailAsync(string toEmail, string resetLink, CancellationToken ct = default)
         {
-            // Aspire injects mailpit as ConnectionStrings__mailpit=smtp://host:port
-            // Fall back to individual Smtp:* settings when running outside Aspire
-            string host;
-            int port;
-            bool useSsl;
-
-            var mailpitCs = _configuration.GetConnectionString("mailpit");
-            if (!string.IsNullOrEmpty(mailpitCs))
-            {
-                // Aspire injects as "Endpoint=smtp://host:port" — extract the URI part
-                var uriString = mailpitCs.Contains("Endpoint=", StringComparison.OrdinalIgnoreCase)
-                    ? mailpitCs.Split("Endpoint=", StringSplitOptions.None)[1].Split(';')[0].Trim()
-                    : mailpitCs;
-                var uri = new Uri(uriString);
-                host = uri.Host;
-                port = uri.Port;
-                useSsl = uri.Scheme.Equals("smtps", StringComparison.OrdinalIgnoreCase);
-            }
-            else
-            {
-                host = _configuration["Smtp:Host"] is { Length: > 0 } h ? h : "localhost";
-                port = int.TryParse(_configuration["Smtp:Port"], out var p) ? p : 1025;
-                useSsl = bool.TryParse(_configuration["Smtp:UseSsl"], out var s) && s;
-            }
-
+            var (host, port, useSsl) = ResolveSmtpSettings();
             var fromAddress = _configuration["Smtp:FromAddress"] ?? "noreply@aspire.local";
             var fromName = _configuration["Smtp:FromName"] ?? "Initial Aspire Project";
 
@@ -82,6 +58,58 @@ namespace InitialAspireProject.ApiIdentity.Services
                 _logger.LogError(ex, "Failed to send password reset email to {Email}", toEmail);
                 throw new InvalidOperationException("Failed to send email.", ex);
             }
+        }
+
+        public async Task SendActivationEmailAsync(string toEmail, string activationLink, CancellationToken ct = default)
+        {
+            var (host, port, useSsl) = ResolveSmtpSettings();
+            var fromAddress = _configuration["Smtp:FromAddress"] ?? "noreply@aspire.local";
+            var fromName = _configuration["Smtp:FromName"] ?? "Initial Aspire Project";
+
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress(fromName, fromAddress));
+            message.To.Add(new MailboxAddress(string.Empty, toEmail));
+            message.Subject = _localizer["EmailSubjectActivation"].Value;
+            message.Body = new TextPart("html")
+            {
+                Text = string.Format(_localizer["EmailBodyActivation"].Value, activationLink)
+            };
+
+            var username = _configuration["Smtp:Username"];
+            var password = _configuration["Smtp:Password"];
+
+            try
+            {
+                using var client = _clientFactory();
+                await client.ConnectAsync(host, port, useSsl, ct);
+                if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password))
+                    await client.AuthenticateAsync(username, password, ct);
+                await client.SendAsync(message, ct);
+                await client.DisconnectAsync(true, ct);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException and not InvalidOperationException)
+            {
+                _logger.LogError(ex, "Failed to send activation email to {Email}", toEmail);
+                throw new InvalidOperationException("Failed to send email.", ex);
+            }
+        }
+
+        private (string host, int port, bool useSsl) ResolveSmtpSettings()
+        {
+            var mailpitCs = _configuration.GetConnectionString("mailpit");
+            if (!string.IsNullOrEmpty(mailpitCs))
+            {
+                var uriString = mailpitCs.Contains("Endpoint=", StringComparison.OrdinalIgnoreCase)
+                    ? mailpitCs.Split("Endpoint=", StringSplitOptions.None)[1].Split(';')[0].Trim()
+                    : mailpitCs;
+                var uri = new Uri(uriString);
+                return (uri.Host, uri.Port, uri.Scheme.Equals("smtps", StringComparison.OrdinalIgnoreCase));
+            }
+
+            var host = _configuration["Smtp:Host"] is { Length: > 0 } h ? h : "localhost";
+            var port = int.TryParse(_configuration["Smtp:Port"], out var p) ? p : 1025;
+            var useSsl = bool.TryParse(_configuration["Smtp:UseSsl"], out var s) && s;
+            return (host, port, useSsl);
         }
     }
 

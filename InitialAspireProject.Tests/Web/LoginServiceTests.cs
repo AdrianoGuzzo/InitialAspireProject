@@ -22,30 +22,47 @@ public class LoginServiceTests
 
         var result = await service.LoginAsync("user@test.com", "Password123$", TestContext.Current.CancellationToken);
 
-        Assert.NotNull(result);
-        Assert.Equal(expectedToken, result.Token);
+        Assert.True(result.Success);
+        Assert.NotNull(result.Token);
+        Assert.Equal(expectedToken, result.Token.Token);
     }
 
     [Fact]
-    public async Task LoginAsync_InvalidCredentials_ReturnsNull()
+    public async Task LoginAsync_InvalidCredentials_ReturnsFailure()
     {
-        var handler = new StubHttpHandler(HttpStatusCode.Unauthorized, "");
+        var body = JsonSerializer.Serialize(new { code = "", message = "Invalid credentials" });
+        var handler = new StubHttpHandler(HttpStatusCode.Unauthorized, body);
         var service = CreateService(handler);
 
         var result = await service.LoginAsync("user@test.com", "WrongPassword", TestContext.Current.CancellationToken);
 
-        Assert.Null(result);
+        Assert.False(result.Success);
+        Assert.False(result.IsEmailNotConfirmed);
     }
 
     [Fact]
-    public async Task LoginAsync_ServerError_ReturnsNull()
+    public async Task LoginAsync_EmailNotConfirmed_ReturnsEmailNotConfirmed()
     {
-        var handler = new StubHttpHandler(HttpStatusCode.InternalServerError, "");
+        var body = JsonSerializer.Serialize(new { code = "EmailNotConfirmed", message = "Email not confirmed" });
+        var handler = new StubHttpHandler(HttpStatusCode.Unauthorized, body);
         var service = CreateService(handler);
 
         var result = await service.LoginAsync("user@test.com", "Password123$", TestContext.Current.CancellationToken);
 
-        Assert.Null(result);
+        Assert.False(result.Success);
+        Assert.True(result.IsEmailNotConfirmed);
+    }
+
+    [Fact]
+    public async Task LoginAsync_ServerError_ReturnsFailure()
+    {
+        var body = JsonSerializer.Serialize(new { code = "", message = "" });
+        var handler = new StubHttpHandler(HttpStatusCode.InternalServerError, body);
+        var service = CreateService(handler);
+
+        var result = await service.LoginAsync("user@test.com", "Password123$", TestContext.Current.CancellationToken);
+
+        Assert.False(result.Success);
     }
 
     [Fact]

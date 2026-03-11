@@ -195,4 +195,17 @@
   <data name="TotalClicks" xml:space="preserve"><value>Total Clicks</value></data>
   <data name="MaxValue" xml:space="preserve"><value>Maximum Value</value></data>
   <data name="MinValue" xml:space="preserve"><value>Minimum Value</value></data>
+
+  <!-- ConfirmEmail page -->
+  <data name="ConfirmEmailBrandingText" xml:space="preserve"><value>Activate your account to start using the platform</value></data>
+  <data name="ConfirmEmailTitle" xml:space="preserve"><value>Confirm Email</value></data>
+  <data name="ConfirmEmailSubtitle" xml:space="preserve"><value>We are confirming your email</value></data>
+  <data name="ConfirmEmailSuccess" xml:space="preserve"><value>Email confirmed successfully! You can now log in.</value></data>
+  <data name="ConfirmEmailError" xml:space="preserve"><value>Could not confirm your email. The link may be invalid or expired.</value></data>
+  <data name="InvalidActivationLink" xml:space="preserve"><value>Invalid or incomplete activation link.</value></data>
+  <data name="Confirming" xml:space="preserve"><value>Confirming...</value></data>
+  <data name="EmailNotConfirmedMsg" xml:space="preserve"><value>Your email has not been confirmed yet. Check your inbox or request a new link.</value></data>
+  <data name="ResendActivationLink" xml:space="preserve"><value>Resend activation link</value></data>
+  <data name="ResendActivationSuccess" xml:space="preserve"><value>If your email is registered and not yet confirmed, you will receive a new activation link.</value></data>
+  <data name="RegisterSuccessCheckEmail" xml:space="preserve"><value>Account created successfully! Check your email to activate your account.</value></data>
 </root>

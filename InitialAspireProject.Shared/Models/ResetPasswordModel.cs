@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace InitialAspireProject.ApiIdentity
+namespace InitialAspireProject.Shared.Models
 {
-    public class ResetPasswordModel
+    public record ResetPasswordModel
     {
         [Required]
         [EmailAddress]

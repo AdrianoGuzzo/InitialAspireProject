@@ -1,12 +1,15 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace InitialAspireProject.ApiIdentity
+namespace InitialAspireProject.Shared.Models
 {
-    public class ForgotPasswordModel
+    public record ConfirmEmailModel
     {
         [Required]
         [EmailAddress]
         [MaxLength(256)]
         public required string Email { get; set; }
+
+        [Required]
+        public required string Token { get; set; }
     }
 }

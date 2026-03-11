@@ -195,4 +195,17 @@
   <data name="TotalClicks" xml:space="preserve"><value>Total de Clics</value></data>
   <data name="MaxValue" xml:space="preserve"><value>Valor Máximo</value></data>
   <data name="MinValue" xml:space="preserve"><value>Valor Mínimo</value></data>
+
+  <!-- ConfirmEmail page -->
+  <data name="ConfirmEmailBrandingText" xml:space="preserve"><value>Active su cuenta para comenzar a usar la plataforma</value></data>
+  <data name="ConfirmEmailTitle" xml:space="preserve"><value>Confirmar Email</value></data>
+  <data name="ConfirmEmailSubtitle" xml:space="preserve"><value>Estamos confirmando su correo electrónico</value></data>
+  <data name="ConfirmEmailSuccess" xml:space="preserve"><value>¡Correo electrónico confirmado con éxito! Ya puede iniciar sesión.</value></data>
+  <data name="ConfirmEmailError" xml:space="preserve"><value>No se pudo confirmar su correo electrónico. El enlace puede ser inválido o haber expirado.</value></data>
+  <data name="InvalidActivationLink" xml:space="preserve"><value>Enlace de activación inválido o incompleto.</value></data>
+  <data name="Confirming" xml:space="preserve"><value>Confirmando...</value></data>
+  <data name="EmailNotConfirmedMsg" xml:space="preserve"><value>Su correo electrónico aún no ha sido confirmado. Revise su bandeja de entrada o solicite un nuevo enlace.</value></data>
+  <data name="ResendActivationLink" xml:space="preserve"><value>Reenviar enlace de activación</value></data>
+  <data name="ResendActivationSuccess" xml:space="preserve"><value>Si su correo está registrado y no confirmado, recibirá un nuevo enlace de activación.</value></data>
+  <data name="RegisterSuccessCheckEmail" xml:space="preserve"><value>¡Cuenta creada con éxito! Revise su correo electrónico para activar su cuenta.</value></data>
 </root>

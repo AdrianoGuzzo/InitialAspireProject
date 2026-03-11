@@ -58,6 +58,7 @@ services:
       Smtp__Username: ${SMTP_USERNAME}
       Smtp__Password: ${SMTP_PASSWORD}
       App__BaseUrl: ${APP_BASE_URL}
+      InternalApiKey: ${INTERNAL_API_KEY}
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://dashboard:18889"
       OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
       OTEL_SERVICE_NAME: "apiidentity"
@@ -111,6 +112,9 @@ services:
       ConnectionStrings__cacheredis: "redis:6379,password=${REDIS_PASSWORD}"
       services__apiidentity__http__0: "http://apiidentity:8080"
       services__apicore__http__0: "http://apicore:8080"
+      Google__ClientId: ${GOOGLE_CLIENT_ID}
+      Google__ClientSecret: ${GOOGLE_CLIENT_SECRET}
+      InternalApiKey: ${INTERNAL_API_KEY}
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://dashboard:18889"
       OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
       OTEL_SERVICE_NAME: "web"

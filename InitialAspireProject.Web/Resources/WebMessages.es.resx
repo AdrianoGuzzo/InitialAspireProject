@@ -108,6 +108,8 @@
   <data name="PasswordPlaceholder" xml:space="preserve"><value>Ingrese su contraseña</value></data>
   <data name="NoAccount" xml:space="preserve"><value>¿No tienes una cuenta?</value></data>
   <data name="InvalidCredentialsMsg" xml:space="preserve"><value>Usuario o contraseña inválidos.</value></data>
+  <data name="SignInWithGoogle" xml:space="preserve"><value>Entrar con Google</value></data>
+  <data name="OrSeparator" xml:space="preserve"><value>o</value></data>
 
   <!-- Register page -->
   <data name="RegisterBrandingText" xml:space="preserve"><value>Únete a nuestra plataforma moderna construida con ASP.NET Core, Blazor y Bootstrap</value></data>

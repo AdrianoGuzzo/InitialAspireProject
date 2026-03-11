@@ -120,6 +120,9 @@
   <data name="UserRegistered" xml:space="preserve">
     <value>Usuario registrado</value>
   </data>
+  <data name="RegistrationFailed" xml:space="preserve">
+    <value>Error al registrar usuario via Google.</value>
+  </data>
   <data name="InvalidCredentials" xml:space="preserve">
     <value>Credenciales inválidas</value>
   </data>

@@ -180,5 +180,32 @@ namespace InitialAspireProject.ApiIdentity.Controllers
 
             return Ok(_localizer["PasswordResetSuccess"].Value);
         }
+
+        [HttpPost("google-login")]
+        public async Task<IActionResult> GoogleLogin(
+            [FromBody] GoogleLoginModel model,
+            [FromHeader(Name = "X-Internal-Key")] string? internalKey)
+        {
+            var expectedKey = _configuration["InternalApiKey"];
+            if (string.IsNullOrEmpty(expectedKey) || internalKey != expectedKey)
+                return Unauthorized();
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                user = new ApplicationUser { Email = model.Email, UserName = model.Email, FullName = model.Name };
+                var createResult = await _userManager.CreateAsync(user);
+                if (!createResult.Succeeded)
+                {
+                    _logger.LogError("Failed to create Google SSO user {Email}: {Errors}", model.Email, createResult.Errors);
+                    return BadRequest(_localizer["RegistrationFailed"].Value);
+                }
+                await _userManager.AddToRoleAsync(user, RoleConstants.User);
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
+            var token = _tokenService.CreateToken(user, roles);
+            return Ok(new { token });
+        }
     }
 }

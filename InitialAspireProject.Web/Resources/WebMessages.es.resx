@@ -210,4 +210,47 @@
   <data name="ResendActivationLink" xml:space="preserve"><value>Reenviar enlace de activación</value></data>
   <data name="ResendActivationSuccess" xml:space="preserve"><value>Si su correo está registrado y no confirmado, recibirá un nuevo enlace de activación.</value></data>
   <data name="RegisterSuccessCheckEmail" xml:space="preserve"><value>¡Cuenta creada con éxito! Revise su correo electrónico para activar su cuenta.</value></data>
+
+  <!-- MainLayout -->
+  <data name="MyAccount" xml:space="preserve"><value>Mi Cuenta</value></data>
+  <data name="FooterBuiltWith" xml:space="preserve"><value>Construido con ASP.NET Core y Bootstrap</value></data>
+  <data name="FooterVersion" xml:space="preserve"><value>Versión 1.0.0</value></data>
+  <data name="UnhandledError" xml:space="preserve"><value>Ha ocurrido un error no controlado.</value></data>
+
+  <!-- ThemeSelector -->
+  <data name="ThemeLabel" xml:space="preserve"><value>Tema</value></data>
+  <data name="ChooseTheme" xml:space="preserve"><value>Elige un tema</value></data>
+  <data name="CurrentThemeLabel" xml:space="preserve"><value>Tema Actual</value></data>
+
+  <!-- Theme descriptions -->
+  <data name="ThemeDescDefault" xml:space="preserve"><value>Tema predeterminado de Bootstrap</value></data>
+  <data name="ThemeDescDark" xml:space="preserve"><value>Tema oscuro moderno</value></data>
+  <data name="ThemeDescCerulean" xml:space="preserve"><value>Tema azul claro y limpio</value></data>
+  <data name="ThemeDescCosmo" xml:space="preserve"><value>Tema moderno y elegante</value></data>
+  <data name="ThemeDescFlatly" xml:space="preserve"><value>Diseño flat y minimalista</value></data>
+  <data name="ThemeDescJournal" xml:space="preserve"><value>Estilo periódico clásico</value></data>
+  <data name="ThemeDescLumen" xml:space="preserve"><value>Tema claro y ventilado</value></data>
+  <data name="ThemeDescPulse" xml:space="preserve"><value>Tema vibrante y colorido</value></data>
+  <data name="ThemeDescSandstone" xml:space="preserve"><value>Tonos terrosos y naturales</value></data>
+  <data name="ThemeDescUnited" xml:space="preserve"><value>Tema corporativo</value></data>
+
+  <!-- Themes page -->
+  <data name="ThemesGallery" xml:space="preserve"><value>Galería de Temas</value></data>
+  <data name="ThemesExploreText" xml:space="preserve"><value>Explora y elige entre diferentes temas de Bootstrap</value></data>
+  <data name="Buttons" xml:space="preserve"><value>Botones</value></data>
+  <data name="Alerts" xml:space="preserve"><value>Alertas</value></data>
+  <data name="AlertPrimary" xml:space="preserve"><value>Alerta primario con ícono</value></data>
+  <data name="AlertSuccess" xml:space="preserve"><value>¡Operación realizada con éxito!</value></data>
+  <data name="AlertWarning" xml:space="preserve"><value>Atención: Verifique los datos</value></data>
+  <data name="AlertDanger" xml:space="preserve"><value>Error: Algo salió mal</value></data>
+  <data name="Forms" xml:space="preserve"><value>Formularios</value></data>
+  <data name="TypeSomething" xml:space="preserve"><value>Escriba algo...</value></data>
+  <data name="ChooseOption" xml:space="preserve"><value>Elija una opción</value></data>
+  <data name="Option" xml:space="preserve"><value>Opción</value></data>
+  <data name="ExampleCheckbox" xml:space="preserve"><value>Checkbox de ejemplo</value></data>
+  <data name="BadgesAndProgress" xml:space="preserve"><value>Badges y Progreso</value></data>
+  <data name="TabHomeContent" xml:space="preserve"><value>Contenido de la pestaña Home. Este es un ejemplo de cómo se ven las pestañas con el tema actual.</value></data>
+  <data name="TabProfileContent" xml:space="preserve"><value>Contenido de la pestaña Profile.</value></data>
+  <data name="TabContactContent" xml:space="preserve"><value>Contenido de la pestaña Contact.</value></data>
+  <data name="Docs" xml:space="preserve"><value>Docs</value></data>
 </root>

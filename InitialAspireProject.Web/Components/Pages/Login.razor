@@ -46,11 +46,17 @@
                                 <i class="bi bi-lock me-1"></i>
                                 @L["Password"]
                             </label>
-                            <InputText @bind-Value="loginModel!.Password"
-                                      id="password"
-                                      type="password"
-                                      class="form-control"
-                                      placeholder="@L["PasswordPlaceholder"]" />
+                            <div class="input-group">
+                                <InputText @bind-Value="loginModel!.Password"
+                                          id="password"
+                                          type="password"
+                                          class="form-control"
+                                          placeholder="@L["PasswordPlaceholder"]" />
+                                <button class="btn btn-outline-secondary" type="button"
+                                        onclick="togglePasswordVisibility('password', this)">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
                             <ValidationMessage For="@(() => loginModel.Password)" class="text-danger small" />
                         </div>
 

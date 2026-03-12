@@ -93,13 +93,13 @@
 									@L["Password"]
 								</label>
 								<div class="input-group">
-									<InputText id="password" type="@(showPassword ? "text" : "password")"
+									<InputText id="password" type="password"
 											   class="form-control form-control-lg"
 											   @bind-Value="registerModel!.Password"
 											   placeholder="@L["PasswordPlaceholder"]" />
 									<button class="btn btn-outline-secondary" type="button"
-											@onclick="TogglePasswordVisibility">
-										<i class="bi @(showPassword ? "bi-eye-slash" : "bi-eye")"></i>
+											onclick="togglePasswordVisibility('password', this)">
+										<i class="bi bi-eye"></i>
 									</button>
 								</div>
 								<div class="form-text small">
@@ -116,13 +116,13 @@
 									@L["ConfirmPassword"]
 								</label>
 								<div class="input-group">
-									<InputText id="confirmPassword" type="@(showConfirmPassword ? "text" : "password")"
+									<InputText id="confirmPassword" type="password"
 											   class="form-control form-control-lg"
 											   @bind-Value="registerModel!.ConfirmPassword"
 											   placeholder="@L["ConfirmPassword"]" />
 									<button class="btn btn-outline-secondary" type="button"
-											@onclick="ToggleConfirmPasswordVisibility">
-										<i class="bi @(showConfirmPassword ? "bi-eye-slash" : "bi-eye")"></i>
+											onclick="togglePasswordVisibility('confirmPassword', this)">
+										<i class="bi bi-eye"></i>
 									</button>
 								</div>
 								<ValidationMessage For="@(() => registerModel.ConfirmPassword)" class="text-danger small mt-1" />
@@ -198,8 +198,6 @@
 	private bool success = false;
 	private string message = string.Empty;
 
-	private bool showPassword = false;
-	private bool showConfirmPassword = false;
 	private bool isLoading = false;
 
 	protected override void OnInitialized() => registerModel ??= new();
@@ -237,15 +235,6 @@
 		}
 	}
 
-	private void TogglePasswordVisibility()
-	{
-		showPassword = !showPassword;
-	}
-
-	private void ToggleConfirmPasswordVisibility()
-	{
-		showConfirmPassword = !showConfirmPassword;
-	}
 	public record RegisterModel
 	{
 		[Required(ErrorMessageResourceType = typeof(WebMessages), ErrorMessageResourceName = "NameRequired")]

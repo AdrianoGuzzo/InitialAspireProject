@@ -1,22 +1,11 @@
 using Blazored.LocalStorage;
+using Microsoft.JSInterop;
 
 namespace InitialAspireProject.Web.Services;
 
 public class ThemeService
 {
-    private readonly ILocalStorageService _localStorage;
-    private string _currentTheme = "pulse";
-
-    public event Action? OnThemeChanged;
-
-    public ThemeService(ILocalStorageService localStorage)
-    {
-        _localStorage = localStorage;
-    }
-
-    public string CurrentTheme => _currentTheme;
-
-    public Dictionary<string, ThemeInfo> AvailableThemes => new()
+    private static readonly Dictionary<string, ThemeInfo> _availableThemes = new()
     {
         { "default", new ThemeInfo("Default", "ThemeDescDefault", "primary", "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css") },
         { "dark", new ThemeInfo("Dark", "ThemeDescDark", "dark", "https://cdn.jsdelivr.net/npm/bootswatch@5.3.0/dist/darkly/bootstrap.min.css") },
@@ -30,6 +19,20 @@ public class ThemeService
         { "united", new ThemeInfo("United", "ThemeDescUnited", "primary", "https://cdn.jsdelivr.net/npm/bootswatch@5.3.0/dist/united/bootstrap.min.css") }
     };
 
+    private readonly ILocalStorageService _localStorage;
+    private string _currentTheme = "pulse";
+
+    public event Action? OnThemeChanged;
+
+    public ThemeService(ILocalStorageService localStorage)
+    {
+        _localStorage = localStorage;
+    }
+
+    public string CurrentTheme => _currentTheme;
+
+    public Dictionary<string, ThemeInfo> AvailableThemes => _availableThemes;
+
     public async Task InitializeAsync()
     {
         try
@@ -40,7 +43,7 @@ public class ThemeService
                 _currentTheme = result;
             }
         }
-        catch
+        catch (Exception ex) when (ex is JSException or InvalidOperationException)
         {
             // localStorage not available during SSR
         }
@@ -55,7 +58,7 @@ public class ThemeService
             {
                 await _localStorage.SetItemAsStringAsync("selected-theme", themeKey);
             }
-            catch
+            catch (Exception ex) when (ex is JSException or InvalidOperationException)
             {
                 // localStorage not available during SSR
             }
@@ -69,4 +72,4 @@ public class ThemeService
     }
 }
 
-public record ThemeInfo(string Name, string Description, string BadgeColor, string CssUrl);
+public record ThemeInfo(string Name, string DescriptionKey, string BadgeColor, string CssUrl);

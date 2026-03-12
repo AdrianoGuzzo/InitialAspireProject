@@ -252,4 +252,5 @@
   <data name="TabHomeContent" xml:space="preserve"><value>Home tab content. This is an example of how tabs look with the current theme.</value></data>
   <data name="TabProfileContent" xml:space="preserve"><value>Profile tab content.</value></data>
   <data name="TabContactContent" xml:space="preserve"><value>Contact tab content.</value></data>
+  <data name="Docs" xml:space="preserve"><value>Docs</value></data>
 </root>

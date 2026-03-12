@@ -252,4 +252,5 @@
   <data name="TabHomeContent" xml:space="preserve"><value>Conteúdo da aba Home. Este é um exemplo de como as abas ficam com o tema atual.</value></data>
   <data name="TabProfileContent" xml:space="preserve"><value>Conteúdo da aba Profile.</value></data>
   <data name="TabContactContent" xml:space="preserve"><value>Conteúdo da aba Contact.</value></data>
+  <data name="Docs" xml:space="preserve"><value>Docs</value></data>
 </root>

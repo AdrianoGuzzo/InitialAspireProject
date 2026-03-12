@@ -252,4 +252,5 @@
   <data name="TabHomeContent" xml:space="preserve"><value>Contenido de la pestaña Home. Este es un ejemplo de cómo se ven las pestañas con el tema actual.</value></data>
   <data name="TabProfileContent" xml:space="preserve"><value>Contenido de la pestaña Profile.</value></data>
   <data name="TabContactContent" xml:space="preserve"><value>Contenido de la pestaña Contact.</value></data>
+  <data name="Docs" xml:space="preserve"><value>Docs</value></data>
 </root>

@@ -11,21 +11,21 @@ public class ThemeServiceTests
     private ThemeService CreateService() => new(_mockLocalStorage.Object);
 
     [Fact]
-    public void CurrentTheme_DefaultIsDark()
+    public void CurrentTheme_DefaultIsPulse()
     {
         var service = CreateService();
 
-        Assert.Equal("dark", service.CurrentTheme);
+        Assert.Equal("pulse", service.CurrentTheme);
     }
 
     [Fact]
-    public async Task InitializeAsync_KeepsDarkTheme()
+    public async Task InitializeAsync_KeepsPulseTheme()
     {
         var service = CreateService();
 
         await service.InitializeAsync();
 
-        Assert.Equal("dark", service.CurrentTheme);
+        Assert.Equal("pulse", service.CurrentTheme);
     }
 
     [Fact]
@@ -42,7 +42,7 @@ public class ThemeServiceTests
     }
 
     [Fact]
-    public async Task InitializeAsync_InvalidStoredTheme_KeepsDark()
+    public async Task InitializeAsync_InvalidStoredTheme_KeepsPulse()
     {
         _mockLocalStorage
             .Setup(x => x.GetItemAsStringAsync("selected-theme", default))
@@ -51,7 +51,7 @@ public class ThemeServiceTests
 
         await service.InitializeAsync();
 
-        Assert.Equal("dark", service.CurrentTheme);
+        Assert.Equal("pulse", service.CurrentTheme);
     }
 
     [Fact]
@@ -81,7 +81,7 @@ public class ThemeServiceTests
 
         await service.SetThemeAsync("nonexistent-theme");
 
-        Assert.Equal("dark", service.CurrentTheme);
+        Assert.Equal("pulse", service.CurrentTheme);
     }
 
     [Fact]
@@ -125,14 +125,14 @@ public class ThemeServiceTests
     }
 
     [Fact]
-    public void GetCurrentThemeInfo_Default_ReturnsDarkThemeInfo()
+    public void GetCurrentThemeInfo_Default_ReturnsPulseThemeInfo()
     {
         var service = CreateService();
 
         var info = service.GetCurrentThemeInfo();
 
-        Assert.Equal("Dark", info.Name);
-        Assert.Equal("dark", info.BadgeColor);
+        Assert.Equal("Pulse", info.Name);
+        Assert.Equal("danger", info.BadgeColor);
     }
 
     [Fact]

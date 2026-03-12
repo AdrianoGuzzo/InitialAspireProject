@@ -1,13 +1,19 @@
+using Blazored.LocalStorage;
 using InitialAspireProject.Web.Services;
+using Moq;
 
 namespace InitialAspireProject.Tests.Web;
 
 public class ThemeServiceTests
 {
+    private readonly Mock<ILocalStorageService> _mockLocalStorage = new();
+
+    private ThemeService CreateService() => new(_mockLocalStorage.Object);
+
     [Fact]
     public void CurrentTheme_DefaultIsDark()
     {
-        var service = new ThemeService();
+        var service = CreateService();
 
         Assert.Equal("dark", service.CurrentTheme);
     }
@@ -15,7 +21,33 @@ public class ThemeServiceTests
     [Fact]
     public async Task InitializeAsync_KeepsDarkTheme()
     {
-        var service = new ThemeService();
+        var service = CreateService();
+
+        await service.InitializeAsync();
+
+        Assert.Equal("dark", service.CurrentTheme);
+    }
+
+    [Fact]
+    public async Task InitializeAsync_ReadsFromLocalStorage()
+    {
+        _mockLocalStorage
+            .Setup(x => x.GetItemAsStringAsync("selected-theme", default))
+            .ReturnsAsync("flatly");
+        var service = CreateService();
+
+        await service.InitializeAsync();
+
+        Assert.Equal("flatly", service.CurrentTheme);
+    }
+
+    [Fact]
+    public async Task InitializeAsync_InvalidStoredTheme_KeepsDark()
+    {
+        _mockLocalStorage
+            .Setup(x => x.GetItemAsStringAsync("selected-theme", default))
+            .ReturnsAsync("nonexistent");
+        var service = CreateService();
 
         await service.InitializeAsync();
 
@@ -25,7 +57,7 @@ public class ThemeServiceTests
     [Fact]
     public async Task SetThemeAsync_ValidTheme_ChangesCurrentTheme()
     {
-        var service = new ThemeService();
+        var service = CreateService();
 
         await service.SetThemeAsync("flatly");
 
@@ -33,9 +65,19 @@ public class ThemeServiceTests
     }
 
     [Fact]
+    public async Task SetThemeAsync_ValidTheme_PersistsToLocalStorage()
+    {
+        var service = CreateService();
+
+        await service.SetThemeAsync("flatly");
+
+        _mockLocalStorage.Verify(x => x.SetItemAsStringAsync("selected-theme", "flatly", default), Times.Once);
+    }
+
+    [Fact]
     public async Task SetThemeAsync_InvalidTheme_DoesNotChange()
     {
-        var service = new ThemeService();
+        var service = CreateService();
 
         await service.SetThemeAsync("nonexistent-theme");
 
@@ -45,7 +87,7 @@ public class ThemeServiceTests
     [Fact]
     public async Task SetThemeAsync_ValidTheme_FiresOnThemeChanged()
     {
-        var service = new ThemeService();
+        var service = CreateService();
         var fired = false;
         service.OnThemeChanged += () => fired = true;
 
@@ -57,7 +99,7 @@ public class ThemeServiceTests
     [Fact]
     public async Task SetThemeAsync_InvalidTheme_DoesNotFireOnThemeChanged()
     {
-        var service = new ThemeService();
+        var service = CreateService();
         var fired = false;
         service.OnThemeChanged += () => fired = true;
 
@@ -69,7 +111,7 @@ public class ThemeServiceTests
     [Fact]
     public void AvailableThemes_ContainsTenThemes()
     {
-        var service = new ThemeService();
+        var service = CreateService();
 
         Assert.Equal(10, service.AvailableThemes.Count);
     }
@@ -77,7 +119,7 @@ public class ThemeServiceTests
     [Fact]
     public void AvailableThemes_ContainsDark()
     {
-        var service = new ThemeService();
+        var service = CreateService();
 
         Assert.True(service.AvailableThemes.ContainsKey("dark"));
     }
@@ -85,7 +127,7 @@ public class ThemeServiceTests
     [Fact]
     public void GetCurrentThemeInfo_Default_ReturnsDarkThemeInfo()
     {
-        var service = new ThemeService();
+        var service = CreateService();
 
         var info = service.GetCurrentThemeInfo();
 
@@ -96,7 +138,7 @@ public class ThemeServiceTests
     [Fact]
     public async Task GetCurrentThemeInfo_AfterSetTheme_ReturnsNewThemeInfo()
     {
-        var service = new ThemeService();
+        var service = CreateService();
         await service.SetThemeAsync("flatly");
 
         var info = service.GetCurrentThemeInfo();

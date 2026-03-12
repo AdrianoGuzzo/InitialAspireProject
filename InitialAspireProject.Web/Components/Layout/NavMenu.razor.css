@@ -1,12 +1,18 @@
-/* NavMenu usando Bootstrap - CSS mínimo necessário */
+/* NavMenu — CSS */
 
-/* Ajustes específicos para o tema */
+/* Brand header */
+.sidebar-brand {
+    background: linear-gradient(135deg, rgba(var(--bs-primary-rgb, 13, 110, 253), 0.9), rgba(var(--bs-primary-rgb, 13, 110, 253), 0.7));
+    letter-spacing: 0.02em;
+}
+
+/* Nav section headers */
 .nav-header {
     font-size: 0.75rem;
     letter-spacing: 0.05em;
 }
 
-/* Smooth transitions para links */
+/* Smooth transitions for links */
 .nav-link {
     transition: all 0.2s ease-in-out;
 }
@@ -19,5 +25,5 @@
 /* Active state */
 .nav-link.active {
     background-color: rgba(255, 255, 255, 0.15);
-    border-left: 3px solid #fff;
+    border-left: 3px solid var(--bs-primary, #0d6efd);
 }

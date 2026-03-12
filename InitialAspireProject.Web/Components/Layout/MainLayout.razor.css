@@ -1,20 +1,35 @@
-/* MainLayout usando Bootstrap - Sidebar Layout */
+/* MainLayout — Sidebar Layout */
 
 /* Sidebar Styling */
 .sidebar {
-    width: 280px;
+    width: var(--app-sidebar-width, 272px);
     min-height: 100vh;
     position: fixed;
     top: 0;
     left: 0;
     z-index: 1000;
     transition: transform 0.3s ease;
+    background: linear-gradient(180deg, #1a1d23, #12141a);
 }
 
 /* Main content offset for sidebar */
 .sidebar + .flex-grow-1 {
-    margin-left: 280px;
+    margin-left: var(--app-sidebar-width, 272px);
     min-height: 100vh;
+}
+
+/* Topbar */
+.topbar {
+    position: sticky;
+    top: 0;
+    z-index: 900;
+    backdrop-filter: blur(8px);
+    background-color: rgba(var(--bs-light-rgb, 248, 249, 250), 0.85) !important;
+}
+
+/* Footer */
+.app-footer {
+    border-top: 1px solid rgba(0,0,0,0.08) !important;
 }
 
 /* Mobile responsiveness */
@@ -22,11 +37,11 @@
     .sidebar {
         transform: translateX(-100%);
     }
-    
+
     .sidebar.show {
         transform: translateX(0);
     }
-    
+
     .sidebar + .flex-grow-1 {
         margin-left: 0;
     }
@@ -34,9 +49,10 @@
 
 /* Navigation Links Styling */
 .nav-link {
-    transition: all 0.2s ease;
-    border-radius: 0.375rem;
+    transition: var(--app-transition, all 0.2s ease);
+    border-radius: var(--app-radius-sm, 0.375rem);
     margin-bottom: 0.25rem;
+    padding: 0.625rem 1rem;
 }
 
 .nav-link:hover {
@@ -45,7 +61,8 @@
 }
 
 .nav-link.active {
-    background-color: rgba(255, 255, 255, 0.2) !important;
+    background-color: rgba(var(--bs-primary-rgb, 13, 110, 253), 0.3) !important;
+    border-left: 3px solid var(--bs-primary, #0d6efd);
     font-weight: 600;
 }
 
@@ -90,7 +107,7 @@
     .nav-scrollable {
         display: none;
     }
-    
+
     .nav-scrollable.show {
         display: block;
     }

@@ -210,4 +210,46 @@
   <data name="ResendActivationLink" xml:space="preserve"><value>Resend activation link</value></data>
   <data name="ResendActivationSuccess" xml:space="preserve"><value>If your email is registered and not yet confirmed, you will receive a new activation link.</value></data>
   <data name="RegisterSuccessCheckEmail" xml:space="preserve"><value>Account created successfully! Check your email to activate your account.</value></data>
+
+  <!-- MainLayout -->
+  <data name="MyAccount" xml:space="preserve"><value>My Account</value></data>
+  <data name="FooterBuiltWith" xml:space="preserve"><value>Built with ASP.NET Core and Bootstrap</value></data>
+  <data name="FooterVersion" xml:space="preserve"><value>Version 1.0.0</value></data>
+  <data name="UnhandledError" xml:space="preserve"><value>An unhandled error has occurred.</value></data>
+
+  <!-- ThemeSelector -->
+  <data name="ThemeLabel" xml:space="preserve"><value>Theme</value></data>
+  <data name="ChooseTheme" xml:space="preserve"><value>Choose a theme</value></data>
+  <data name="CurrentThemeLabel" xml:space="preserve"><value>Current Theme</value></data>
+
+  <!-- Theme descriptions -->
+  <data name="ThemeDescDefault" xml:space="preserve"><value>Default Bootstrap theme</value></data>
+  <data name="ThemeDescDark" xml:space="preserve"><value>Modern dark theme</value></data>
+  <data name="ThemeDescCerulean" xml:space="preserve"><value>Clean light blue theme</value></data>
+  <data name="ThemeDescCosmo" xml:space="preserve"><value>Modern and elegant theme</value></data>
+  <data name="ThemeDescFlatly" xml:space="preserve"><value>Flat and minimalist design</value></data>
+  <data name="ThemeDescJournal" xml:space="preserve"><value>Classic journal style</value></data>
+  <data name="ThemeDescLumen" xml:space="preserve"><value>Light and airy theme</value></data>
+  <data name="ThemeDescPulse" xml:space="preserve"><value>Vibrant and colorful theme</value></data>
+  <data name="ThemeDescSandstone" xml:space="preserve"><value>Earthy and natural tones</value></data>
+  <data name="ThemeDescUnited" xml:space="preserve"><value>Corporate theme</value></data>
+
+  <!-- Themes page -->
+  <data name="ThemesGallery" xml:space="preserve"><value>Theme Gallery</value></data>
+  <data name="ThemesExploreText" xml:space="preserve"><value>Explore and choose from different Bootstrap themes</value></data>
+  <data name="Buttons" xml:space="preserve"><value>Buttons</value></data>
+  <data name="Alerts" xml:space="preserve"><value>Alerts</value></data>
+  <data name="AlertPrimary" xml:space="preserve"><value>Primary alert with icon</value></data>
+  <data name="AlertSuccess" xml:space="preserve"><value>Operation completed successfully!</value></data>
+  <data name="AlertWarning" xml:space="preserve"><value>Warning: Check the data</value></data>
+  <data name="AlertDanger" xml:space="preserve"><value>Error: Something went wrong</value></data>
+  <data name="Forms" xml:space="preserve"><value>Forms</value></data>
+  <data name="TypeSomething" xml:space="preserve"><value>Type something...</value></data>
+  <data name="ChooseOption" xml:space="preserve"><value>Choose an option</value></data>
+  <data name="Option" xml:space="preserve"><value>Option</value></data>
+  <data name="ExampleCheckbox" xml:space="preserve"><value>Example checkbox</value></data>
+  <data name="BadgesAndProgress" xml:space="preserve"><value>Badges and Progress</value></data>
+  <data name="TabHomeContent" xml:space="preserve"><value>Home tab content. This is an example of how tabs look with the current theme.</value></data>
+  <data name="TabProfileContent" xml:space="preserve"><value>Profile tab content.</value></data>
+  <data name="TabContactContent" xml:space="preserve"><value>Contact tab content.</value></data>
 </root>

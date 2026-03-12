@@ -7,19 +7,19 @@
     <div class="dropdown">
         <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
             <i class="bi bi-palette me-1"></i>
-            Tema: @ThemeService.GetCurrentThemeInfo().Name
+            @L["ThemeLabel"]: @ThemeService.GetCurrentThemeInfo().Name
         </button>
         <ul class="dropdown-menu dropdown-menu-end">
-            <li><h6 class="dropdown-header">Escolha um tema</h6></li>
+            <li><h6 class="dropdown-header">@L["ChooseTheme"]</h6></li>
             @foreach (var theme in ThemeService.AvailableThemes)
             {
                 <li>
-                    <button class="dropdown-item d-flex align-items-center @(ThemeService.CurrentTheme == theme.Key ? "active" : "")" 
+                    <button class="dropdown-item d-flex align-items-center @(ThemeService.CurrentTheme == theme.Key ? "active" : "")"
                             @onclick="() => ChangeTheme(theme.Key)">
                         <span class="badge bg-@theme.Value.BadgeColor me-2" style="width: 12px; height: 12px;"></span>
                         <div>
                             <div class="fw-medium">@theme.Value.Name</div>
-                            <small class="text-muted">@theme.Value.Description</small>
+                            <small class="text-muted">@L[theme.Value.Description]</small>
                         </div>
                         @if (ThemeService.CurrentTheme == theme.Key)
                         {
@@ -48,8 +48,15 @@
 
     private async Task UpdateThemeLink()
     {
-        // var themeInfo = ThemeService.GetCurrentThemeInfo();
-        // await JSRuntime.InvokeVoidAsync("updateThemeLink", themeInfo.CssUrl);
+        try
+        {
+            var themeInfo = ThemeService.GetCurrentThemeInfo();
+            await JSRuntime.InvokeVoidAsync("updateThemeLink", themeInfo.CssUrl);
+        }
+        catch
+        {
+            // JS interop not available during SSR
+        }
     }
 
     public void Dispose()

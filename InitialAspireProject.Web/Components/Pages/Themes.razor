@@ -11,9 +11,9 @@
                 <div>
                     <h1 class="display-4">
                         <i class="bi bi-palette-fill me-3"></i>
-                        Galeria de Temas
+                        @L["ThemesGallery"]
                     </h1>
-                    <p class="lead text-muted">Explore e escolha entre diferentes temas do Bootstrap</p>
+                    <p class="lead text-muted">@L["ThemesExploreText"]</p>
                 </div>
                 <ThemeSelector />
             </div>
@@ -25,8 +25,8 @@
             <div class="alert alert-info d-flex align-items-center">
                 <i class="bi bi-info-circle-fill me-2"></i>
                 <div>
-                    <strong>Tema Atual:</strong> @ThemeService.GetCurrentThemeInfo().Name - 
-                    @ThemeService.GetCurrentThemeInfo().Description
+                    <strong>@L["CurrentThemeLabel"]:</strong> @ThemeService.GetCurrentThemeInfo().Name -
+                    @L[ThemeService.GetCurrentThemeInfo().Description]
                 </div>
             </div>
         </div>
@@ -38,7 +38,7 @@
                 <div class="card-header">
                     <h5 class="mb-0">
                         <i class="bi bi-mouse me-2"></i>
-                        Botões
+                        @L["Buttons"]
                     </h5>
                 </div>
                 <div class="card-body">
@@ -67,25 +67,25 @@
                 <div class="card-header">
                     <h5 class="mb-0">
                         <i class="bi bi-exclamation-triangle me-2"></i>
-                        Alertas
+                        @L["Alerts"]
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="alert alert-primary" role="alert">
                         <i class="bi bi-info-circle me-2"></i>
-                        Alerta primário com ícone
+                        @L["AlertPrimary"]
                     </div>
                     <div class="alert alert-success" role="alert">
                         <i class="bi bi-check-circle me-2"></i>
-                        Operação realizada com sucesso!
+                        @L["AlertSuccess"]
                     </div>
                     <div class="alert alert-warning" role="alert">
                         <i class="bi bi-exclamation-triangle me-2"></i>
-                        Atenção: Verifique os dados
+                        @L["AlertWarning"]
                     </div>
                     <div class="alert alert-danger" role="alert">
                         <i class="bi bi-x-circle me-2"></i>
-                        Erro: Algo deu errado
+                        @L["AlertDanger"]
                     </div>
                 </div>
             </div>
@@ -96,28 +96,28 @@
                 <div class="card-header">
                     <h5 class="mb-0">
                         <i class="bi bi-ui-checks me-2"></i>
-                        Formulários
+                        @L["Forms"]
                     </h5>
                 </div>
                 <div class="card-body">
                     <form>
                         <div class="mb-3">
                             <label for="exampleInput" class="form-label">Input Text</label>
-                            <input type="text" class="form-control" id="exampleInput" placeholder="Digite algo...">
+                            <input type="text" class="form-control" id="exampleInput" placeholder="@L["TypeSomething"]">
                         </div>
                         <div class="mb-3">
                             <label for="exampleSelect" class="form-label">Select</label>
                             <select class="form-select" id="exampleSelect">
-                                <option selected>Escolha uma opção</option>
-                                <option value="1">Opção 1</option>
-                                <option value="2">Opção 2</option>
-                                <option value="3">Opção 3</option>
+                                <option selected>@L["ChooseOption"]</option>
+                                <option value="1">@L["Option"] 1</option>
+                                <option value="2">@L["Option"] 2</option>
+                                <option value="3">@L["Option"] 3</option>
                             </select>
                         </div>
                         <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="exampleCheck">
                             <label class="form-check-label" for="exampleCheck">
-                                Checkbox de exemplo
+                                @L["ExampleCheckbox"]
                             </label>
                         </div>
                         <div class="mb-3">
@@ -144,7 +144,7 @@
                 <div class="card-header">
                     <h5 class="mb-0">
                         <i class="bi bi-award me-2"></i>
-                        Badges e Progress
+                        @L["BadgesAndProgress"]
                     </h5>
                 </div>
                 <div class="card-body">
@@ -157,7 +157,7 @@
                         <span class="badge bg-warning text-dark me-1">Warning</span>
                         <span class="badge bg-info me-1">Info</span>
                     </div>
-                    
+
                     <h6>Progress Bars</h6>
                     <div class="progress mb-2">
                         <div class="progress-bar" role="progressbar" style="width: 25%"></div>
@@ -182,7 +182,7 @@
                 <div class="card-header">
                     <h5 class="mb-0">
                         <i class="bi bi-compass me-2"></i>
-                        Navegação
+                        @L["Navigation"]
                     </h5>
                 </div>
                 <div class="card-body">
@@ -195,13 +195,13 @@
                     </nav>
                     <div class="tab-content" id="nav-tabContent">
                         <div class="tab-pane fade show active" id="nav-home" role="tabpanel">
-                            <p>Conteúdo da aba Home. Este é um exemplo de como as abas ficam com o tema atual.</p>
+                            <p>@L["TabHomeContent"]</p>
                         </div>
                         <div class="tab-pane fade" id="nav-profile" role="tabpanel">
-                            <p>Conteúdo da aba Profile.</p>
+                            <p>@L["TabProfileContent"]</p>
                         </div>
                         <div class="tab-pane fade" id="nav-contact" role="tabpanel">
-                            <p>Conteúdo da aba Contact.</p>
+                            <p>@L["TabContactContent"]</p>
                         </div>
                     </div>
                 </div>
@@ -211,9 +211,9 @@
 
     <div class="row mt-4">
         <div class="col text-center">
-            <a href="/login" class="btn btn-outline-primary">
+            <a href="/" class="btn btn-outline-primary">
                 <i class="bi bi-arrow-left me-2"></i>
-                Voltar para Login
+                Home
             </a>
         </div>
     </div>

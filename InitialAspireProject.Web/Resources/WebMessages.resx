@@ -253,4 +253,5 @@
   <data name="TabProfileContent" xml:space="preserve"><value>Conteúdo da aba Profile.</value></data>
   <data name="TabContactContent" xml:space="preserve"><value>Conteúdo da aba Contact.</value></data>
   <data name="Docs" xml:space="preserve"><value>Docs</value></data>
+  <data name="TogglePasswordVisibility" xml:space="preserve"><value>Alternar visibilidade da senha</value></data>
 </root>

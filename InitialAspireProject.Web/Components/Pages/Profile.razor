@@ -264,7 +264,7 @@
             }
             else
             {
-                nameMessage = result.Message ?? L["ProfileUpdateError"].Value;
+                nameMessage = result.Message ?? L["ProfileUpdateErrorGeneric"].Value;
             }
         }
         catch (Exception ex)
@@ -294,7 +294,7 @@
             }
             else
             {
-                passwordMessage = result.Message ?? L["PasswordChangeError"].Value;
+                passwordMessage = result.Message ?? L["PasswordChangeErrorGeneric"].Value;
             }
         }
         catch (Exception ex)
@@ -312,7 +312,7 @@
     {
         [Required(ErrorMessageResourceType = typeof(WebMessages), ErrorMessageResourceName = "NameRequired")]
         [MaxLength(200)]
-        [Display(Name = "Nome Completo")]
+        [Display(Name = nameof(WebMessages.FullName), ResourceType = typeof(WebMessages))]
         public string FullName { get; set; } = string.Empty;
     }
 
@@ -320,18 +320,18 @@
     {
         [Required(ErrorMessageResourceType = typeof(WebMessages), ErrorMessageResourceName = "CurrentPasswordRequired")]
         [DataType(DataType.Password)]
-        [Display(Name = "Senha Atual")]
+        [Display(Name = nameof(WebMessages.CurrentPassword), ResourceType = typeof(WebMessages))]
         public string CurrentPassword { get; set; } = string.Empty;
 
         [Required(ErrorMessageResourceType = typeof(WebMessages), ErrorMessageResourceName = "NewPasswordRequired")]
         [StringLength(100, ErrorMessageResourceType = typeof(WebMessages), ErrorMessageResourceName = "PasswordMin8", MinimumLength = 8)]
         [DataType(DataType.Password)]
-        [Display(Name = "Nova Senha")]
+        [Display(Name = nameof(WebMessages.NewPassword), ResourceType = typeof(WebMessages))]
         public string NewPassword { get; set; } = string.Empty;
 
         [Required(ErrorMessageResourceType = typeof(WebMessages), ErrorMessageResourceName = "ConfirmPasswordRequired")]
         [DataType(DataType.Password)]
-        [Display(Name = "Confirmar Nova Senha")]
+        [Display(Name = nameof(WebMessages.ConfirmNewPassword), ResourceType = typeof(WebMessages))]
         [Compare("NewPassword", ErrorMessageResourceType = typeof(WebMessages), ErrorMessageResourceName = "PasswordMismatch")]
         public string ConfirmNewPassword { get; set; } = string.Empty;
     }

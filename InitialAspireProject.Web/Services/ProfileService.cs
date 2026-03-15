@@ -55,7 +55,7 @@ public class ProfileService(HttpClient httpClient, IHttpContextAccessor httpCont
         catch (Exception ex)
         {
             logger.LogError(ex, "Error updating profile");
-            return new ProfileResult { Success = false, Message = "Erro interno do servidor. Tente novamente mais tarde." };
+            return new ProfileResult { Success = false };
         }
     }
 
@@ -84,7 +84,7 @@ public class ProfileService(HttpClient httpClient, IHttpContextAccessor httpCont
         catch (Exception ex)
         {
             logger.LogError(ex, "Error changing password");
-            return new ProfileResult { Success = false, Message = "Erro interno do servidor. Tente novamente mais tarde." };
+            return new ProfileResult { Success = false };
         }
     }
 }

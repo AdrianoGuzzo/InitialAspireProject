@@ -269,8 +269,10 @@
   <data name="Saving" xml:space="preserve"><value>Guardando...</value></data>
   <data name="ProfileUpdateSuccess" xml:space="preserve"><value>¡Perfil actualizado con éxito!</value></data>
   <data name="ProfileUpdateError" xml:space="preserve"><value>Error al actualizar perfil: {0}</value></data>
+  <data name="ProfileUpdateErrorGeneric" xml:space="preserve"><value>Error al actualizar perfil. Inténtelo más tarde.</value></data>
   <data name="PasswordChangeSuccess" xml:space="preserve"><value>¡Contraseña cambiada con éxito!</value></data>
   <data name="PasswordChangeError" xml:space="preserve"><value>Error al cambiar contraseña: {0}</value></data>
+  <data name="PasswordChangeErrorGeneric" xml:space="preserve"><value>Error al cambiar contraseña. Inténtelo más tarde.</value></data>
   <data name="ProfileLoadError" xml:space="preserve"><value>Error al cargar perfil. Inténtelo más tarde.</value></data>
   <data name="CurrentPasswordRequired" xml:space="preserve"><value>La contraseña actual es requerida</value></data>
 </root>

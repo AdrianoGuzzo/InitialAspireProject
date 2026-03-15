@@ -121,7 +121,7 @@ public class ProfileServiceTests
         var result = await service.UpdateProfileAsync("Name", TestContext.Current.CancellationToken);
 
         Assert.False(result.Success);
-        Assert.NotNull(result.Message);
+        Assert.Null(result.Message);
     }
 
     // --- ChangePasswordAsync ---
@@ -162,7 +162,7 @@ public class ProfileServiceTests
         var result = await service.ChangePasswordAsync("Old", "New", TestContext.Current.CancellationToken);
 
         Assert.False(result.Success);
-        Assert.NotNull(result.Message);
+        Assert.Null(result.Message);
     }
 
     private sealed class StubHttpHandler(HttpStatusCode statusCode, string body) : HttpMessageHandler

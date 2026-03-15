@@ -282,4 +282,17 @@
   <data name="PermissionsTitle" xml:space="preserve"><value>Permisos</value></data>
   <data name="PermissionSaveSuccess" xml:space="preserve"><value>Permiso guardado con éxito.</value></data>
   <data name="PermissionSaveError" xml:space="preserve"><value>Error al guardar el permiso.</value></data>
+  <data name="Permission_CanViewSettings" xml:space="preserve"><value>Ver Configuración</value></data>
+  <data name="Permission_CanViewSettings_Desc" xml:space="preserve"><value>Ver la configuración del sistema</value></data>
+  <data name="Permission_CanManageUsers" xml:space="preserve"><value>Administrar Usuarios</value></data>
+  <data name="Permission_CanManageUsers_Desc" xml:space="preserve"><value>Administrar cuentas de usuarios</value></data>
+  <data name="Permission_CanViewReports" xml:space="preserve"><value>Ver Informes</value></data>
+  <data name="Permission_CanViewReports_Desc" xml:space="preserve"><value>Ver informes del sistema</value></data>
+  <data name="Permission_CanManagePermissions" xml:space="preserve"><value>Administrar Permisos</value></data>
+  <data name="Permission_CanManagePermissions_Desc" xml:space="preserve"><value>Administrar permisos de roles</value></data>
+  <data name="PermissionCategory_System" xml:space="preserve"><value>Sistema</value></data>
+  <data name="PermissionCategory_Settings" xml:space="preserve"><value>Configuración</value></data>
+  <data name="PermissionCategory_Users" xml:space="preserve"><value>Usuarios</value></data>
+  <data name="PermissionCategory_Reports" xml:space="preserve"><value>Informes</value></data>
+  <data name="PermissionCategory_Security" xml:space="preserve"><value>Seguridad</value></data>
 </root>

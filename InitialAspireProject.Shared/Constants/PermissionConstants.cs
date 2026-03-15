@@ -7,7 +7,7 @@ namespace InitialAspireProject.Shared.Constants
         public const string CanViewSettings = "CanViewSettings";
         public const string CanManageUsers = "CanManageUsers";
         public const string CanViewReports = "CanViewReports";
-        public const string CanManagePermissions = "CanManagePermissions";
+        public const string CanManagePermissions = "CanManagePermissions";        
 
         public static readonly string[] All =
         [
@@ -15,6 +15,16 @@ namespace InitialAspireProject.Shared.Constants
             CanManageUsers,
             CanViewReports,
             CanManagePermissions
+        ];
+
+        public record PermissionInfo(string Key, string Category);
+
+        public static readonly PermissionInfo[] AllPermissions =
+        [
+            new(CanViewSettings, "System.Settings"),
+            new(CanManageUsers, "System.Users"),
+            new(CanViewReports, "System.Reports"),
+            new(CanManagePermissions, "System.Security")
         ];
     }
 }

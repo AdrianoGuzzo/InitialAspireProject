@@ -48,7 +48,7 @@ public class AdminPermissionsPageTests : Bunit.TestContext
     }
 
     [Fact]
-    public void AdminPermissions_RendersAllPermissionRows()
+    public void AdminPermissions_RendersAllPermissionNames()
     {
         var authContext = this.AddTestAuthorization();
         authContext.SetAuthorized("admin@localhost");
@@ -56,10 +56,41 @@ public class AdminPermissionsPageTests : Bunit.TestContext
 
         var cut = RenderComponent<AdminPermissions>();
 
-        foreach (var permission in PermissionConstants.All)
+        foreach (var perm in PermissionConstants.AllPermissions)
         {
-            Assert.Contains(permission, cut.Markup);
+            Assert.Contains($"Permission_{perm.Key}", cut.Markup);
         }
+    }
+
+    [Fact]
+    public void AdminPermissions_RendersPermissionDescriptions()
+    {
+        var authContext = this.AddTestAuthorization();
+        authContext.SetAuthorized("admin@localhost");
+        authContext.SetPolicies("CanManagePermissions");
+
+        var cut = RenderComponent<AdminPermissions>();
+
+        foreach (var perm in PermissionConstants.AllPermissions)
+        {
+            Assert.Contains($"Permission_{perm.Key}_Desc", cut.Markup);
+        }
+    }
+
+    [Fact]
+    public void AdminPermissions_RendersCategoryNodes()
+    {
+        var authContext = this.AddTestAuthorization();
+        authContext.SetAuthorized("admin@localhost");
+        authContext.SetPolicies("CanManagePermissions");
+
+        var cut = RenderComponent<AdminPermissions>();
+
+        Assert.Contains("PermissionCategory_System", cut.Markup);
+        Assert.Contains("PermissionCategory_Settings", cut.Markup);
+        Assert.Contains("PermissionCategory_Users", cut.Markup);
+        Assert.Contains("PermissionCategory_Reports", cut.Markup);
+        Assert.Contains("PermissionCategory_Security", cut.Markup);
     }
 
     [Fact]
@@ -77,12 +108,25 @@ public class AdminPermissionsPageTests : Bunit.TestContext
 
         // Find an unchecked toggle (User role doesn't have CanViewSettings)
         var checkboxes = cut.FindAll("input[type='checkbox']");
-        // The grid is permissions x roles, so there are All.Length * 2 checkboxes
-        // Second column (User) of first row (CanViewSettings) = index 1
+        // The tree has 4 permissions x 2 roles = 8 checkboxes
+        // Second column (User) of first permission = index 1
         var uncheckedBox = checkboxes[1]; // User + CanViewSettings
         await cut.InvokeAsync(() => uncheckedBox.Change(true));
 
         _permissionServiceMock.Verify(x => x.AssignPermissionAsync(
             "User", PermissionConstants.CanViewSettings, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public void AdminPermissions_TreeHasExpandCollapseIcons()
+    {
+        var authContext = this.AddTestAuthorization();
+        authContext.SetAuthorized("admin@localhost");
+        authContext.SetPolicies("CanManagePermissions");
+
+        var cut = RenderComponent<AdminPermissions>();
+
+        // Category rows should have chevron-down icons (expanded by default)
+        Assert.Contains("bi-chevron-down", cut.Markup);
     }
 }

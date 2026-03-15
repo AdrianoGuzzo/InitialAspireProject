@@ -1,6 +1,8 @@
 @page "/admin/permissions"
 @attribute [Authorize(Policy = "CanManagePermissions")]
+@rendermode InteractiveServer
 @using Microsoft.AspNetCore.Authorization
+@using InitialAspireProject.Shared.Constants
 @using InitialAspireProject.Shared.Models
 @using InitialAspireProject.Web.Services
 @inject IPermissionService PermissionService
@@ -33,7 +35,7 @@
                     }
 
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle">
+                        <table class="table align-middle mb-0">
                             <thead class="table-light">
                                 <tr>
                                     <th>@L["PermissionsTitle"]</th>
@@ -44,24 +46,9 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var permission in allPermissions)
+                                @foreach (var rootNode in treeNodes)
                                 {
-                                    <tr>
-                                        <td><code>@permission</code></td>
-                                        @foreach (var rp in rolePermissions)
-                                        {
-                                            var roleName = rp.RoleName;
-                                            var hasPermission = rp.Permissions.Contains(permission);
-                                            <td class="text-center">
-                                                <div class="form-check form-switch d-inline-block">
-                                                    <input class="form-check-input" type="checkbox"
-                                                           checked="@hasPermission"
-                                                           disabled="@saving"
-                                                           @onchange="(e) => TogglePermission(roleName, permission, (bool)e.Value!)" />
-                                                </div>
-                                            </td>
-                                        }
-                                    </tr>
+                                    RenderNode(rootNode, 0);
                                 }
                             </tbody>
                         </table>
@@ -73,12 +60,21 @@
 </div>
 
 @code {
-    private string[] allPermissions = [];
     private List<RolePermissionsDto> rolePermissions = [];
     private bool loading = true;
     private bool saving;
     private string? statusMessage;
     private bool statusSuccess;
+    private List<TreeNode> treeNodes = [];
+
+    private class TreeNode
+    {
+        public string Label { get; set; } = "";
+        public string CategoryKey { get; set; } = "";
+        public PermissionConstants.PermissionInfo? Permission { get; set; }
+        public List<TreeNode> Children { get; set; } = [];
+        public bool Expanded { get; set; } = true;
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -88,9 +84,74 @@
     private async Task LoadDataAsync()
     {
         loading = true;
-        allPermissions = await PermissionService.GetAllPermissionsAsync();
         rolePermissions = await PermissionService.GetAllRolePermissionsAsync();
+        BuildTree();
         loading = false;
+    }
+
+    private void BuildTree()
+    {
+        var root = new Dictionary<string, TreeNode>();
+
+        foreach (var perm in PermissionConstants.AllPermissions)
+        {
+            var segments = perm.Category.Split('.');
+            var current = root;
+            TreeNode? parentNode = null;
+
+            for (int i = 0; i < segments.Length; i++)
+            {
+                var segment = segments[i];
+                var path = string.Join(".", segments.Take(i + 1));
+
+                if (i == 0)
+                {
+                    if (!root.ContainsKey(segment))
+                    {
+                        root[segment] = new TreeNode
+                        {
+                            Label = segment,
+                            CategoryKey = segment,
+                            Expanded = true
+                        };
+                    }
+                    parentNode = root[segment];
+                }
+                else
+                {
+                    var existing = parentNode!.Children.FirstOrDefault(c => c.CategoryKey == segment);
+                    if (existing == null)
+                    {
+                        existing = new TreeNode
+                        {
+                            Label = segment,
+                            CategoryKey = segment,
+                            Expanded = true
+                        };
+                        parentNode.Children.Add(existing);
+                    }
+                    parentNode = existing;
+                }
+            }
+
+            parentNode!.Children.Add(new TreeNode
+            {
+                Permission = perm,
+                Label = perm.Key
+            });
+        }
+
+        treeNodes = root.Values.ToList();
+    }
+
+    private void RenderNode(TreeNode node, int depth)
+    {
+        // This method is intentionally empty — rendering is done inline via the recursive fragment below
+    }
+
+    private void ToggleExpand(TreeNode node)
+    {
+        node.Expanded = !node.Expanded;
     }
 
     private async Task TogglePermission(string roleName, string permission, bool enabled)
@@ -122,3 +183,51 @@
         saving = false;
     }
 }
+
+@{ void RenderNode(TreeNode node, int depth)
+{
+    if (node.Permission is not null)
+    {
+        var perm = node.Permission;
+        <tr>
+            <td style="padding-left: @((depth * 1.5) + 0.5)rem">
+                <div>
+                    <strong>@L[$"Permission_{perm.Key}"]</strong>
+                </div>
+                <small class="text-muted">@L[$"Permission_{perm.Key}_Desc"]</small>
+            </td>
+            @foreach (var rp in rolePermissions)
+            {
+                var roleName = rp.RoleName;
+                var permKey = perm.Key;
+                var hasPermission = rp.Permissions.Contains(permKey);
+                <td class="text-center">
+                    <div class="form-check form-switch d-inline-block">
+                        <input class="form-check-input" type="checkbox"
+                               checked="@hasPermission"
+                               disabled="@saving"
+                               @onchange="(e) => TogglePermission(roleName, permKey, (bool)e.Value!)" />
+                    </div>
+                </td>
+            }
+        </tr>
+    }
+    else
+    {
+        <tr class="table-light" @onclick="() => ToggleExpand(node)" style="cursor: pointer">
+            <td style="padding-left: @((depth * 1.5) + 0.5)rem" colspan="@(1 + rolePermissions.Count)">
+                <strong>
+                    <i class="bi @(node.Expanded ? "bi-chevron-down" : "bi-chevron-right") me-1"></i>
+                    @L[$"PermissionCategory_{node.CategoryKey}"]
+                </strong>
+            </td>
+        </tr>
+        @if (node.Expanded)
+        {
+            @foreach (var child in node.Children)
+            {
+                RenderNode(child, depth + 1);
+            }
+        }
+    }
+} }

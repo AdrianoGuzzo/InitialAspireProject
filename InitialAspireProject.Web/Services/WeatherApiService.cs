@@ -1,12 +1,12 @@
+using InitialAspireProject.Shared.Constants;
+
 namespace InitialAspireProject.Web.Services;
 
 public class WeatherApiService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor, ILogger<WeatherApiService> logger)
 {
-    private const string TokenKey = "AuthToken";
-
     public async Task<WeatherForecast[]> GetWeatherAsync(int maxItems = 10, CancellationToken cancellationToken = default)
     {
-        var token = httpContextAccessor.HttpContext?.Session.GetString(TokenKey);
+        var token = httpContextAccessor.HttpContext?.Session.GetString(SessionConstants.TokenKey);
         if (!string.IsNullOrEmpty(token))
             httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 

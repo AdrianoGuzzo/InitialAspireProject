@@ -92,7 +92,7 @@ namespace InitialAspireProject.ApiIdentity.Controllers
             var existingClaims = await _roleManager.GetClaimsAsync(role);
             var claimToRemove = existingClaims.FirstOrDefault(c => c.Type == PermissionConstants.ClaimType && c.Value == permission);
             if (claimToRemove is null)
-                return NotFound(_localizer["InvalidPermission"].Value);
+                return NotFound(_localizer["PermissionNotAssigned"].Value);
 
             await _roleManager.RemoveClaimAsync(role, claimToRemove);
             return Ok(_localizer["PermissionRemoved"].Value);

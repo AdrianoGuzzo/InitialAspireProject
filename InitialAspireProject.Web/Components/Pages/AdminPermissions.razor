@@ -144,11 +144,6 @@
         treeNodes = root.Values.ToList();
     }
 
-    private void RenderNode(TreeNode node, int depth)
-    {
-        // This method is intentionally empty — rendering is done inline via the recursive fragment below
-    }
-
     private void ToggleExpand(TreeNode node)
     {
         node.Expanded = !node.Expanded;

@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using InitialAspireProject.Shared.Constants;
 using InitialAspireProject.Shared.Models;
 using InitialAspireProject.Web.Services;
 using Microsoft.AspNetCore.Http;
@@ -24,7 +25,7 @@ public class ProfileServiceTests
         if (token is not null)
         {
             byte[]? bytes = Encoding.UTF8.GetBytes(token);
-            sessionMock.Setup(x => x.TryGetValue("AuthToken", out bytes)).Returns(true);
+            sessionMock.Setup(x => x.TryGetValue(SessionConstants.TokenKey, out bytes)).Returns(true);
         }
         else
         {

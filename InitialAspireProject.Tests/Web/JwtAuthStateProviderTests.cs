@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using InitialAspireProject.Shared.Constants;
 using InitialAspireProject.Web;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -19,7 +20,7 @@ public class JwtAuthStateProviderTests
         if (storedToken is not null)
         {
             byte[]? tokenBytes = Encoding.UTF8.GetBytes(storedToken);
-            sessionMock.Setup(x => x.TryGetValue("AuthToken", out tokenBytes)).Returns(true);
+            sessionMock.Setup(x => x.TryGetValue(SessionConstants.TokenKey, out tokenBytes)).Returns(true);
         }
         else
         {
@@ -121,7 +122,7 @@ public class JwtAuthStateProviderTests
 
         await provider.GetAuthenticationStateAsync();
 
-        session.Verify(x => x.Remove("AuthToken"), Times.Once);
+        session.Verify(x => x.Remove(SessionConstants.TokenKey), Times.Once);
     }
 
     [Fact]
@@ -154,7 +155,7 @@ public class JwtAuthStateProviderTests
 
         await provider.GetAuthenticationStateAsync();
 
-        session.Verify(x => x.Remove("AuthToken"), Times.Once);
+        session.Verify(x => x.Remove(SessionConstants.TokenKey), Times.Once);
     }
 
     [Fact]

@@ -1,3 +1,4 @@
+using InitialAspireProject.Shared.Constants;
 using InitialAspireProject.Shared.Models;
 
 namespace InitialAspireProject.Web.Services;
@@ -11,11 +12,9 @@ public interface IProfileService
 
 public class ProfileService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor, ILogger<ProfileService> logger) : IProfileService
 {
-    private const string TokenKey = "AuthToken";
-
     private void AttachToken()
     {
-        var token = httpContextAccessor.HttpContext?.Session.GetString(TokenKey);
+        var token = httpContextAccessor.HttpContext?.Session.GetString(SessionConstants.TokenKey);
         if (!string.IsNullOrEmpty(token))
             httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
     }

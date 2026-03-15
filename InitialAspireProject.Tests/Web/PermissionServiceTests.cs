@@ -20,7 +20,7 @@ public class PermissionServiceTests
 
         var sessionMock = new Mock<ISession>();
         byte[]? tokenBytes = Encoding.UTF8.GetBytes("test-token");
-        sessionMock.Setup(x => x.TryGetValue("AuthToken", out tokenBytes)).Returns(true);
+        sessionMock.Setup(x => x.TryGetValue(SessionConstants.TokenKey, out tokenBytes)).Returns(true);
 
         var contextMock = new Mock<HttpContext>();
         contextMock.Setup(x => x.Session).Returns(sessionMock.Object);

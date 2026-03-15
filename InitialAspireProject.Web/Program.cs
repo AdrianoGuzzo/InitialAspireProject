@@ -1,4 +1,5 @@
 using Blazored.LocalStorage;
+using InitialAspireProject.Shared.Constants;
 using InitialAspireProject.Web;
 using InitialAspireProject.Web.Components;
 using InitialAspireProject.Web.Services;
@@ -145,7 +146,7 @@ app.MapGet("/google-callback", async (HttpContext ctx, IGoogleLoginService googl
     }
 
     await ctx.Session.LoadAsync();
-    ctx.Session.SetString("AuthToken", tokenResponse.Token);
+    ctx.Session.SetString(SessionConstants.TokenKey, tokenResponse.Token);
 
     await ctx.SignOutAsync("ExternalCookie");
     var claims = new[] { new Claim(ClaimTypes.Email, email), new Claim(ClaimTypes.Name, name ?? email) };

@@ -183,6 +183,9 @@
   <data name="InvalidPermission" xml:space="preserve">
     <value>Permiso inválido.</value>
   </data>
+  <data name="PermissionNotAssigned" xml:space="preserve">
+    <value>Este permiso no está asignado a este rol.</value>
+  </data>
   <data name="ProfileUpdated" xml:space="preserve">
     <value>Perfil actualizado con éxito.</value>
   </data>

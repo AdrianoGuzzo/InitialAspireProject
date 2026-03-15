@@ -189,4 +189,7 @@
   <data name="InvalidPermission" xml:space="preserve">
     <value>Invalid permission.</value>
   </data>
+  <data name="PermissionNotAssigned" xml:space="preserve">
+    <value>This permission is not assigned to this role.</value>
+  </data>
 </root>

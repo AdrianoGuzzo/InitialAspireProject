@@ -1,3 +1,4 @@
+using InitialAspireProject.Shared.Constants;
 using InitialAspireProject.Shared.Models;
 
 namespace InitialAspireProject.Web.Services
@@ -12,11 +13,9 @@ namespace InitialAspireProject.Web.Services
 
     public class PermissionService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor, ILogger<PermissionService> logger) : IPermissionService
     {
-        private const string TokenKey = "AuthToken";
-
         private void AttachToken()
         {
-            var token = httpContextAccessor.HttpContext?.Session.GetString(TokenKey);
+            var token = httpContextAccessor.HttpContext?.Session.GetString(SessionConstants.TokenKey);
             if (!string.IsNullOrEmpty(token))
                 httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
         }
@@ -54,7 +53,7 @@ namespace InitialAspireProject.Web.Services
             AttachToken();
             try
             {
-                var response = await httpClient.PostAsJsonAsync($"/permissions/roles/{roleName}", new AssignPermissionModel { Permission = permission }, cancellationToken);
+                var response = await httpClient.PostAsJsonAsync($"/permissions/roles/{Uri.EscapeDataString(roleName)}", new AssignPermissionModel { Permission = permission }, cancellationToken);
                 return response.IsSuccessStatusCode;
             }
             catch (HttpRequestException ex)
@@ -69,7 +68,7 @@ namespace InitialAspireProject.Web.Services
             AttachToken();
             try
             {
-                var response = await httpClient.DeleteAsync($"/permissions/roles/{roleName}/{permission}", cancellationToken);
+                var response = await httpClient.DeleteAsync($"/permissions/roles/{Uri.EscapeDataString(roleName)}/{Uri.EscapeDataString(permission)}", cancellationToken);
                 return response.IsSuccessStatusCode;
             }
             catch (HttpRequestException ex)

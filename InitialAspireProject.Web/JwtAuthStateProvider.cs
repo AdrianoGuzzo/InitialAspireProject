@@ -105,7 +105,19 @@ namespace InitialAspireProject.Web
             var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonBytes)
                 ?? throw new JsonException("JWT payload could not be deserialized");
 
-            var claims = keyValuePairs.Select(kvp => new Claim(kvp.Key, kvp.Value.ToString()!)).ToList();
+            var claims = new List<Claim>();
+            foreach (var kvp in keyValuePairs)
+            {
+                if (kvp.Value is JsonElement element && element.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var item in element.EnumerateArray())
+                        claims.Add(new Claim(kvp.Key, item.GetString()!));
+                }
+                else
+                {
+                    claims.Add(new Claim(kvp.Key, kvp.Value.ToString()!));
+                }
+            }
 
             // Enforce token expiry
             var expClaim = claims.FirstOrDefault(c => c.Type == "exp");

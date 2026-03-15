@@ -168,4 +168,19 @@
   <data name="ResendActivationGenericMessage" xml:space="preserve">
     <value>If your email is registered and not yet confirmed, you will receive a new activation link.</value>
   </data>
+  <data name="PermissionAssigned" xml:space="preserve">
+    <value>Permission assigned successfully.</value>
+  </data>
+  <data name="PermissionRemoved" xml:space="preserve">
+    <value>Permission removed successfully.</value>
+  </data>
+  <data name="PermissionAlreadyAssigned" xml:space="preserve">
+    <value>This permission is already assigned to this role.</value>
+  </data>
+  <data name="RoleNotFound" xml:space="preserve">
+    <value>Role not found.</value>
+  </data>
+  <data name="InvalidPermission" xml:space="preserve">
+    <value>Invalid permission.</value>
+  </data>
 </root>

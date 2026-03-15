@@ -254,4 +254,11 @@
   <data name="TabContactContent" xml:space="preserve"><value>Contact tab content.</value></data>
   <data name="Docs" xml:space="preserve"><value>Docs</value></data>
   <data name="TogglePasswordVisibility" xml:space="preserve"><value>Toggle password visibility</value></data>
+
+  <!-- Permissions -->
+  <data name="ManagePermissions" xml:space="preserve"><value>Manage Permissions</value></data>
+  <data name="SettingsTitle" xml:space="preserve"><value>Settings</value></data>
+  <data name="PermissionsTitle" xml:space="preserve"><value>Permissions</value></data>
+  <data name="PermissionSaveSuccess" xml:space="preserve"><value>Permission saved successfully.</value></data>
+  <data name="PermissionSaveError" xml:space="preserve"><value>Error saving permission.</value></data>
 </root>

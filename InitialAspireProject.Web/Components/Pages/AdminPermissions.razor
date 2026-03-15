@@ -1,0 +1,124 @@
+@page "/admin/permissions"
+@attribute [Authorize(Policy = "CanManagePermissions")]
+@using Microsoft.AspNetCore.Authorization
+@using InitialAspireProject.Shared.Models
+@using InitialAspireProject.Web.Services
+@inject IPermissionService PermissionService
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="bi bi-shield-lock me-2"></i>
+                    @L["PermissionsTitle"]
+                </h4>
+            </div>
+            <div class="card-body">
+                @if (loading)
+                {
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2 text-muted">@L["Loading"]</p>
+                    </div>
+                }
+                else if (rolePermissions.Count > 0)
+                {
+                    @if (!string.IsNullOrEmpty(statusMessage))
+                    {
+                        <div class="alert @(statusSuccess ? "alert-success" : "alert-danger") alert-dismissible fade show">
+                            @statusMessage
+                            <button type="button" class="btn-close" @onclick="() => statusMessage = null"></button>
+                        </div>
+                    }
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>@L["PermissionsTitle"]</th>
+                                    @foreach (var rp in rolePermissions)
+                                    {
+                                        <th class="text-center">@rp.RoleName</th>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var permission in allPermissions)
+                                {
+                                    <tr>
+                                        <td><code>@permission</code></td>
+                                        @foreach (var rp in rolePermissions)
+                                        {
+                                            var roleName = rp.RoleName;
+                                            var hasPermission = rp.Permissions.Contains(permission);
+                                            <td class="text-center">
+                                                <div class="form-check form-switch d-inline-block">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           checked="@hasPermission"
+                                                           disabled="@saving"
+                                                           @onchange="(e) => TogglePermission(roleName, permission, (bool)e.Value!)" />
+                                                </div>
+                                            </td>
+                                        }
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string[] allPermissions = [];
+    private List<RolePermissionsDto> rolePermissions = [];
+    private bool loading = true;
+    private bool saving;
+    private string? statusMessage;
+    private bool statusSuccess;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        loading = true;
+        allPermissions = await PermissionService.GetAllPermissionsAsync();
+        rolePermissions = await PermissionService.GetAllRolePermissionsAsync();
+        loading = false;
+    }
+
+    private async Task TogglePermission(string roleName, string permission, bool enabled)
+    {
+        saving = true;
+        statusMessage = null;
+
+        bool success;
+        if (enabled)
+            success = await PermissionService.AssignPermissionAsync(roleName, permission);
+        else
+            success = await PermissionService.RemovePermissionAsync(roleName, permission);
+
+        statusSuccess = success;
+        statusMessage = success ? L["PermissionSaveSuccess"].Value : L["PermissionSaveError"].Value;
+
+        if (success)
+        {
+            var rp = rolePermissions.FirstOrDefault(r => r.RoleName == roleName);
+            if (rp is not null)
+            {
+                if (enabled && !rp.Permissions.Contains(permission))
+                    rp.Permissions.Add(permission);
+                else if (!enabled)
+                    rp.Permissions.Remove(permission);
+            }
+        }
+
+        saving = false;
+    }
+}

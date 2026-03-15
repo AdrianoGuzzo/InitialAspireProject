@@ -112,6 +112,11 @@
                         @L["Profile"]
                     </a>
                 </div>
+            </Authorized>
+        </AuthorizeView>
+
+        <AuthorizeView Policy="CanViewSettings">
+            <Authorized>
                 <div class="nav-item">
                     <a class="nav-link text-white d-flex align-items-center py-2 px-3 rounded"
                        href="/settings">
@@ -119,6 +124,23 @@
                         @L["Settings"]
                     </a>
                 </div>
+            </Authorized>
+        </AuthorizeView>
+
+        <AuthorizeView Policy="CanManagePermissions">
+            <Authorized>
+                <div class="nav-item">
+                    <a class="nav-link text-white d-flex align-items-center py-2 px-3 rounded"
+                       href="/admin/permissions">
+                        <i class="bi bi-shield-lock me-2"></i>
+                        @L["ManagePermissions"]
+                    </a>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+
+        <AuthorizeView>
+            <Authorized>
                 <div class="nav-item">
                     <a class="nav-link text-danger d-flex align-items-center py-2 px-3 rounded"
                        href="/logout" data-enhance-nav="false">

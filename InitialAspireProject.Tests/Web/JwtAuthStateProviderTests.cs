@@ -207,4 +207,40 @@ public class JwtAuthStateProviderTests
         Assert.True(notifiedState!.User.Identity?.IsAuthenticated);
         Assert.Equal("notify@example.com", notifiedState.User.FindFirst("unique_name")?.Value);
     }
+
+    [Fact]
+    public async Task GetAuthenticationStateAsync_ArrayClaim_ParsesMultipleValues()
+    {
+        var jwt = CreateJwt(new()
+        {
+            ["exp"] = DateTimeOffset.UtcNow.AddHours(1).ToUnixTimeSeconds(),
+            ["unique_name"] = "test@example.com",
+            ["Permission"] = new[] { "CanViewSettings", "CanManageUsers" }
+        });
+        var (accessor, _) = SetupSession(jwt);
+        var provider = CreateProvider(accessor.Object);
+
+        var state = await provider.GetAuthenticationStateAsync();
+
+        var permissions = state.User.FindAll("Permission").Select(c => c.Value).ToList();
+        Assert.Contains("CanViewSettings", permissions);
+        Assert.Contains("CanManageUsers", permissions);
+    }
+
+    [Fact]
+    public async Task GetAuthenticationStateAsync_SinglePermissionClaim_Works()
+    {
+        var jwt = CreateJwt(new()
+        {
+            ["exp"] = DateTimeOffset.UtcNow.AddHours(1).ToUnixTimeSeconds(),
+            ["unique_name"] = "test@example.com",
+            ["Permission"] = "CanViewSettings"
+        });
+        var (accessor, _) = SetupSession(jwt);
+        var provider = CreateProvider(accessor.Object);
+
+        var state = await provider.GetAuthenticationStateAsync();
+
+        Assert.Equal("CanViewSettings", state.User.FindFirst("Permission")?.Value);
+    }
 }

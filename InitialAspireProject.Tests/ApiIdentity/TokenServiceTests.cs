@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using InitialAspireProject.ApiIdentity;
+using InitialAspireProject.Shared.Constants;
 using InitialAspireProject.Tests.Builders;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -149,5 +150,36 @@ public class TokenServiceTests
         var jwt = new JwtSecurityTokenHandler().ReadJwtToken(token);
         var expectedExpiry = DateTime.UtcNow.AddHours(1);
         Assert.InRange(jwt.ValidTo, expectedExpiry.AddMinutes(-1), expectedExpiry.AddMinutes(1));
+    }
+
+    [Fact]
+    public void CreateToken_WithPermissions_ContainsPermissionClaims()
+    {
+        var service = CreateService();
+        var user = new ApplicationUserBuilder().Build();
+        var permissionClaims = new List<Claim>
+        {
+            new(PermissionConstants.ClaimType, PermissionConstants.CanViewSettings),
+            new(PermissionConstants.ClaimType, PermissionConstants.CanManageUsers)
+        };
+
+        var token = service.CreateToken(user, ["Admin"], permissionClaims);
+
+        var principal = ParseToken(token);
+        var permissions = principal.FindAll(PermissionConstants.ClaimType).Select(c => c.Value).ToList();
+        Assert.Contains(PermissionConstants.CanViewSettings, permissions);
+        Assert.Contains(PermissionConstants.CanManageUsers, permissions);
+    }
+
+    [Fact]
+    public void CreateToken_WithNullPermissions_StillWorks()
+    {
+        var service = CreateService();
+        var user = new ApplicationUserBuilder().Build();
+
+        var token = service.CreateToken(user, ["User"], null);
+
+        var principal = ParseToken(token);
+        Assert.Empty(principal.FindAll(PermissionConstants.ClaimType));
     }
 }

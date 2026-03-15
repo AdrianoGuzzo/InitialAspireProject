@@ -254,4 +254,11 @@
   <data name="TabContactContent" xml:space="preserve"><value>Contenido de la pestaña Contact.</value></data>
   <data name="Docs" xml:space="preserve"><value>Docs</value></data>
   <data name="TogglePasswordVisibility" xml:space="preserve"><value>Alternar visibilidad de la contraseña</value></data>
+
+  <!-- Permissions -->
+  <data name="ManagePermissions" xml:space="preserve"><value>Administrar Permisos</value></data>
+  <data name="SettingsTitle" xml:space="preserve"><value>Configuración</value></data>
+  <data name="PermissionsTitle" xml:space="preserve"><value>Permisos</value></data>
+  <data name="PermissionSaveSuccess" xml:space="preserve"><value>Permiso guardado con éxito.</value></data>
+  <data name="PermissionSaveError" xml:space="preserve"><value>Error al guardar el permiso.</value></data>
 </root>

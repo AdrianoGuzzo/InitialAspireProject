@@ -1,4 +1,6 @@
 using System.Globalization;
+using InitialAspireProject.Shared.Constants;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Localization;
@@ -128,6 +130,15 @@ public static class Extensions
     {
         app.UseRequestLocalization();
         return app;
+    }
+
+    public static void AddPermissionPolicies(this AuthorizationOptions options)
+    {
+        foreach (var permission in PermissionConstants.All)
+        {
+            options.AddPolicy(permission, policy =>
+                policy.RequireClaim(PermissionConstants.ClaimType, permission));
+        }
     }
 
     public static WebApplication MapDefaultEndpoints(this WebApplication app)

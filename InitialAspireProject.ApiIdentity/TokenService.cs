@@ -15,7 +15,7 @@ namespace InitialAspireProject.ApiIdentity
             _config = config;
         }
 
-        public string CreateToken(ApplicationUser user, IList<string> roles)
+        public string CreateToken(ApplicationUser user, IList<string> roles, IList<Claim>? permissionClaims = null)
         {
             var claims = new List<Claim>
         {
@@ -25,6 +25,12 @@ namespace InitialAspireProject.ApiIdentity
 
             foreach (var role in roles)
                 claims.Add(new Claim(ClaimTypes.Role, role));
+
+            if (permissionClaims is not null)
+            {
+                foreach (var claim in permissionClaims)
+                    claims.Add(claim);
+            }
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key is not configured")));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

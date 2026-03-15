@@ -45,6 +45,8 @@ internal class Program
             };
         });
 
+        builder.Services.AddAuthorization(options => options.AddPermissionPolicies());
+
         var app = builder.Build();
 
         using (var scope = app.Services.CreateScope())

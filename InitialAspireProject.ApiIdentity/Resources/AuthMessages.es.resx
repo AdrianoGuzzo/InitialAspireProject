@@ -168,4 +168,19 @@
   <data name="ResendActivationGenericMessage" xml:space="preserve">
     <value>Si su correo está registrado y no confirmado, recibirá un nuevo enlace de activación.</value>
   </data>
+  <data name="PermissionAssigned" xml:space="preserve">
+    <value>Permiso asignado con éxito.</value>
+  </data>
+  <data name="PermissionRemoved" xml:space="preserve">
+    <value>Permiso eliminado con éxito.</value>
+  </data>
+  <data name="PermissionAlreadyAssigned" xml:space="preserve">
+    <value>Este permiso ya está asignado a este rol.</value>
+  </data>
+  <data name="RoleNotFound" xml:space="preserve">
+    <value>Rol no encontrado.</value>
+  </data>
+  <data name="InvalidPermission" xml:space="preserve">
+    <value>Permiso inválido.</value>
+  </data>
 </root>

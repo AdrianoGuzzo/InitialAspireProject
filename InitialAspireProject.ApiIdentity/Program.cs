@@ -62,6 +62,8 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddAuthorization(options => options.AddPermissionPolicies());
+
 builder.Services.AddRateLimiter(options =>
 {
     options.AddFixedWindowLimiter("auth", limiter =>

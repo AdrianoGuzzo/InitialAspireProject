@@ -44,7 +44,7 @@ namespace InitialAspireProject.ApiIdentity.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
-            var user = new ApplicationUser { Email = model.Email, UserName = model.Email, FullName = model.FullName };
+            var user = new ApplicationUser { Email = model.Email, UserName = model.Email, FullName = model.FullName ?? string.Empty };
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded) return BadRequest(result.Errors);
 
@@ -91,7 +91,35 @@ namespace InitialAspireProject.ApiIdentity.Controllers
             var user = await _userManager.FindByEmailAsync(User?.Identity?.Name ?? "");
             if (user is null) return NotFound(_localizer["UserNotFound"].Value);
             var roles = await _userManager.GetRolesAsync(user);
-            return Ok(new { email = user.Email, fullName = user.FullName, roles });
+            return Ok(new ProfileResponse { Email = user.Email!, FullName = user.FullName, Roles = roles.ToList() });
+        }
+
+        [Authorize]
+        [HttpPut("profile")]
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileModel model)
+        {
+            var user = await _userManager.FindByEmailAsync(User?.Identity?.Name ?? "");
+            if (user is null) return NotFound(_localizer["UserNotFound"].Value);
+
+            user.FullName = model.FullName;
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded) return BadRequest(result.Errors);
+
+            return Ok(_localizer["ProfileUpdated"].Value);
+        }
+
+        [Authorize]
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordModel model)
+        {
+            var user = await _userManager.FindByEmailAsync(User?.Identity?.Name ?? "");
+            if (user is null) return NotFound(_localizer["UserNotFound"].Value);
+
+            var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+            if (!result.Succeeded)
+                return BadRequest(result.Errors);
+
+            return Ok(_localizer["PasswordChanged"].Value);
         }
 
         [Authorize(Roles = RoleConstants.Admin)]

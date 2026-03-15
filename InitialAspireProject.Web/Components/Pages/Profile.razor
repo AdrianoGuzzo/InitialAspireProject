@@ -1,0 +1,338 @@
+@page "/profile"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@using System.ComponentModel.DataAnnotations
+@using InitialAspireProject.Web.Services
+@using InitialAspireProject.Web.Resources
+@inject IProfileService ProfileService
+
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2 class="fw-bold">
+                <i class="bi bi-person-gear me-2"></i>
+                @L["ProfileTitle"]
+            </h2>
+            <p class="text-muted">@L["ProfileSubtitle"]</p>
+        </div>
+    </div>
+
+    @if (isLoadingProfile)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 text-muted">@L["Loading"]</p>
+        </div>
+    }
+    else if (loadError)
+    {
+        <div class="alert alert-danger d-flex align-items-center" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <div>@L["ProfileLoadError"]</div>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            <!-- Personal Info Card -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body text-center py-4">
+                        <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                            <i class="bi bi-person-fill text-primary display-5"></i>
+                        </div>
+                        <h5 class="fw-bold mb-1">@profileFullName</h5>
+                        <p class="text-muted mb-3">@profileEmail</p>
+                        @if (profileRoles.Count > 0)
+                        {
+                            <div class="mb-2">
+                                <small class="text-muted fw-semibold">@L["Roles"]</small>
+                            </div>
+                            @foreach (var role in profileRoles)
+                            {
+                                <span class="badge bg-primary me-1">@role</span>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Forms -->
+            <div class="col-lg-8">
+                <!-- Edit Name -->
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0 fw-semibold">
+                            <i class="bi bi-pencil me-2"></i>
+                            @L["EditName"]
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        @if (!string.IsNullOrEmpty(nameMessage))
+                        {
+                            <div class="alert alert-@(nameSuccess ? "success" : "danger") d-flex align-items-center" role="alert">
+                                <i class="bi @(nameSuccess ? "bi-check-circle-fill" : "bi-exclamation-triangle-fill") me-2"></i>
+                                <div>@nameMessage</div>
+                            </div>
+                        }
+
+                        <EditForm Model="nameModel" OnValidSubmit="HandleUpdateName" FormName="UpdateNameForm">
+                            <DataAnnotationsValidator />
+                            <div class="mb-3">
+                                <label for="profileFullName" class="form-label fw-semibold">
+                                    <i class="bi bi-person me-1"></i>
+                                    @L["FullName"]
+                                </label>
+                                <InputText id="profileFullName" class="form-control form-control-lg"
+                                           @bind-Value="nameModel!.FullName"
+                                           placeholder="@L["FullNamePlaceholder"]" />
+                                <ValidationMessage For="@(() => nameModel.FullName)" class="text-danger small mt-1" />
+                            </div>
+                            <button type="submit" class="btn btn-primary" disabled="@isSavingName">
+                                @if (isSavingName)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                    <span>@L["Saving"]</span>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-check-lg me-1"></i>
+                                    <span>@L["SaveChanges"]</span>
+                                }
+                            </button>
+                        </EditForm>
+                    </div>
+                </div>
+
+                <!-- Change Password -->
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0 fw-semibold">
+                            <i class="bi bi-lock me-2"></i>
+                            @L["ChangePassword"]
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        @if (!string.IsNullOrEmpty(passwordMessage))
+                        {
+                            <div class="alert alert-@(passwordSuccess ? "success" : "danger") d-flex align-items-center" role="alert">
+                                <i class="bi @(passwordSuccess ? "bi-check-circle-fill" : "bi-exclamation-triangle-fill") me-2"></i>
+                                <div>@passwordMessage</div>
+                            </div>
+                        }
+
+                        <EditForm Model="passwordModel" OnValidSubmit="HandleChangePassword" FormName="ChangePasswordForm">
+                            <DataAnnotationsValidator />
+                            <div class="mb-3">
+                                <label for="currentPassword" class="form-label fw-semibold">
+                                    <i class="bi bi-lock me-1"></i>
+                                    @L["CurrentPassword"]
+                                </label>
+                                <div class="input-group">
+                                    <InputText id="currentPassword" type="password"
+                                               class="form-control form-control-lg"
+                                               @bind-Value="passwordModel!.CurrentPassword"
+                                               placeholder="@L["CurrentPasswordPlaceholder"]" />
+                                    <button class="btn btn-outline-secondary" type="button"
+                                            aria-label="@L["TogglePasswordVisibility"]"
+                                            onclick="togglePasswordVisibility('currentPassword', this)">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                                <ValidationMessage For="@(() => passwordModel.CurrentPassword)" class="text-danger small mt-1" />
+                            </div>
+                            <div class="mb-3">
+                                <label for="newPassword" class="form-label fw-semibold">
+                                    <i class="bi bi-lock-fill me-1"></i>
+                                    @L["NewPassword"]
+                                </label>
+                                <div class="input-group">
+                                    <InputText id="newPassword" type="password"
+                                               class="form-control form-control-lg"
+                                               @bind-Value="passwordModel!.NewPassword"
+                                               placeholder="@L["NewPasswordPlaceholder"]" />
+                                    <button class="btn btn-outline-secondary" type="button"
+                                            aria-label="@L["TogglePasswordVisibility"]"
+                                            onclick="togglePasswordVisibility('newPassword', this)">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="form-text small">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    @L["PasswordHint8"]
+                                </div>
+                                <ValidationMessage For="@(() => passwordModel.NewPassword)" class="text-danger small mt-1" />
+                            </div>
+                            <div class="mb-3">
+                                <label for="confirmNewPassword" class="form-label fw-semibold">
+                                    <i class="bi bi-lock-fill me-1"></i>
+                                    @L["ConfirmNewPassword"]
+                                </label>
+                                <div class="input-group">
+                                    <InputText id="confirmNewPassword" type="password"
+                                               class="form-control form-control-lg"
+                                               @bind-Value="passwordModel!.ConfirmNewPassword"
+                                               placeholder="@L["ConfirmNewPasswordPlaceholder"]" />
+                                    <button class="btn btn-outline-secondary" type="button"
+                                            aria-label="@L["TogglePasswordVisibility"]"
+                                            onclick="togglePasswordVisibility('confirmNewPassword', this)">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                                <ValidationMessage For="@(() => passwordModel.ConfirmNewPassword)" class="text-danger small mt-1" />
+                            </div>
+                            <button type="submit" class="btn btn-warning" disabled="@isSavingPassword">
+                                @if (isSavingPassword)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                    <span>@L["Saving"]</span>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-shield-lock me-1"></i>
+                                    <span>@L["ChangePassword"]</span>
+                                }
+                            </button>
+                        </EditForm>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [SupplyParameterFromForm(FormName = "UpdateNameForm")]
+    private NameFormModel? nameModel { get; set; }
+
+    [SupplyParameterFromForm(FormName = "ChangePasswordForm")]
+    private PasswordFormModel? passwordModel { get; set; }
+
+    private string profileEmail = string.Empty;
+    private string profileFullName = string.Empty;
+    private List<string> profileRoles = [];
+
+    private bool isLoadingProfile = true;
+    private bool loadError;
+
+    private bool isSavingName;
+    private bool nameSuccess;
+    private string nameMessage = string.Empty;
+
+    private bool isSavingPassword;
+    private bool passwordSuccess;
+    private string passwordMessage = string.Empty;
+
+    private bool isFormSubmit;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isFormSubmit = nameModel is not null || passwordModel is not null;
+        nameModel ??= new();
+        passwordModel ??= new();
+
+        var profile = await ProfileService.GetProfileAsync();
+        if (profile is null)
+        {
+            loadError = true;
+            isLoadingProfile = false;
+            return;
+        }
+
+        profileEmail = profile.Email;
+        profileFullName = profile.FullName;
+        profileRoles = profile.Roles;
+
+        if (!isFormSubmit)
+            nameModel.FullName = profile.FullName;
+
+        isLoadingProfile = false;
+    }
+
+    private async Task HandleUpdateName()
+    {
+        nameMessage = string.Empty;
+        isSavingName = true;
+
+        try
+        {
+            var result = await ProfileService.UpdateProfileAsync(nameModel!.FullName);
+            nameSuccess = result.Success;
+            if (result.Success)
+            {
+                profileFullName = nameModel.FullName;
+                nameMessage = L["ProfileUpdateSuccess"].Value;
+            }
+            else
+            {
+                nameMessage = result.Message ?? L["ProfileUpdateError"].Value;
+            }
+        }
+        catch (Exception ex)
+        {
+            nameSuccess = false;
+            nameMessage = string.Format(L["ProfileUpdateError"].Value, ex.Message);
+        }
+        finally
+        {
+            isSavingName = false;
+        }
+    }
+
+    private async Task HandleChangePassword()
+    {
+        passwordMessage = string.Empty;
+        isSavingPassword = true;
+
+        try
+        {
+            var result = await ProfileService.ChangePasswordAsync(passwordModel!.CurrentPassword, passwordModel.NewPassword);
+            passwordSuccess = result.Success;
+            if (result.Success)
+            {
+                passwordMessage = L["PasswordChangeSuccess"].Value;
+                passwordModel = new();
+            }
+            else
+            {
+                passwordMessage = result.Message ?? L["PasswordChangeError"].Value;
+            }
+        }
+        catch (Exception ex)
+        {
+            passwordSuccess = false;
+            passwordMessage = string.Format(L["PasswordChangeError"].Value, ex.Message);
+        }
+        finally
+        {
+            isSavingPassword = false;
+        }
+    }
+
+    public record NameFormModel
+    {
+        [Required(ErrorMessageResourceType = typeof(WebMessages), ErrorMessageResourceName = "NameRequired")]
+        [MaxLength(200)]
+        [Display(Name = "Nome Completo")]
+        public string FullName { get; set; } = string.Empty;
+    }
+
+    public record PasswordFormModel
+    {
+        [Required(ErrorMessageResourceType = typeof(WebMessages), ErrorMessageResourceName = "CurrentPasswordRequired")]
+        [DataType(DataType.Password)]
+        [Display(Name = "Senha Atual")]
+        public string CurrentPassword { get; set; } = string.Empty;
+
+        [Required(ErrorMessageResourceType = typeof(WebMessages), ErrorMessageResourceName = "NewPasswordRequired")]
+        [StringLength(100, ErrorMessageResourceType = typeof(WebMessages), ErrorMessageResourceName = "PasswordMin8", MinimumLength = 8)]
+        [DataType(DataType.Password)]
+        [Display(Name = "Nova Senha")]
+        public string NewPassword { get; set; } = string.Empty;
+
+        [Required(ErrorMessageResourceType = typeof(WebMessages), ErrorMessageResourceName = "ConfirmPasswordRequired")]
+        [DataType(DataType.Password)]
+        [Display(Name = "Confirmar Nova Senha")]
+        [Compare("NewPassword", ErrorMessageResourceType = typeof(WebMessages), ErrorMessageResourceName = "PasswordMismatch")]
+        public string ConfirmNewPassword { get; set; } = string.Empty;
+    }
+}

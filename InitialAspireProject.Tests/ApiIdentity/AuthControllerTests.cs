@@ -110,12 +110,11 @@ public class AuthControllerTests
     }
 
     [Fact]
-    public async Task Register_CreatesUserWithCorrectEmailAndFullName()
+    public async Task Register_CreatesUserWithCorrectEmail()
     {
         var (userManagerMock, _, controller) = CreateController();
         var model = new RegisterModelBuilder()
             .WithEmail("jane@test.com")
-            .WithFullName("Jane Doe")
             .Build();
 
         ApplicationUser? createdUser = null;
@@ -128,7 +127,6 @@ public class AuthControllerTests
 
         Assert.NotNull(createdUser);
         Assert.Equal("jane@test.com", createdUser.Email);
-        Assert.Equal("Jane Doe", createdUser.FullName);
     }
 
     [Fact]
@@ -389,6 +387,160 @@ public class AuthControllerTests
         var result = await controller.ResendActivation(model);
 
         Assert.IsType<OkObjectResult>(result);
+    }
+
+    // --- UpdateProfile ---
+
+    [Fact]
+    public async Task UpdateProfile_ValidModel_ReturnsOk()
+    {
+        var (userManagerMock, _, controller) = CreateController();
+        var user = new ApplicationUserBuilder().WithEmail("test@test.com").Build();
+
+        var identity = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, user.Email!) }, "TestAuth");
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(identity) }
+        };
+
+        userManagerMock.Setup(x => x.FindByEmailAsync(user.Email!)).ReturnsAsync(user);
+        userManagerMock.Setup(x => x.UpdateAsync(user)).ReturnsAsync(IdentityResult.Success);
+
+        var model = new UpdateProfileModel { FullName = "New Name" };
+        var result = await controller.UpdateProfile(model);
+
+        Assert.IsType<OkObjectResult>(result);
+        Assert.Equal("New Name", user.FullName);
+    }
+
+    [Fact]
+    public async Task UpdateProfile_UserNotFound_ReturnsNotFound()
+    {
+        var (userManagerMock, _, controller) = CreateController();
+
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(new ClaimsIdentity()) }
+        };
+
+        userManagerMock.Setup(x => x.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync((ApplicationUser?)null);
+
+        var model = new UpdateProfileModel { FullName = "New Name" };
+        var result = await controller.UpdateProfile(model);
+
+        Assert.IsType<NotFoundObjectResult>(result);
+    }
+
+    [Fact]
+    public async Task UpdateProfile_UpdateFails_ReturnsBadRequest()
+    {
+        var (userManagerMock, _, controller) = CreateController();
+        var user = new ApplicationUserBuilder().WithEmail("test@test.com").Build();
+
+        var identity = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, user.Email!) }, "TestAuth");
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(identity) }
+        };
+
+        userManagerMock.Setup(x => x.FindByEmailAsync(user.Email!)).ReturnsAsync(user);
+        userManagerMock.Setup(x => x.UpdateAsync(user))
+            .ReturnsAsync(IdentityResult.Failed(new IdentityError { Code = "Error", Description = "Update failed" }));
+
+        var model = new UpdateProfileModel { FullName = "New Name" };
+        var result = await controller.UpdateProfile(model);
+
+        Assert.IsType<BadRequestObjectResult>(result);
+    }
+
+    // --- ChangePassword ---
+
+    [Fact]
+    public async Task ChangePassword_ValidModel_ReturnsOk()
+    {
+        var (userManagerMock, _, controller) = CreateController();
+        var user = new ApplicationUserBuilder().WithEmail("test@test.com").Build();
+
+        var identity = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, user.Email!) }, "TestAuth");
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(identity) }
+        };
+
+        userManagerMock.Setup(x => x.FindByEmailAsync(user.Email!)).ReturnsAsync(user);
+        userManagerMock.Setup(x => x.ChangePasswordAsync(user, "OldPass123$", "NewPass123$"))
+            .ReturnsAsync(IdentityResult.Success);
+
+        var model = new ChangePasswordModel { CurrentPassword = "OldPass123$", NewPassword = "NewPass123$" };
+        var result = await controller.ChangePassword(model);
+
+        Assert.IsType<OkObjectResult>(result);
+    }
+
+    [Fact]
+    public async Task ChangePassword_WrongCurrentPassword_ReturnsBadRequest()
+    {
+        var (userManagerMock, _, controller) = CreateController();
+        var user = new ApplicationUserBuilder().WithEmail("test@test.com").Build();
+
+        var identity = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, user.Email!) }, "TestAuth");
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(identity) }
+        };
+
+        userManagerMock.Setup(x => x.FindByEmailAsync(user.Email!)).ReturnsAsync(user);
+        userManagerMock.Setup(x => x.ChangePasswordAsync(user, "WrongPass", "NewPass123$"))
+            .ReturnsAsync(IdentityResult.Failed(new IdentityError { Code = "PasswordMismatch", Description = "Incorrect password." }));
+
+        var model = new ChangePasswordModel { CurrentPassword = "WrongPass", NewPassword = "NewPass123$" };
+        var result = await controller.ChangePassword(model);
+
+        Assert.IsType<BadRequestObjectResult>(result);
+    }
+
+    [Fact]
+    public async Task ChangePassword_UserNotFound_ReturnsNotFound()
+    {
+        var (userManagerMock, _, controller) = CreateController();
+
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(new ClaimsIdentity()) }
+        };
+
+        userManagerMock.Setup(x => x.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync((ApplicationUser?)null);
+
+        var model = new ChangePasswordModel { CurrentPassword = "OldPass", NewPassword = "NewPass123$" };
+        var result = await controller.ChangePassword(model);
+
+        Assert.IsType<NotFoundObjectResult>(result);
+    }
+
+    // --- Profile returns ProfileResponse ---
+
+    [Fact]
+    public async Task Profile_ReturnsProfileResponse()
+    {
+        var (userManagerMock, _, controller) = CreateController();
+        var user = new ApplicationUserBuilder().WithEmail("test@test.com").Build();
+
+        var identity = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, user.Email!) }, "TestAuth");
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(identity) }
+        };
+
+        userManagerMock.Setup(x => x.FindByEmailAsync(user.Email!)).ReturnsAsync(user);
+        userManagerMock.Setup(x => x.GetRolesAsync(user)).ReturnsAsync(new List<string> { "User" });
+
+        var result = await controller.Profile();
+
+        var ok = Assert.IsType<OkObjectResult>(result);
+        var profile = Assert.IsType<ProfileResponse>(ok.Value);
+        Assert.Equal(user.Email, profile.Email);
+        Assert.Equal(user.FullName, profile.FullName);
+        Assert.Contains("User", profile.Roles);
     }
 
     // --- AdminOnly ---

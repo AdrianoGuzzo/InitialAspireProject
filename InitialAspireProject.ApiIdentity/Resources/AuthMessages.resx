@@ -168,4 +168,10 @@
   <data name="ResendActivationGenericMessage" xml:space="preserve">
     <value>Se o seu email estiver cadastrado e não confirmado, você receberá um novo link de ativação.</value>
   </data>
+  <data name="ProfileUpdated" xml:space="preserve">
+    <value>Perfil atualizado com sucesso.</value>
+  </data>
+  <data name="PasswordChanged" xml:space="preserve">
+    <value>Senha alterada com sucesso.</value>
+  </data>
 </root>

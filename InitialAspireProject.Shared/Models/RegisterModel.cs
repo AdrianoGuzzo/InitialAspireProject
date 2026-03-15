@@ -14,8 +14,7 @@ namespace InitialAspireProject.Shared.Models
         [MaxLength(128)]
         public required string Password { get; set; }
 
-        [Required]
         [MaxLength(100)]
-        public required string FullName { get; set; }
+        public string? FullName { get; set; }
     }
 }

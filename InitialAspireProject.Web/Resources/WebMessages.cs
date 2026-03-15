@@ -27,4 +27,5 @@ public class WebMessages
     public static string PasswordMismatch => Get(nameof(PasswordMismatch));
     public static string MustAcceptTerms => Get(nameof(MustAcceptTerms));
     public static string NewPasswordRequired => Get(nameof(NewPasswordRequired));
+    public static string CurrentPasswordRequired => Get(nameof(CurrentPasswordRequired));
 }

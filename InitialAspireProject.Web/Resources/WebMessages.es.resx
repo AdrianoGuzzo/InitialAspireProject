@@ -254,4 +254,23 @@
   <data name="TabContactContent" xml:space="preserve"><value>Contenido de la pestaña Contact.</value></data>
   <data name="Docs" xml:space="preserve"><value>Docs</value></data>
   <data name="TogglePasswordVisibility" xml:space="preserve"><value>Alternar visibilidad de la contraseña</value></data>
+
+  <!-- Profile page -->
+  <data name="ProfileTitle" xml:space="preserve"><value>Mi Perfil</value></data>
+  <data name="ProfileSubtitle" xml:space="preserve"><value>Administra tu información personal</value></data>
+  <data name="PersonalInfo" xml:space="preserve"><value>Información Personal</value></data>
+  <data name="EditName" xml:space="preserve"><value>Editar Nombre</value></data>
+  <data name="ChangePassword" xml:space="preserve"><value>Cambiar Contraseña</value></data>
+  <data name="CurrentPassword" xml:space="preserve"><value>Contraseña Actual</value></data>
+  <data name="CurrentPasswordPlaceholder" xml:space="preserve"><value>Ingrese su contraseña actual</value></data>
+  <data name="Roles" xml:space="preserve"><value>Roles</value></data>
+  <data name="MemberSince" xml:space="preserve"><value>Miembro desde</value></data>
+  <data name="SaveChanges" xml:space="preserve"><value>Guardar Cambios</value></data>
+  <data name="Saving" xml:space="preserve"><value>Guardando...</value></data>
+  <data name="ProfileUpdateSuccess" xml:space="preserve"><value>¡Perfil actualizado con éxito!</value></data>
+  <data name="ProfileUpdateError" xml:space="preserve"><value>Error al actualizar perfil: {0}</value></data>
+  <data name="PasswordChangeSuccess" xml:space="preserve"><value>¡Contraseña cambiada con éxito!</value></data>
+  <data name="PasswordChangeError" xml:space="preserve"><value>Error al cambiar contraseña: {0}</value></data>
+  <data name="ProfileLoadError" xml:space="preserve"><value>Error al cargar perfil. Inténtelo más tarde.</value></data>
+  <data name="CurrentPasswordRequired" xml:space="preserve"><value>La contraseña actual es requerida</value></data>
 </root>

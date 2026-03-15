@@ -4,13 +4,13 @@ namespace InitialAspireProject.Web.Services
 {
     public interface IRegisterService
     {
-        Task<RegisterResult> RegisterAsync(string fullName, string email, string password, CancellationToken cancellationToken = default);
+        Task<RegisterResult> RegisterAsync(string email, string password, CancellationToken cancellationToken = default);
     }
 
     public class RegisterService(HttpClient httpClient, ILogger<RegisterService> logger) : IRegisterService
     {
 
-        public async Task<RegisterResult> RegisterAsync(string fullName, string email, string password, CancellationToken cancellationToken = default)
+        public async Task<RegisterResult> RegisterAsync(string email, string password, CancellationToken cancellationToken = default)
         {
             ErrorValidation[]? errorValidations = null;
             try
@@ -18,7 +18,6 @@ namespace InitialAspireProject.Web.Services
 
                 var response = await httpClient.PostAsJsonAsync("/auth/Register", new RegisterModel
                 {
-                    FullName = fullName,
                     Email = email,
                     Password = password
                 }, cancellationToken);

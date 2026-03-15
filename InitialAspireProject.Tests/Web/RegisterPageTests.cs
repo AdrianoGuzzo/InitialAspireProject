@@ -27,7 +27,6 @@ public class RegisterPageTests : Bunit.TestContext
     {
         var cut = RenderComponent<Register>();
 
-        Assert.NotNull(cut.Find("input#fullName"));
         Assert.NotNull(cut.Find("input#email"));
         Assert.NotNull(cut.Find("input#password"));
         Assert.NotNull(cut.Find("input#confirmPassword"));
@@ -46,12 +45,11 @@ public class RegisterPageTests : Bunit.TestContext
     [Fact]
     public void Register_SuccessfulRegistration_ShowsSuccessAlert()
     {
-        _registerServiceMock.Setup(s => s.RegisterAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), default))
+        _registerServiceMock.Setup(s => s.RegisterAsync(It.IsAny<string>(), It.IsAny<string>(), default))
                             .ReturnsAsync(new RegisterResult { Success = true, Message = "Account created!" });
 
         var cut = RenderComponent<Register>();
 
-        cut.Find("input#fullName").Change("Test User");
         cut.Find("input#email").Change("test@example.com");
         cut.Find("input#password").Change("Password123!");
         cut.Find("input#confirmPassword").Change("Password123!");
@@ -65,12 +63,11 @@ public class RegisterPageTests : Bunit.TestContext
     [Fact]
     public void Register_FailedRegistration_ShowsDangerAlert()
     {
-        _registerServiceMock.Setup(s => s.RegisterAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), default))
+        _registerServiceMock.Setup(s => s.RegisterAsync(It.IsAny<string>(), It.IsAny<string>(), default))
                             .ReturnsAsync(new RegisterResult { Success = false, Message = "Email already exists" });
 
         var cut = RenderComponent<Register>();
 
-        cut.Find("input#fullName").Change("Test User");
         cut.Find("input#email").Change("test@example.com");
         cut.Find("input#password").Change("Password123!");
         cut.Find("input#confirmPassword").Change("Password123!");
@@ -84,12 +81,11 @@ public class RegisterPageTests : Bunit.TestContext
     [Fact]
     public void Register_ServiceThrows_ShowsErrorMessage()
     {
-        _registerServiceMock.Setup(s => s.RegisterAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), default))
+        _registerServiceMock.Setup(s => s.RegisterAsync(It.IsAny<string>(), It.IsAny<string>(), default))
                             .ThrowsAsync(new Exception("Network error"));
 
         var cut = RenderComponent<Register>();
 
-        cut.Find("input#fullName").Change("Test User");
         cut.Find("input#email").Change("test@example.com");
         cut.Find("input#password").Change("Password123!");
         cut.Find("input#confirmPassword").Change("Password123!");

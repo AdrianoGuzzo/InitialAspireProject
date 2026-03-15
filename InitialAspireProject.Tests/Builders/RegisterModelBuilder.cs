@@ -33,7 +33,7 @@ public class RegisterModelBuilder
     {
         Email    = _email    ?? _faker.Internet.Email(),
         Password = _password ?? $"Pass{_faker.Random.AlphaNumeric(6)}1$",
-        FullName = _fullName ?? _faker.Name.FullName()
+        FullName = _fullName
     };
 
     public static RegisterModel Default() => new RegisterModelBuilder().Build();

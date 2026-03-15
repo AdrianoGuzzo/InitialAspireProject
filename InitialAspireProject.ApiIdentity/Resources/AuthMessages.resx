@@ -183,4 +183,10 @@
   <data name="InvalidPermission" xml:space="preserve">
     <value>Permissão inválida.</value>
   </data>
+  <data name="ProfileUpdated" xml:space="preserve">
+    <value>Perfil atualizado com sucesso.</value>
+  </data>
+  <data name="PasswordChanged" xml:space="preserve">
+    <value>Senha alterada com sucesso.</value>
+  </data>
 </root>

@@ -27,4 +27,11 @@ public class WebMessages
     public static string PasswordMismatch => Get(nameof(PasswordMismatch));
     public static string MustAcceptTerms => Get(nameof(MustAcceptTerms));
     public static string NewPasswordRequired => Get(nameof(NewPasswordRequired));
+    public static string CurrentPasswordRequired => Get(nameof(CurrentPasswordRequired));
+
+    // Display names — used by DataAnnotations Display(ResourceType)
+    public static string FullName => Get(nameof(FullName));
+    public static string CurrentPassword => Get(nameof(CurrentPassword));
+    public static string NewPassword => Get(nameof(NewPassword));
+    public static string ConfirmNewPassword => Get(nameof(ConfirmNewPassword));
 }

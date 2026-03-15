@@ -19,7 +19,7 @@ public class RegisterServiceTests
         var handler = new StubHttpHandler(HttpStatusCode.OK, "\"User registered\"");
         var service = CreateService(handler);
 
-        var result = await service.RegisterAsync("John Doe", "john@example.com", "Password123$", TestContext.Current.CancellationToken);
+        var result = await service.RegisterAsync("john@example.com", "Password123$", TestContext.Current.CancellationToken);
 
         Assert.True(result.Success);
         Assert.Null(result.Message);
@@ -35,7 +35,7 @@ public class RegisterServiceTests
         var handler = new StubHttpHandler(HttpStatusCode.BadRequest, errors);
         var service = CreateService(handler);
 
-        var result = await service.RegisterAsync("John", "john@example.com", "short", TestContext.Current.CancellationToken);
+        var result = await service.RegisterAsync("john@example.com", "short", TestContext.Current.CancellationToken);
 
         Assert.False(result.Success);
         Assert.Contains("A senha deve ter pelo menos 8 caracteres.", result.Message);
@@ -52,7 +52,7 @@ public class RegisterServiceTests
         var handler = new StubHttpHandler(HttpStatusCode.BadRequest, errors);
         var service = CreateService(handler);
 
-        var result = await service.RegisterAsync("John", "john@example.com", "short", TestContext.Current.CancellationToken);
+        var result = await service.RegisterAsync("john@example.com", "short", TestContext.Current.CancellationToken);
 
         Assert.False(result.Success);
         Assert.Contains("Senha muito curta.", result.Message);
@@ -65,7 +65,7 @@ public class RegisterServiceTests
         var handler = new ThrowingHttpHandler();
         var service = CreateService(handler);
 
-        var result = await service.RegisterAsync("John", "john@example.com", "Password123$", TestContext.Current.CancellationToken);
+        var result = await service.RegisterAsync("john@example.com", "Password123$", TestContext.Current.CancellationToken);
 
         Assert.False(result.Success);
         Assert.Equal("Erro interno do servidor. Tente novamente mais tarde.", result.Message);

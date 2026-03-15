@@ -254,4 +254,25 @@
   <data name="TabContactContent" xml:space="preserve"><value>Contact tab content.</value></data>
   <data name="Docs" xml:space="preserve"><value>Docs</value></data>
   <data name="TogglePasswordVisibility" xml:space="preserve"><value>Toggle password visibility</value></data>
+
+  <!-- Profile page -->
+  <data name="ProfileTitle" xml:space="preserve"><value>My Profile</value></data>
+  <data name="ProfileSubtitle" xml:space="preserve"><value>Manage your personal information</value></data>
+  <data name="PersonalInfo" xml:space="preserve"><value>Personal Information</value></data>
+  <data name="EditName" xml:space="preserve"><value>Edit Name</value></data>
+  <data name="ChangePassword" xml:space="preserve"><value>Change Password</value></data>
+  <data name="CurrentPassword" xml:space="preserve"><value>Current Password</value></data>
+  <data name="CurrentPasswordPlaceholder" xml:space="preserve"><value>Enter your current password</value></data>
+  <data name="Roles" xml:space="preserve"><value>Roles</value></data>
+  <data name="MemberSince" xml:space="preserve"><value>Member since</value></data>
+  <data name="SaveChanges" xml:space="preserve"><value>Save Changes</value></data>
+  <data name="Saving" xml:space="preserve"><value>Saving...</value></data>
+  <data name="ProfileUpdateSuccess" xml:space="preserve"><value>Profile updated successfully!</value></data>
+  <data name="ProfileUpdateError" xml:space="preserve"><value>Error updating profile: {0}</value></data>
+  <data name="ProfileUpdateErrorGeneric" xml:space="preserve"><value>Error updating profile. Please try again later.</value></data>
+  <data name="PasswordChangeSuccess" xml:space="preserve"><value>Password changed successfully!</value></data>
+  <data name="PasswordChangeError" xml:space="preserve"><value>Error changing password: {0}</value></data>
+  <data name="PasswordChangeErrorGeneric" xml:space="preserve"><value>Error changing password. Please try again later.</value></data>
+  <data name="ProfileLoadError" xml:space="preserve"><value>Error loading profile. Please try again later.</value></data>
+  <data name="CurrentPasswordRequired" xml:space="preserve"><value>Current password is required</value></data>
 </root>

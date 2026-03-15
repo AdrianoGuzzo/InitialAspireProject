@@ -67,6 +67,7 @@ builder.Services.AddHttpClient<IRegisterService, RegisterService>(client => clie
 builder.Services.AddHttpClient<IForgotPasswordService, ForgotPasswordService>(client => client.BaseAddress = new(apiIdentityUrl));
 builder.Services.AddHttpClient<IResetPasswordService, ResetPasswordService>(client => client.BaseAddress = new(apiIdentityUrl));
 builder.Services.AddHttpClient<IConfirmEmailService, ConfirmEmailService>(client => client.BaseAddress = new(apiIdentityUrl));
+builder.Services.AddHttpClient<IProfileService, ProfileService>(client => client.BaseAddress = new(apiIdentityUrl));
 builder.Services.AddHttpClient<WeatherApiService>(client => client.BaseAddress = new("https+http://apicore"));
 builder.Services.AddHttpClient<IGoogleLoginService, GoogleLoginService>(client => client.BaseAddress = new(apiIdentityUrl));
 

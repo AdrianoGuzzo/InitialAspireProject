@@ -254,4 +254,25 @@
   <data name="TabContactContent" xml:space="preserve"><value>Conteúdo da aba Contact.</value></data>
   <data name="Docs" xml:space="preserve"><value>Docs</value></data>
   <data name="TogglePasswordVisibility" xml:space="preserve"><value>Alternar visibilidade da senha</value></data>
+
+  <!-- Profile page -->
+  <data name="ProfileTitle" xml:space="preserve"><value>Meu Perfil</value></data>
+  <data name="ProfileSubtitle" xml:space="preserve"><value>Gerencie suas informações pessoais</value></data>
+  <data name="PersonalInfo" xml:space="preserve"><value>Informações Pessoais</value></data>
+  <data name="EditName" xml:space="preserve"><value>Editar Nome</value></data>
+  <data name="ChangePassword" xml:space="preserve"><value>Alterar Senha</value></data>
+  <data name="CurrentPassword" xml:space="preserve"><value>Senha Atual</value></data>
+  <data name="CurrentPasswordPlaceholder" xml:space="preserve"><value>Digite sua senha atual</value></data>
+  <data name="Roles" xml:space="preserve"><value>Perfis</value></data>
+  <data name="MemberSince" xml:space="preserve"><value>Membro desde</value></data>
+  <data name="SaveChanges" xml:space="preserve"><value>Salvar Alterações</value></data>
+  <data name="Saving" xml:space="preserve"><value>Salvando...</value></data>
+  <data name="ProfileUpdateSuccess" xml:space="preserve"><value>Perfil atualizado com sucesso!</value></data>
+  <data name="ProfileUpdateError" xml:space="preserve"><value>Erro ao atualizar perfil: {0}</value></data>
+  <data name="ProfileUpdateErrorGeneric" xml:space="preserve"><value>Erro ao atualizar perfil. Tente novamente mais tarde.</value></data>
+  <data name="PasswordChangeSuccess" xml:space="preserve"><value>Senha alterada com sucesso!</value></data>
+  <data name="PasswordChangeError" xml:space="preserve"><value>Erro ao alterar senha: {0}</value></data>
+  <data name="PasswordChangeErrorGeneric" xml:space="preserve"><value>Erro ao alterar senha. Tente novamente mais tarde.</value></data>
+  <data name="ProfileLoadError" xml:space="preserve"><value>Erro ao carregar perfil. Tente novamente mais tarde.</value></data>
+  <data name="CurrentPasswordRequired" xml:space="preserve"><value>A senha atual é obrigatória</value></data>
 </root>

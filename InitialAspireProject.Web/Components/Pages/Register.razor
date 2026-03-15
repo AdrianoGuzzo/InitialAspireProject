@@ -62,18 +62,6 @@
 						<EditForm Model="registerModel" OnValidSubmit="HandleRegister" FormName="RegisterForm">
 							<DataAnnotationsValidator />
 
-							<!-- Nome Completo -->
-							<div class="mb-3">
-								<label for="fullName" class="form-label fw-semibold">
-									<i class="bi bi-person me-1"></i>
-									@L["FullName"]
-								</label>
-								<InputText id="fullName" class="form-control form-control-lg"
-										   @bind-Value="registerModel!.FullName"
-										   placeholder="@L["FullNamePlaceholder"]" />
-								<ValidationMessage For="@(() => registerModel.FullName)" class="text-danger small mt-1" />
-							</div>
-
 							<!-- Email -->
 							<div class="mb-3">
 								<label for="email" class="form-label fw-semibold">
@@ -214,7 +202,6 @@
 				return;
 			}
 			var result = await RegisterService.RegisterAsync(
-				registerModel.FullName,
 				registerModel.Email,
 				registerModel.Password);
 
@@ -236,10 +223,6 @@
 
 	public record RegisterModel
 	{
-		[Required(ErrorMessageResourceType = typeof(WebMessages), ErrorMessageResourceName = "NameRequired")]
-		[Display(Name = "Nome Completo")]
-		public string FullName { get; set; } = string.Empty;
-
 		[Required(ErrorMessageResourceType = typeof(WebMessages), ErrorMessageResourceName = "EmailRequired")]
 		[EmailAddress(ErrorMessageResourceType = typeof(WebMessages), ErrorMessageResourceName = "InvalidEmail")]
 		[Display(Name = "Email")]

@@ -46,7 +46,7 @@ public class RegisterPageTests : Bunit.TestContext
     public void Register_SuccessfulRegistration_ShowsSuccessAlert()
     {
         _registerServiceMock.Setup(s => s.RegisterAsync(It.IsAny<string>(), It.IsAny<string>(), default))
-                            .ReturnsAsync(new RegisterResult { Success = true, Message = "Account created!" });
+                            .ReturnsAsync(new ServiceResult { Success = true, Message = "Account created!" });
 
         var cut = RenderComponent<Register>();
 
@@ -64,7 +64,7 @@ public class RegisterPageTests : Bunit.TestContext
     public void Register_FailedRegistration_ShowsDangerAlert()
     {
         _registerServiceMock.Setup(s => s.RegisterAsync(It.IsAny<string>(), It.IsAny<string>(), default))
-                            .ReturnsAsync(new RegisterResult { Success = false, Message = "Email already exists" });
+                            .ReturnsAsync(new ServiceResult { Success = false, Message = "Email already exists" });
 
         var cut = RenderComponent<Register>();
 

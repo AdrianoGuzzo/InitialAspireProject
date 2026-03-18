@@ -1,4 +1,4 @@
-using InitialAspireProject.Shared.Constants;
+using System.Net.Http.Json;
 using InitialAspireProject.Shared.Models;
 
 namespace InitialAspireProject.Web.Services;
@@ -6,25 +6,21 @@ namespace InitialAspireProject.Web.Services;
 public interface IProfileService
 {
     Task<ProfileResponse?> GetProfileAsync(CancellationToken cancellationToken = default);
-    Task<ProfileResult> UpdateProfileAsync(string fullName, CancellationToken cancellationToken = default);
-    Task<ProfileResult> ChangePasswordAsync(string currentPassword, string newPassword, CancellationToken cancellationToken = default);
+    Task<ServiceResult> UpdateProfileAsync(string fullName, CancellationToken cancellationToken = default);
+    Task<ServiceResult> ChangePasswordAsync(string currentPassword, string newPassword, CancellationToken cancellationToken = default);
 }
 
-public class ProfileService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor, ILogger<ProfileService> logger) : IProfileService
+public class ProfileService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor, ILogger<ProfileService> logger)
+    : AuthenticatedHttpService(httpClient, httpContextAccessor, logger), IProfileService
 {
-    private void AttachToken()
-    {
-        var token = httpContextAccessor.HttpContext?.Session.GetString(SessionConstants.TokenKey);
-        if (!string.IsNullOrEmpty(token))
-            httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-    }
-
     public async Task<ProfileResponse?> GetProfileAsync(CancellationToken cancellationToken = default)
     {
-        AttachToken();
         try
         {
-            return await httpClient.GetFromJsonAsync<ProfileResponse>("/auth/profile", cancellationToken);
+            using var request = CreateAuthenticatedRequest(HttpMethod.Get, "/auth/profile");
+            var response = await HttpClient.SendAsync(request, cancellationToken);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<ProfileResponse>(cancellationToken: cancellationToken);
         }
         catch (Exception ex)
         {
@@ -33,57 +29,17 @@ public class ProfileService(HttpClient httpClient, IHttpContextAccessor httpCont
         }
     }
 
-    public async Task<ProfileResult> UpdateProfileAsync(string fullName, CancellationToken cancellationToken = default)
+    public Task<ServiceResult> UpdateProfileAsync(string fullName, CancellationToken cancellationToken = default)
     {
-        AttachToken();
-        try
-        {
-            var response = await httpClient.PutAsJsonAsync("/auth/profile", new UpdateProfileModel { FullName = fullName }, cancellationToken);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var errors = await response.Content.ReadFromJsonAsync<ErrorValidation[]>(cancellationToken: cancellationToken);
-                var message = errors is not null
-                    ? string.Join("\n", errors.Select(x => x.Description))
-                    : await response.Content.ReadAsStringAsync(cancellationToken);
-                return new ProfileResult { Success = false, Message = message };
-            }
-
-            return new ProfileResult { Success = true };
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error updating profile");
-            return new ProfileResult { Success = false };
-        }
+        return SendWithValidationAsync(HttpMethod.Put, "/auth/profile", new UpdateProfileModel { FullName = fullName }, cancellationToken, token: GetToken());
     }
 
-    public async Task<ProfileResult> ChangePasswordAsync(string currentPassword, string newPassword, CancellationToken cancellationToken = default)
+    public Task<ServiceResult> ChangePasswordAsync(string currentPassword, string newPassword, CancellationToken cancellationToken = default)
     {
-        AttachToken();
-        try
+        return SendWithValidationAsync(HttpMethod.Post, "/auth/change-password", new ChangePasswordModel
         {
-            var response = await httpClient.PostAsJsonAsync("/auth/change-password", new ChangePasswordModel
-            {
-                CurrentPassword = currentPassword,
-                NewPassword = newPassword
-            }, cancellationToken);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var errors = await response.Content.ReadFromJsonAsync<ErrorValidation[]>(cancellationToken: cancellationToken);
-                var message = errors is not null
-                    ? string.Join("\n", errors.Select(x => x.Description))
-                    : await response.Content.ReadAsStringAsync(cancellationToken);
-                return new ProfileResult { Success = false, Message = message };
-            }
-
-            return new ProfileResult { Success = true };
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error changing password");
-            return new ProfileResult { Success = false };
-        }
+            CurrentPassword = currentPassword,
+            NewPassword = newPassword
+        }, cancellationToken, token: GetToken());
     }
 }

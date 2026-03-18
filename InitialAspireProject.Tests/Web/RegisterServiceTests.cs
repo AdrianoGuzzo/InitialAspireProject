@@ -68,7 +68,7 @@ public class RegisterServiceTests
         var result = await service.RegisterAsync("john@example.com", "Password123$", TestContext.Current.CancellationToken);
 
         Assert.False(result.Success);
-        Assert.Equal("Erro interno do servidor. Tente novamente mais tarde.", result.Message);
+        Assert.Equal("Erro de conexão. Tente novamente mais tarde.", result.Message);
     }
 
     private sealed class StubHttpHandler(HttpStatusCode statusCode, string body) : HttpMessageHandler

@@ -4,48 +4,21 @@ namespace InitialAspireProject.Web.Services
 {
     public interface IResetPasswordService
     {
-        Task<ResetPasswordResult> ResetPasswordAsync(string email, string token, string newPassword, string confirmPassword, CancellationToken cancellationToken = default);
+        Task<ServiceResult> ResetPasswordAsync(string email, string token, string newPassword, string confirmPassword, CancellationToken cancellationToken = default);
     }
 
-    public class ResetPasswordService(HttpClient httpClient, ILogger<ResetPasswordService> logger) : IResetPasswordService
+    public class ResetPasswordService(HttpClient httpClient, ILogger<ResetPasswordService> logger)
+        : BaseHttpService(httpClient, logger), IResetPasswordService
     {
-        public async Task<ResetPasswordResult> ResetPasswordAsync(string email, string token, string newPassword, string confirmPassword, CancellationToken cancellationToken = default)
+        public Task<ServiceResult> ResetPasswordAsync(string email, string token, string newPassword, string confirmPassword, CancellationToken cancellationToken = default)
         {
-            ErrorValidation[]? errorValidations = null;
-            try
+            return PostWithValidationAsync("/auth/reset-password", new ResetPasswordModel
             {
-                var response = await httpClient.PostAsJsonAsync("/auth/reset-password", new ResetPasswordModel
-                {
-                    Email = email,
-                    Token = token,
-                    NewPassword = newPassword,
-                    ConfirmPassword = confirmPassword
-                }, cancellationToken);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    errorValidations = await response.Content.ReadFromJsonAsync<ErrorValidation[]>(cancellationToken: cancellationToken);
-                    throw new Exception("Validation Error");
-                }
-
-                return new ResetPasswordResult { Success = true };
-            }
-            catch (Exception ex)
-            {
-                if (errorValidations is not null)
-                {
-                    var validationError = string.Join("\n", errorValidations.Select(x => x.Description).ToArray());
-                    logger.LogError(ex, "Reset password validation failed: {Errors}", validationError);
-                    return new ResetPasswordResult { Success = false, Message = validationError };
-                }
-
-                logger.LogError(ex, "Unexpected reset password error: {Message}", ex.Message);
-                return new ResetPasswordResult
-                {
-                    Success = false,
-                    Message = "Erro interno do servidor. Tente novamente mais tarde."
-                };
-            }
+                Email = email,
+                Token = token,
+                NewPassword = newPassword,
+                ConfirmPassword = confirmPassword
+            }, cancellationToken);
         }
     }
 }

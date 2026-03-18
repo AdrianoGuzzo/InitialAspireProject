@@ -1,20 +1,22 @@
-using InitialAspireProject.Shared.Constants;
+using System.Text.Json;
 
 namespace InitialAspireProject.Web.Services;
 
 public class WeatherApiService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor, ILogger<WeatherApiService> logger)
+    : AuthenticatedHttpService(httpClient, httpContextAccessor, logger)
 {
     public async Task<WeatherForecast[]> GetWeatherAsync(int maxItems = 10, CancellationToken cancellationToken = default)
     {
-        var token = httpContextAccessor.HttpContext?.Session.GetString(SessionConstants.TokenKey);
-        if (!string.IsNullOrEmpty(token))
-            httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-
         List<WeatherForecast>? forecasts = null;
 
         try
         {
-            await foreach (var forecast in httpClient.GetFromJsonAsAsyncEnumerable<WeatherForecast>("/WeatherForecast", cancellationToken))
+            using var request = CreateAuthenticatedRequest(HttpMethod.Get, "/WeatherForecast");
+            using var response = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            response.EnsureSuccessStatusCode();
+
+            using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            await foreach (var forecast in JsonSerializer.DeserializeAsyncEnumerable<WeatherForecast>(stream, cancellationToken: cancellationToken))
             {
                 if (forecasts?.Count >= maxItems)
                 {

@@ -1,4 +1,4 @@
-using InitialAspireProject.Shared.Constants;
+using System.Net.Http.Json;
 using InitialAspireProject.Shared.Models;
 
 namespace InitialAspireProject.Web.Services
@@ -11,21 +11,17 @@ namespace InitialAspireProject.Web.Services
         Task<bool> RemovePermissionAsync(string roleName, string permission, CancellationToken cancellationToken = default);
     }
 
-    public class PermissionService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor, ILogger<PermissionService> logger) : IPermissionService
+    public class PermissionService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor, ILogger<PermissionService> logger)
+        : AuthenticatedHttpService(httpClient, httpContextAccessor, logger), IPermissionService
     {
-        private void AttachToken()
-        {
-            var token = httpContextAccessor.HttpContext?.Session.GetString(SessionConstants.TokenKey);
-            if (!string.IsNullOrEmpty(token))
-                httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-        }
-
         public async Task<string[]> GetAllPermissionsAsync(CancellationToken cancellationToken)
         {
-            AttachToken();
             try
             {
-                return await httpClient.GetFromJsonAsync<string[]>("/permissions", cancellationToken) ?? [];
+                using var request = CreateAuthenticatedRequest(HttpMethod.Get, "/permissions");
+                var response = await HttpClient.SendAsync(request, cancellationToken);
+                response.EnsureSuccessStatusCode();
+                return await response.Content.ReadFromJsonAsync<string[]>(cancellationToken: cancellationToken) ?? [];
             }
             catch (HttpRequestException ex)
             {
@@ -36,10 +32,12 @@ namespace InitialAspireProject.Web.Services
 
         public async Task<List<RolePermissionsDto>> GetAllRolePermissionsAsync(CancellationToken cancellationToken)
         {
-            AttachToken();
             try
             {
-                return await httpClient.GetFromJsonAsync<List<RolePermissionsDto>>("/permissions/roles", cancellationToken) ?? [];
+                using var request = CreateAuthenticatedRequest(HttpMethod.Get, "/permissions/roles");
+                var response = await HttpClient.SendAsync(request, cancellationToken);
+                response.EnsureSuccessStatusCode();
+                return await response.Content.ReadFromJsonAsync<List<RolePermissionsDto>>(cancellationToken: cancellationToken) ?? [];
             }
             catch (HttpRequestException ex)
             {
@@ -50,10 +48,11 @@ namespace InitialAspireProject.Web.Services
 
         public async Task<bool> AssignPermissionAsync(string roleName, string permission, CancellationToken cancellationToken)
         {
-            AttachToken();
             try
             {
-                var response = await httpClient.PostAsJsonAsync($"/permissions/roles/{Uri.EscapeDataString(roleName)}", new AssignPermissionModel { Permission = permission }, cancellationToken);
+                using var request = CreateAuthenticatedRequest(HttpMethod.Post, $"/permissions/roles/{Uri.EscapeDataString(roleName)}");
+                request.Content = JsonContent.Create(new AssignPermissionModel { Permission = permission });
+                var response = await HttpClient.SendAsync(request, cancellationToken);
                 return response.IsSuccessStatusCode;
             }
             catch (HttpRequestException ex)
@@ -65,10 +64,10 @@ namespace InitialAspireProject.Web.Services
 
         public async Task<bool> RemovePermissionAsync(string roleName, string permission, CancellationToken cancellationToken)
         {
-            AttachToken();
             try
             {
-                var response = await httpClient.DeleteAsync($"/permissions/roles/{Uri.EscapeDataString(roleName)}/{Uri.EscapeDataString(permission)}", cancellationToken);
+                using var request = CreateAuthenticatedRequest(HttpMethod.Delete, $"/permissions/roles/{Uri.EscapeDataString(roleName)}/{Uri.EscapeDataString(permission)}");
+                var response = await HttpClient.SendAsync(request, cancellationToken);
                 return response.IsSuccessStatusCode;
             }
             catch (HttpRequestException ex)

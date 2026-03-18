@@ -43,7 +43,7 @@ public class ForgotPasswordPageTests : Bunit.TestContext
     public void ForgotPassword_SubmitValidEmail_ShowsSuccessMessage()
     {
         _serviceMock.Setup(s => s.ForgotPasswordAsync(It.IsAny<string>(), default))
-                    .ReturnsAsync(new ForgotPasswordResult { Success = true });
+                    .ReturnsAsync(new ServiceResult { Success = true });
 
         var cut = RenderComponent<ForgotPassword>();
 
@@ -58,7 +58,7 @@ public class ForgotPasswordPageTests : Bunit.TestContext
     public void ForgotPassword_SubmitValidEmail_HidesFormAfterSuccess()
     {
         _serviceMock.Setup(s => s.ForgotPasswordAsync(It.IsAny<string>(), default))
-                    .ReturnsAsync(new ForgotPasswordResult { Success = true });
+                    .ReturnsAsync(new ServiceResult { Success = true });
 
         var cut = RenderComponent<ForgotPassword>();
         cut.Find("input#email").Change("user@example.com");
@@ -72,7 +72,7 @@ public class ForgotPasswordPageTests : Bunit.TestContext
     public void ForgotPassword_SubmitValidEmail_CallsServiceWithEmail()
     {
         _serviceMock.Setup(s => s.ForgotPasswordAsync("test@example.com", default))
-                    .ReturnsAsync(new ForgotPasswordResult { Success = true });
+                    .ReturnsAsync(new ServiceResult { Success = true });
 
         var cut = RenderComponent<ForgotPassword>();
         cut.Find("input#email").Change("test@example.com");

@@ -10,10 +10,7 @@ public static class UrlHelper
         if (!url.StartsWith('/'))
             return false;
 
-        if (url.StartsWith("//"))
-            return false;
-
-        if (url.Contains("://"))
+        if (url.Length > 1 && (url[1] == '/' || url[1] == '\\'))
             return false;
 
         return true;

@@ -195,6 +195,63 @@ Show the user:
 
 ------------------------------------------------------------------------
 
+### 10. Code review (post-PR)
+
+After the PR is created and confirmed:
+
+1.  **Ask the user** whether they want to trigger a code review bot.
+    Confirm the exact comment text before posting (e.g.
+    `@claude code review`). **Do NOT post without explicit approval.**
+
+2.  **Post the comment** once approved:
+
+    ``` bash
+    gh pr comment <PR_NUMBER> --body "$(cat <<'EOF'
+    <approved comment text>
+    EOF
+    )"
+    ```
+
+3.  **Poll every 1 minute** for the review response. Use the `/loop`
+    skill with a 1-minute interval to check for new review comments on
+    the PR:
+
+    ``` bash
+    gh api repos/<owner>/<repo>/issues/<PR_NUMBER>/comments
+    ```
+
+    or
+
+    ``` bash
+    gh pr view <PR_NUMBER> --comments
+    ```
+
+    Stop polling once a review with actionable feedback is detected.
+    **Timeout:** if no review response arrives after **10 minutes**,
+    stop the loop and notify the user.
+
+4.  **Apply corrections** — in the interactive session, read the review
+    feedback from the polling output, make the necessary code changes,
+    then commit and push the fixes to the same branch. Use the same
+    commit conventions from steps 5–7. The polling loop reports the
+    feedback back to the active session, which then handles the fixes.
+
+5.  **Notify the user** — show a summary of what the review requested
+    and what was changed.
+
+6.  **Post fix confirmation** — after corrections are committed and
+    pushed, post a comment on the PR to signal that the review
+    feedback has been addressed:
+
+    ``` bash
+    gh pr comment <PR_NUMBER> --body "$(cat <<'EOF'
+    @claude code review fixed
+    EOF
+    )"
+    ```
+
+------------------------------------------------------------------------
+
 ## Rules
 
 -   **Never** use `--no-verify` or skip hooks\

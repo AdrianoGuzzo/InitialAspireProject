@@ -206,7 +206,10 @@ After the PR is created and confirmed:
 2.  **Post the comment** once approved:
 
     ``` bash
-    gh pr comment <PR_NUMBER> --body "<approved comment text>"
+    gh pr comment <PR_NUMBER> --body "$(cat <<'EOF'
+    <approved comment text>
+    EOF
+    )"
     ```
 
 3.  **Poll every 1 minute** for the review response. Use the `/loop`
@@ -214,7 +217,7 @@ After the PR is created and confirmed:
     the PR:
 
     ``` bash
-    gh api repos/<owner>/<repo>/pulls/<PR_NUMBER>/reviews
+    gh api repos/<owner>/<repo>/issues/<PR_NUMBER>/comments
     ```
 
     or
@@ -224,10 +227,14 @@ After the PR is created and confirmed:
     ```
 
     Stop polling once a review with actionable feedback is detected.
+    **Timeout:** if no review response arrives after **10 minutes**,
+    stop the loop and notify the user.
 
-4.  **Apply corrections** — read the review feedback, make the
-    necessary code changes, then commit and push the fixes to the
-    same branch. Use the same commit conventions from steps 5–7.
+4.  **Apply corrections** — in the interactive session, read the review
+    feedback from the polling output, make the necessary code changes,
+    then commit and push the fixes to the same branch. Use the same
+    commit conventions from steps 5–7. The polling loop reports the
+    feedback back to the active session, which then handles the fixes.
 
 5.  **Notify the user** — show a summary of what the review requested
     and what was changed.

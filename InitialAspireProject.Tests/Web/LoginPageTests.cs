@@ -141,6 +141,72 @@ public class LoginPageTests : Bunit.TestContext
     }
 
     [Fact]
+    public void Login_ValidCredentials_WithLocalReturnUrl_NavigatesToReturnUrl()
+    {
+        var payload = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(
+            """{"sub":"1","name":"Test User","exp":9999999999}"""));
+        var token = $"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.{payload}.signature";
+
+        _loginServiceMock.Setup(s => s.LoginAsync(It.IsAny<string>(), It.IsAny<string>(), default))
+                         .ReturnsAsync(new LoginResult { Token = new LoginResponse { Token = token } });
+
+        var nav = Services.GetRequiredService<Bunit.TestDoubles.FakeNavigationManager>();
+        nav.NavigateTo("/login?ReturnUrl=%2Fweather");
+
+        var cut = RenderComponent<Login>();
+
+        cut.Find("input#username").Change("admin@localhost");
+        cut.Find("input#password").Change("Admin123$");
+        cut.Find("form").Submit();
+
+        Assert.EndsWith("/weather", nav.Uri);
+    }
+
+    [Fact]
+    public void Login_ValidCredentials_WithExternalReturnUrl_NavigatesToHome()
+    {
+        var payload = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(
+            """{"sub":"1","name":"Test User","exp":9999999999}"""));
+        var token = $"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.{payload}.signature";
+
+        _loginServiceMock.Setup(s => s.LoginAsync(It.IsAny<string>(), It.IsAny<string>(), default))
+                         .ReturnsAsync(new LoginResult { Token = new LoginResponse { Token = token } });
+
+        var nav = Services.GetRequiredService<Bunit.TestDoubles.FakeNavigationManager>();
+        nav.NavigateTo("/login?ReturnUrl=https%3A%2F%2Fevil.com");
+
+        var cut = RenderComponent<Login>();
+
+        cut.Find("input#username").Change("admin@localhost");
+        cut.Find("input#password").Change("Admin123$");
+        cut.Find("form").Submit();
+
+        Assert.Equal("http://localhost/", nav.Uri);
+    }
+
+    [Fact]
+    public void Login_ValidCredentials_WithProtocolRelativeReturnUrl_NavigatesToHome()
+    {
+        var payload = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(
+            """{"sub":"1","name":"Test User","exp":9999999999}"""));
+        var token = $"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.{payload}.signature";
+
+        _loginServiceMock.Setup(s => s.LoginAsync(It.IsAny<string>(), It.IsAny<string>(), default))
+                         .ReturnsAsync(new LoginResult { Token = new LoginResponse { Token = token } });
+
+        var nav = Services.GetRequiredService<Bunit.TestDoubles.FakeNavigationManager>();
+        nav.NavigateTo("/login?ReturnUrl=%2F%2Fevil.com");
+
+        var cut = RenderComponent<Login>();
+
+        cut.Find("input#username").Change("admin@localhost");
+        cut.Find("input#password").Change("Admin123$");
+        cut.Find("form").Submit();
+
+        Assert.Equal("http://localhost/", nav.Uri);
+    }
+
+    [Fact]
     public void Login_ShowsRegisterLink()
     {
         var cut = RenderComponent<Login>();

@@ -19,7 +19,7 @@ namespace InitialAspireProject.Web.Services
             try
             {
                 using var request = CreateAuthenticatedRequest(HttpMethod.Get, "/permissions");
-                var response = await HttpClient.SendAsync(request, cancellationToken);
+                using var response = await HttpClient.SendAsync(request, cancellationToken);
                 response.EnsureSuccessStatusCode();
                 return await response.Content.ReadFromJsonAsync<string[]>(cancellationToken: cancellationToken) ?? [];
             }
@@ -35,7 +35,7 @@ namespace InitialAspireProject.Web.Services
             try
             {
                 using var request = CreateAuthenticatedRequest(HttpMethod.Get, "/permissions/roles");
-                var response = await HttpClient.SendAsync(request, cancellationToken);
+                using var response = await HttpClient.SendAsync(request, cancellationToken);
                 response.EnsureSuccessStatusCode();
                 return await response.Content.ReadFromJsonAsync<List<RolePermissionsDto>>(cancellationToken: cancellationToken) ?? [];
             }
@@ -52,7 +52,7 @@ namespace InitialAspireProject.Web.Services
             {
                 using var request = CreateAuthenticatedRequest(HttpMethod.Post, $"/permissions/roles/{Uri.EscapeDataString(roleName)}");
                 request.Content = JsonContent.Create(new AssignPermissionModel { Permission = permission });
-                var response = await HttpClient.SendAsync(request, cancellationToken);
+                using var response = await HttpClient.SendAsync(request, cancellationToken);
                 return response.IsSuccessStatusCode;
             }
             catch (HttpRequestException ex)
@@ -67,7 +67,7 @@ namespace InitialAspireProject.Web.Services
             try
             {
                 using var request = CreateAuthenticatedRequest(HttpMethod.Delete, $"/permissions/roles/{Uri.EscapeDataString(roleName)}/{Uri.EscapeDataString(permission)}");
-                var response = await HttpClient.SendAsync(request, cancellationToken);
+                using var response = await HttpClient.SendAsync(request, cancellationToken);
                 return response.IsSuccessStatusCode;
             }
             catch (HttpRequestException ex)

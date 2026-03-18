@@ -10,9 +10,9 @@ public abstract class BaseHttpService(HttpClient httpClient, ILogger logger)
 {
     protected HttpClient HttpClient { get; } = httpClient;
 
-    protected async Task<ServiceResult> PostWithValidationAsync<T>(string url, T payload, CancellationToken cancellationToken = default)
+    protected Task<ServiceResult> PostWithValidationAsync<T>(string url, T payload, CancellationToken cancellationToken = default)
     {
-        return await SendWithValidationAsync(HttpMethod.Post, url, payload, cancellationToken);
+        return SendWithValidationAsync(HttpMethod.Post, url, payload, cancellationToken);
     }
 
     protected async Task<ServiceResult> PostAntiEnumerationAsync<T>(string url, T payload, CancellationToken cancellationToken = default)
@@ -62,7 +62,7 @@ public abstract class BaseHttpService(HttpClient httpClient, ILogger logger)
             if (!string.IsNullOrEmpty(token))
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            var response = await HttpClient.SendAsync(request, cancellationToken);
+            using var response = await HttpClient.SendAsync(request, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {

@@ -18,7 +18,7 @@ public class ProfileService(HttpClient httpClient, IHttpContextAccessor httpCont
         try
         {
             using var request = CreateAuthenticatedRequest(HttpMethod.Get, "/auth/profile");
-            var response = await HttpClient.SendAsync(request, cancellationToken);
+            using var response = await HttpClient.SendAsync(request, cancellationToken);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<ProfileResponse>(cancellationToken: cancellationToken);
         }

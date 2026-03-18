@@ -55,7 +55,7 @@ public abstract class BaseHttpService(HttpClient httpClient, ILogger logger)
     {
         try
         {
-            var request = new HttpRequestMessage(method, url)
+            using var request = new HttpRequestMessage(method, url)
             {
                 Content = JsonContent.Create(payload)
             };

@@ -239,6 +239,17 @@ After the PR is created and confirmed:
 5.  **Notify the user** — show a summary of what the review requested
     and what was changed.
 
+6.  **Post fix confirmation** — after corrections are committed and
+    pushed, post a comment on the PR to signal that the review
+    feedback has been addressed:
+
+    ``` bash
+    gh pr comment <PR_NUMBER> --body "$(cat <<'EOF'
+    @claude code review fixed
+    EOF
+    )"
+    ```
+
 ------------------------------------------------------------------------
 
 ## Rules

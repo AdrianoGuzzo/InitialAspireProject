@@ -67,7 +67,7 @@ public class ResetPasswordServiceTests
         var result = await service.ResetPasswordAsync("user@test.com", "token", "NewPass123$", "NewPass123$", TestContext.Current.CancellationToken);
 
         Assert.False(result.Success);
-        Assert.Equal("Erro interno do servidor. Tente novamente mais tarde.", result.Message);
+        Assert.Equal("Erro de conexão. Tente novamente mais tarde.", result.Message);
     }
 
     [Fact]

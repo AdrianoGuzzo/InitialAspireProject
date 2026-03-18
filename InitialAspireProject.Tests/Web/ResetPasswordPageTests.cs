@@ -54,7 +54,7 @@ public class ResetPasswordPageTests : Bunit.TestContext
     public void ResetPassword_SuccessfulReset_ShowsSuccessMessage()
     {
         _serviceMock.Setup(s => s.ResetPasswordAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), default))
-                    .ReturnsAsync(new ResetPasswordResult { Success = true });
+                    .ReturnsAsync(new ServiceResult { Success = true });
 
         var nav = Services.GetRequiredService<Bunit.TestDoubles.FakeNavigationManager>();
         nav.NavigateTo("/reset-password?email=test@example.com&token=abc123");
@@ -73,7 +73,7 @@ public class ResetPasswordPageTests : Bunit.TestContext
     public void ResetPassword_FailedReset_ShowsErrorMessage()
     {
         _serviceMock.Setup(s => s.ResetPasswordAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), default))
-                    .ReturnsAsync(new ResetPasswordResult { Success = false, Message = "Token expired" });
+                    .ReturnsAsync(new ServiceResult { Success = false, Message = "Token expired" });
 
         var nav = Services.GetRequiredService<Bunit.TestDoubles.FakeNavigationManager>();
         nav.NavigateTo("/reset-password?email=test@example.com&token=abc123");
@@ -92,7 +92,7 @@ public class ResetPasswordPageTests : Bunit.TestContext
     public void ResetPassword_SuccessfulReset_ShowsLoginLink()
     {
         _serviceMock.Setup(s => s.ResetPasswordAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), default))
-                    .ReturnsAsync(new ResetPasswordResult { Success = true });
+                    .ReturnsAsync(new ServiceResult { Success = true });
 
         var nav = Services.GetRequiredService<Bunit.TestDoubles.FakeNavigationManager>();
         nav.NavigateTo("/reset-password?email=test@example.com&token=abc123");

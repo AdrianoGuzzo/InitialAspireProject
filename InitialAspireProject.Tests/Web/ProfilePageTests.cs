@@ -86,7 +86,7 @@ public class ProfilePageTests : Bunit.TestContext
     public void Profile_UpdateName_Success_ShowsSuccessAlert()
     {
         _profileServiceMock.Setup(s => s.UpdateProfileAsync(It.IsAny<string>(), default))
-            .ReturnsAsync(new ProfileResult { Success = true });
+            .ReturnsAsync(new ServiceResult { Success = true });
 
         var cut = RenderComponent<Profile>();
         cut.WaitForState(() => !cut.Markup.Contains("spinner-border"));
@@ -102,7 +102,7 @@ public class ProfilePageTests : Bunit.TestContext
     public void Profile_UpdateName_Failure_ShowsDangerAlert()
     {
         _profileServiceMock.Setup(s => s.UpdateProfileAsync(It.IsAny<string>(), default))
-            .ReturnsAsync(new ProfileResult { Success = false, Message = "Update failed" });
+            .ReturnsAsync(new ServiceResult { Success = false, Message = "Update failed" });
 
         var cut = RenderComponent<Profile>();
         cut.WaitForState(() => !cut.Markup.Contains("spinner-border"));
@@ -118,7 +118,7 @@ public class ProfilePageTests : Bunit.TestContext
     public void Profile_ChangePassword_Success_ShowsSuccessAlert()
     {
         _profileServiceMock.Setup(s => s.ChangePasswordAsync(It.IsAny<string>(), It.IsAny<string>(), default))
-            .ReturnsAsync(new ProfileResult { Success = true });
+            .ReturnsAsync(new ServiceResult { Success = true });
 
         var cut = RenderComponent<Profile>();
         cut.WaitForState(() => !cut.Markup.Contains("spinner-border"));
@@ -136,7 +136,7 @@ public class ProfilePageTests : Bunit.TestContext
     public void Profile_ChangePassword_Failure_ShowsDangerAlert()
     {
         _profileServiceMock.Setup(s => s.ChangePasswordAsync(It.IsAny<string>(), It.IsAny<string>(), default))
-            .ReturnsAsync(new ProfileResult { Success = false, Message = "Wrong password" });
+            .ReturnsAsync(new ServiceResult { Success = false, Message = "Wrong password" });
 
         var cut = RenderComponent<Profile>();
         cut.WaitForState(() => !cut.Markup.Contains("spinner-border"));

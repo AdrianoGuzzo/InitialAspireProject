@@ -1,32 +1,10 @@
-namespace InitialAspireProject.Web.Services
+namespace InitialAspireProject.Web.Services;
+
+public class ServiceResult
 {
-    public class RegisterResult
-    {
-        public bool Success { get; set; }
-        public string? Message { get; set; }
-    }
+    public bool Success { get; set; }
+    public string? Message { get; set; }
 
-    public class ForgotPasswordResult
-    {
-        public bool Success { get; set; }
-        public string? Message { get; set; }
-    }
-
-    public class ResetPasswordResult
-    {
-        public bool Success { get; set; }
-        public string? Message { get; set; }
-    }
-
-    public class ConfirmEmailResult
-    {
-        public bool Success { get; set; }
-        public string? Message { get; set; }
-    }
-
-    public class ProfileResult
-    {
-        public bool Success { get; set; }
-        public string? Message { get; set; }
-    }
+    public static ServiceResult Ok() => new() { Success = true };
+    public static ServiceResult Fail(string? message) => new() { Success = false, Message = message };
 }

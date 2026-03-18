@@ -44,6 +44,11 @@ public class AuthControllerTests
             .Build();
 
         var tokenService = new TokenService(config);
+
+        var roleStoreMock = new Mock<IRoleStore<IdentityRole>>();
+        var roleManagerMock = new Mock<RoleManager<IdentityRole>>(
+            roleStoreMock.Object, null!, null!, null!, null!);
+
         var localizer = new Mock<IStringLocalizer<AuthMessages>>();
         localizer.Setup(l => l[It.IsAny<string>()])
                  .Returns<string>(key => new LocalizedString(key, key));
@@ -51,6 +56,7 @@ public class AuthControllerTests
         var controller = new AuthController(
             userManagerMock.Object,
             signInManagerMock.Object,
+            roleManagerMock.Object,
             tokenService,
             Mock.Of<IEmailService>(),
             config,

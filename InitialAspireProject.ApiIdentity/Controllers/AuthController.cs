@@ -1,7 +1,9 @@
+using System.Security.Claims;
 using InitialAspireProject.ApiIdentity.Repository;
 using InitialAspireProject.ApiIdentity.Repository.Constants;
 using InitialAspireProject.ApiIdentity.Resources;
 using InitialAspireProject.ApiIdentity.Services;
+using InitialAspireProject.Shared.Constants;
 using InitialAspireProject.Shared.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -17,6 +19,7 @@ namespace InitialAspireProject.ApiIdentity.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly TokenService _tokenService;
         private readonly IEmailService _emailService;
         private readonly IConfiguration _configuration;
@@ -25,6 +28,7 @@ namespace InitialAspireProject.ApiIdentity.Controllers
 
         public AuthController(UserManager<ApplicationUser> userManager,
                               SignInManager<ApplicationUser> signInManager,
+                              RoleManager<IdentityRole> roleManager,
                               TokenService tokenService,
                               IEmailService emailService,
                               IConfiguration configuration,
@@ -33,6 +37,7 @@ namespace InitialAspireProject.ApiIdentity.Controllers
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _roleManager = roleManager;
             _tokenService = tokenService;
             _emailService = emailService;
             _configuration = configuration;
@@ -79,7 +84,8 @@ namespace InitialAspireProject.ApiIdentity.Controllers
             if (!result.Succeeded) return Unauthorized(_localizer["InvalidCredentials"].Value);
 
             var roles = await _userManager.GetRolesAsync(user);
-            var token = _tokenService.CreateToken(user, roles);
+            var permissionClaims = await GetPermissionClaimsForRolesAsync(roles);
+            var token = _tokenService.CreateToken(user, roles, permissionClaims);
 
             return Ok(new LoginResponse { Token = token });
         }
@@ -232,8 +238,23 @@ namespace InitialAspireProject.ApiIdentity.Controllers
             }
 
             var roles = await _userManager.GetRolesAsync(user);
-            var token = _tokenService.CreateToken(user, roles);
+            var permissionClaims = await GetPermissionClaimsForRolesAsync(roles);
+            var token = _tokenService.CreateToken(user, roles, permissionClaims);
             return Ok(new LoginResponse { Token = token });
+        }
+
+        private async Task<List<Claim>> GetPermissionClaimsForRolesAsync(IList<string> roles)
+        {
+            var permissions = new HashSet<string>();
+            foreach (var roleName in roles)
+            {
+                var role = await _roleManager.FindByNameAsync(roleName);
+                if (role is null) continue;
+                var claims = await _roleManager.GetClaimsAsync(role);
+                foreach (var claim in claims.Where(c => c.Type == PermissionConstants.ClaimType))
+                    permissions.Add(claim.Value);
+            }
+            return permissions.Select(p => new Claim(PermissionConstants.ClaimType, p)).ToList();
         }
     }
 }

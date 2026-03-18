@@ -275,4 +275,24 @@
   <data name="PasswordChangeErrorGeneric" xml:space="preserve"><value>Erro ao alterar senha. Tente novamente mais tarde.</value></data>
   <data name="ProfileLoadError" xml:space="preserve"><value>Erro ao carregar perfil. Tente novamente mais tarde.</value></data>
   <data name="CurrentPasswordRequired" xml:space="preserve"><value>A senha atual é obrigatória</value></data>
+
+  <!-- Permissions -->
+  <data name="ManagePermissions" xml:space="preserve"><value>Gerenciar Permissões</value></data>
+  <data name="SettingsTitle" xml:space="preserve"><value>Configurações</value></data>
+  <data name="PermissionsTitle" xml:space="preserve"><value>Permissões</value></data>
+  <data name="PermissionSaveSuccess" xml:space="preserve"><value>Permissão salva com sucesso.</value></data>
+  <data name="PermissionSaveError" xml:space="preserve"><value>Erro ao salvar permissão.</value></data>
+  <data name="Permission_CanViewSettings" xml:space="preserve"><value>Visualizar Configurações</value></data>
+  <data name="Permission_CanViewSettings_Desc" xml:space="preserve"><value>Permite visualizar as configurações do sistema</value></data>
+  <data name="Permission_CanManageUsers" xml:space="preserve"><value>Gerenciar Usuários</value></data>
+  <data name="Permission_CanManageUsers_Desc" xml:space="preserve"><value>Permite gerenciar contas de usuários</value></data>
+  <data name="Permission_CanViewReports" xml:space="preserve"><value>Visualizar Relatórios</value></data>
+  <data name="Permission_CanViewReports_Desc" xml:space="preserve"><value>Permite visualizar relatórios do sistema</value></data>
+  <data name="Permission_CanManagePermissions" xml:space="preserve"><value>Gerenciar Permissões</value></data>
+  <data name="Permission_CanManagePermissions_Desc" xml:space="preserve"><value>Permite gerenciar permissões de funções</value></data>
+  <data name="PermissionCategory_System" xml:space="preserve"><value>Sistema</value></data>
+  <data name="PermissionCategory_Settings" xml:space="preserve"><value>Configurações</value></data>
+  <data name="PermissionCategory_Users" xml:space="preserve"><value>Usuários</value></data>
+  <data name="PermissionCategory_Reports" xml:space="preserve"><value>Relatórios</value></data>
+  <data name="PermissionCategory_Security" xml:space="preserve"><value>Segurança</value></data>
 </root>

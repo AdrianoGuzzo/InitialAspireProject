@@ -53,12 +53,16 @@
                                         @L["Profile"]
                                     </a>
                                 </li>
-                                <li>
-                                    <a class="dropdown-item" href="/settings">
-                                        <i class="bi bi-gear me-2"></i>
-                                        @L["Settings"]
-                                    </a>
-                                </li>
+                                <AuthorizeView Policy="CanViewSettings" Context="settingsContext">
+                                    <Authorized>
+                                        <li>
+                                            <a class="dropdown-item" href="/settings">
+                                                <i class="bi bi-gear me-2"></i>
+                                                @L["Settings"]
+                                            </a>
+                                        </li>
+                                    </Authorized>
+                                </AuthorizeView>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <a class="dropdown-item text-danger" href="/logout" data-enhance-nav="false">

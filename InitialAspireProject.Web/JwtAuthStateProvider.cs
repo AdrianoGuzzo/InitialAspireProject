@@ -1,3 +1,4 @@
+using InitialAspireProject.Shared.Constants;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
@@ -9,7 +10,6 @@ namespace InitialAspireProject.Web
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<JwtAuthStateProvider> _logger;
-        private const string TokenKey = "AuthToken";
         private const string AuthScheme = "jwt";
         private ClaimsPrincipal? _cachedUser;
 
@@ -21,7 +21,7 @@ namespace InitialAspireProject.Web
 
         public async Task MarkUserAsAuthenticated(string token)
         {
-            _httpContextAccessor.HttpContext?.Session.SetString(TokenKey, token);
+            _httpContextAccessor.HttpContext?.Session.SetString(SessionConstants.TokenKey, token);
 
             var claims = ParseClaimsFromJwt(token);
             var identity = new ClaimsIdentity(claims, AuthScheme);
@@ -38,7 +38,7 @@ namespace InitialAspireProject.Web
             if (_httpContextAccessor.HttpContext is null)
                 return new AuthenticationState(_cachedUser ?? new ClaimsPrincipal(new ClaimsIdentity()));
 
-            var savedToken = _httpContextAccessor.HttpContext.Session.GetString(TokenKey);
+            var savedToken = _httpContextAccessor.HttpContext.Session.GetString(SessionConstants.TokenKey);
 
             if (string.IsNullOrWhiteSpace(savedToken))
             {
@@ -56,14 +56,14 @@ namespace InitialAspireProject.Web
             catch (Exception ex) when (ex is FormatException || ex is JsonException || ex is IndexOutOfRangeException)
             {
                 _logger.LogWarning(ex, "Invalid JWT token found in session; removing it");
-                _httpContextAccessor.HttpContext.Session.Remove(TokenKey);
+                _httpContextAccessor.HttpContext.Session.Remove(SessionConstants.TokenKey);
                 _cachedUser = null;
                 return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Unexpected error reading authentication state");
-                _httpContextAccessor.HttpContext.Session.Remove(TokenKey);
+                _httpContextAccessor.HttpContext.Session.Remove(SessionConstants.TokenKey);
                 _cachedUser = null;
                 return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
             }
@@ -71,7 +71,7 @@ namespace InitialAspireProject.Web
 
         public void NotifyUserAuthentication(string token)
         {
-            _httpContextAccessor.HttpContext?.Session.SetString(TokenKey, token);
+            _httpContextAccessor.HttpContext?.Session.SetString(SessionConstants.TokenKey, token);
 
             var claims = ParseClaimsFromJwt(token);
             var identity = new ClaimsIdentity(claims, AuthScheme);
@@ -82,7 +82,7 @@ namespace InitialAspireProject.Web
         public async Task NotifyUserLogout()
         {
             _cachedUser = null;
-            _httpContextAccessor.HttpContext?.Session.Remove(TokenKey);
+            _httpContextAccessor.HttpContext?.Session.Remove(SessionConstants.TokenKey);
             if (_httpContextAccessor.HttpContext is not null)
                 await _httpContextAccessor.HttpContext.SignOutAsync("Cookies");
 
@@ -92,7 +92,7 @@ namespace InitialAspireProject.Web
 
         public string? GetStoredToken()
         {
-            return _httpContextAccessor.HttpContext?.Session.GetString(TokenKey);
+            return _httpContextAccessor.HttpContext?.Session.GetString(SessionConstants.TokenKey);
         }
 
         private IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
@@ -105,7 +105,19 @@ namespace InitialAspireProject.Web
             var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonBytes)
                 ?? throw new JsonException("JWT payload could not be deserialized");
 
-            var claims = keyValuePairs.Select(kvp => new Claim(kvp.Key, kvp.Value.ToString()!)).ToList();
+            var claims = new List<Claim>();
+            foreach (var kvp in keyValuePairs)
+            {
+                if (kvp.Value is JsonElement element && element.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var item in element.EnumerateArray())
+                        claims.Add(new Claim(kvp.Key, item.GetString()!));
+                }
+                else
+                {
+                    claims.Add(new Claim(kvp.Key, kvp.Value.ToString()!));
+                }
+            }
 
             // Enforce token expiry
             var expClaim = claims.FirstOrDefault(c => c.Type == "exp");

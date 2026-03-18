@@ -43,6 +43,11 @@ public class AuthControllerPasswordResetTests
 
         var tokenService = new TokenService(config);
         emailMock ??= new Mock<IEmailService>();
+
+        var roleStoreMock = new Mock<IRoleStore<IdentityRole>>();
+        var roleManagerMock = new Mock<RoleManager<IdentityRole>>(
+            roleStoreMock.Object, null!, null!, null!, null!);
+
         var localizer = new Mock<IStringLocalizer<AuthMessages>>();
         localizer.Setup(l => l[It.IsAny<string>()])
                  .Returns<string>(key => new LocalizedString(key, key));
@@ -50,6 +55,7 @@ public class AuthControllerPasswordResetTests
         var controller = new AuthController(
             userManagerMock.Object,
             signInManagerMock.Object,
+            roleManagerMock.Object,
             tokenService,
             emailMock.Object,
             config,

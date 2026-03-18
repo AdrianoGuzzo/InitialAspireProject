@@ -1,4 +1,5 @@
 using Blazored.LocalStorage;
+using InitialAspireProject.Shared.Constants;
 using InitialAspireProject.Web;
 using InitialAspireProject.Web.Components;
 using InitialAspireProject.Web.Services;
@@ -24,7 +25,7 @@ builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthStateProvider>();
 builder.Services.AddScoped<JwtAuthStateProvider>();
 builder.Services.AddScoped<ThemeService>();
-builder.Services.AddAuthorizationCore();
+builder.Services.AddAuthorizationCore(options => options.AddPermissionPolicies());
 builder.Services.AddHttpClient();
 
 builder.Services.AddHttpContextAccessor();
@@ -68,6 +69,7 @@ builder.Services.AddHttpClient<IForgotPasswordService, ForgotPasswordService>(cl
 builder.Services.AddHttpClient<IResetPasswordService, ResetPasswordService>(client => client.BaseAddress = new(apiIdentityUrl));
 builder.Services.AddHttpClient<IConfirmEmailService, ConfirmEmailService>(client => client.BaseAddress = new(apiIdentityUrl));
 builder.Services.AddHttpClient<IProfileService, ProfileService>(client => client.BaseAddress = new(apiIdentityUrl));
+builder.Services.AddHttpClient<IPermissionService, PermissionService>(client => client.BaseAddress = new(apiIdentityUrl));
 builder.Services.AddHttpClient<WeatherApiService>(client => client.BaseAddress = new("https+http://apicore"));
 builder.Services.AddHttpClient<IGoogleLoginService, GoogleLoginService>(client => client.BaseAddress = new(apiIdentityUrl));
 
@@ -144,7 +146,7 @@ app.MapGet("/google-callback", async (HttpContext ctx, IGoogleLoginService googl
     }
 
     await ctx.Session.LoadAsync();
-    ctx.Session.SetString("AuthToken", tokenResponse.Token);
+    ctx.Session.SetString(SessionConstants.TokenKey, tokenResponse.Token);
 
     await ctx.SignOutAsync("ExternalCookie");
     var claims = new[] { new Claim(ClaimTypes.Email, email), new Claim(ClaimTypes.Name, name ?? email) };

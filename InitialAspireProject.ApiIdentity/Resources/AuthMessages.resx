@@ -168,6 +168,24 @@
   <data name="ResendActivationGenericMessage" xml:space="preserve">
     <value>Se o seu email estiver cadastrado e não confirmado, você receberá um novo link de ativação.</value>
   </data>
+  <data name="PermissionAssigned" xml:space="preserve">
+    <value>Permissão atribuída com sucesso.</value>
+  </data>
+  <data name="PermissionRemoved" xml:space="preserve">
+    <value>Permissão removida com sucesso.</value>
+  </data>
+  <data name="PermissionAlreadyAssigned" xml:space="preserve">
+    <value>Esta permissão já está atribuída a este papel.</value>
+  </data>
+  <data name="RoleNotFound" xml:space="preserve">
+    <value>Papel não encontrado.</value>
+  </data>
+  <data name="InvalidPermission" xml:space="preserve">
+    <value>Permissão inválida.</value>
+  </data>
+  <data name="PermissionNotAssigned" xml:space="preserve">
+    <value>Esta permissão não está atribuída a este papel.</value>
+  </data>
   <data name="ProfileUpdated" xml:space="preserve">
     <value>Perfil atualizado com sucesso.</value>
   </data>

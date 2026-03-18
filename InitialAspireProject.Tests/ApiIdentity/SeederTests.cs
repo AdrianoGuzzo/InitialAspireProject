@@ -1,5 +1,7 @@
+using System.Security.Claims;
 using InitialAspireProject.ApiIdentity.Repository;
 using InitialAspireProject.ApiIdentity.Repository.Constants;
+using InitialAspireProject.Shared.Constants;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -94,5 +96,88 @@ public class SeederTests
 
         roleManager.Verify(x => x.CreateAsync(It.Is<IdentityRole>(r => r.Name == RoleConstants.Admin)), Times.Once);
         roleManager.Verify(x => x.CreateAsync(It.Is<IdentityRole>(r => r.Name == RoleConstants.User)), Times.Never);
+    }
+
+    // --- SeedPermissionsAsync ---
+
+    private static Mock<RoleManager<IdentityRole>> CreateRoleManagerMock(
+        Dictionary<string, List<Claim>>? existingClaims = null)
+    {
+        var roleStoreMock = new Mock<IRoleStore<IdentityRole>>();
+        var roleManagerMock = new Mock<RoleManager<IdentityRole>>(
+            roleStoreMock.Object, null!, null!, null!, null!);
+
+        var adminRole = new IdentityRole(RoleConstants.Admin) { Id = "admin-id" };
+        var userRole = new IdentityRole(RoleConstants.User) { Id = "user-id" };
+
+        roleManagerMock.Setup(x => x.FindByNameAsync(RoleConstants.Admin)).ReturnsAsync(adminRole);
+        roleManagerMock.Setup(x => x.FindByNameAsync(RoleConstants.User)).ReturnsAsync(userRole);
+
+        var adminClaims = existingClaims?.GetValueOrDefault(RoleConstants.Admin) ?? [];
+        var userClaims = existingClaims?.GetValueOrDefault(RoleConstants.User) ?? [];
+
+        roleManagerMock.Setup(x => x.GetClaimsAsync(adminRole)).ReturnsAsync(adminClaims);
+        roleManagerMock.Setup(x => x.GetClaimsAsync(userRole)).ReturnsAsync(userClaims);
+        roleManagerMock.Setup(x => x.AddClaimAsync(It.IsAny<IdentityRole>(), It.IsAny<Claim>()))
+            .ReturnsAsync(IdentityResult.Success);
+
+        return roleManagerMock;
+    }
+
+    [Fact]
+    public async Task SeedPermissionsAsync_AdminRole_GetsAllPermissions()
+    {
+        var roleManagerMock = CreateRoleManagerMock();
+
+        await Seeder.SeedPermissionsAsync(roleManagerMock.Object);
+
+        foreach (var permission in PermissionConstants.All)
+        {
+            roleManagerMock.Verify(x => x.AddClaimAsync(
+                It.Is<IdentityRole>(r => r.Name == RoleConstants.Admin),
+                It.Is<Claim>(c => c.Type == PermissionConstants.ClaimType && c.Value == permission)),
+                Times.Once);
+        }
+    }
+
+    [Fact]
+    public async Task SeedPermissionsAsync_UserRole_GetsOnlyCanViewReports()
+    {
+        var roleManagerMock = CreateRoleManagerMock();
+
+        await Seeder.SeedPermissionsAsync(roleManagerMock.Object);
+
+        roleManagerMock.Verify(x => x.AddClaimAsync(
+            It.Is<IdentityRole>(r => r.Name == RoleConstants.User),
+            It.Is<Claim>(c => c.Type == PermissionConstants.ClaimType && c.Value == PermissionConstants.CanViewReports)),
+            Times.Once);
+
+        roleManagerMock.Verify(x => x.AddClaimAsync(
+            It.Is<IdentityRole>(r => r.Name == RoleConstants.User),
+            It.Is<Claim>(c => c.Type == PermissionConstants.ClaimType && c.Value == PermissionConstants.CanManagePermissions)),
+            Times.Never);
+    }
+
+    [Fact]
+    public async Task SeedPermissionsAsync_Idempotent_SkipsExistingPermissions()
+    {
+        var existingClaims = new Dictionary<string, List<Claim>>
+        {
+            [RoleConstants.Admin] = [new Claim(PermissionConstants.ClaimType, PermissionConstants.CanViewSettings)],
+            [RoleConstants.User] = [new Claim(PermissionConstants.ClaimType, PermissionConstants.CanViewReports)]
+        };
+        var roleManagerMock = CreateRoleManagerMock(existingClaims);
+
+        await Seeder.SeedPermissionsAsync(roleManagerMock.Object);
+
+        roleManagerMock.Verify(x => x.AddClaimAsync(
+            It.Is<IdentityRole>(r => r.Name == RoleConstants.Admin),
+            It.Is<Claim>(c => c.Value == PermissionConstants.CanViewSettings)),
+            Times.Never);
+
+        roleManagerMock.Verify(x => x.AddClaimAsync(
+            It.Is<IdentityRole>(r => r.Name == RoleConstants.User),
+            It.Is<Claim>(c => c.Value == PermissionConstants.CanViewReports)),
+            Times.Never);
     }
 }

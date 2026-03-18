@@ -1,0 +1,19 @@
+@page "/settings"
+@attribute [Authorize(Policy = "CanViewSettings")]
+@using Microsoft.AspNetCore.Authorization
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-gear me-2"></i>
+                    @L["SettingsTitle"]
+                </h4>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">@L["SettingsTitle"]</p>
+            </div>
+        </div>
+    </div>
+</div>

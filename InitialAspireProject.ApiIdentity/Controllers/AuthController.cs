@@ -218,6 +218,8 @@ namespace InitialAspireProject.ApiIdentity.Controllers
             if (!result.Succeeded)
                 return BadRequest(result.Errors);
 
+            await _refreshTokenService.RevokeAllForUserAsync(user.Id);
+
             return Ok(_localizer["PasswordResetSuccess"].Value);
         }
 

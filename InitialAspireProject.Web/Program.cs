@@ -106,9 +106,10 @@ app.MapRazorComponents<App>()
 
 app.MapDefaultEndpoints();
 
-app.MapGet("/logout", async (HttpContext ctx, ITokenRefreshService tokenRefreshService) =>
+app.MapGet("/logout", async (HttpContext ctx) =>
 {
     var refreshToken = ctx.Session.GetString(SessionConstants.RefreshTokenKey);
+    var jwt = ctx.Session.GetString(SessionConstants.TokenKey);
     ctx.Session.Clear();
     await ctx.SignOutAsync("Cookies");
 
@@ -118,6 +119,8 @@ app.MapGet("/logout", async (HttpContext ctx, ITokenRefreshService tokenRefreshS
         {
             var httpClientFactory = ctx.RequestServices.GetRequiredService<IHttpClientFactory>();
             var httpClient = httpClientFactory.CreateClient("apiidentity-revoke");
+            if (!string.IsNullOrEmpty(jwt))
+                httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", jwt);
             await httpClient.PostAsJsonAsync("/auth/revoke", new RevokeTokenRequest { RefreshToken = refreshToken });
         }
         catch { /* Best-effort revocation */ }

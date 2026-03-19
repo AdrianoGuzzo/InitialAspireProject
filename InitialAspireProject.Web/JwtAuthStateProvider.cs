@@ -58,7 +58,7 @@ namespace InitialAspireProject.Web
                 _cachedUser = new ClaimsPrincipal(identity);
                 return new AuthenticationState(_cachedUser);
             }
-            catch (FormatException ex) when (ex.Message == "JWT token has expired")
+            catch (TokenExpiredException)
             {
                 _logger.LogInformation("JWT token expired, attempting silent refresh");
                 try
@@ -166,7 +166,7 @@ namespace InitialAspireProject.Web
             {
                 var expiry = DateTimeOffset.FromUnixTimeSeconds(exp);
                 if (expiry < DateTimeOffset.UtcNow)
-                    throw new FormatException("JWT token has expired");
+                    throw new TokenExpiredException();
             }
 
             return claims;
@@ -181,5 +181,10 @@ namespace InitialAspireProject.Web
             }
             return Convert.FromBase64String(base64);
         }
+    }
+
+    public class TokenExpiredException : Exception
+    {
+        public TokenExpiredException() : base("JWT token has expired") { }
     }
 }

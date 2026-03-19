@@ -20,6 +20,7 @@ public class TokenRefreshServiceTests
         var httpClient = new HttpClient(handler) { BaseAddress = new Uri("http://localhost") };
 
         var sessionMock = new Mock<ISession>();
+        sessionMock.Setup(x => x.Id).Returns(Guid.NewGuid().ToString());
         if (storedRefreshToken is not null)
         {
             byte[]? tokenBytes = Encoding.UTF8.GetBytes(storedRefreshToken);
@@ -101,6 +102,7 @@ public class TokenRefreshServiceTests
         var httpClient = new HttpClient(handler) { BaseAddress = new Uri("http://localhost") };
 
         var sessionMock = new Mock<ISession>();
+        sessionMock.Setup(x => x.Id).Returns(Guid.NewGuid().ToString());
         byte[]? tokenBytes = Encoding.UTF8.GetBytes("some-refresh-token");
         sessionMock.Setup(x => x.TryGetValue(SessionConstants.RefreshTokenKey, out tokenBytes)).Returns(true);
 

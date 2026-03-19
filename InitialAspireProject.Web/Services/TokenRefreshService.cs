@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Net.Http.Json;
 using InitialAspireProject.Shared.Constants;
 using InitialAspireProject.Shared.Models;
@@ -14,7 +15,7 @@ public class TokenRefreshService : ITokenRefreshService
     private readonly HttpClient _httpClient;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ILogger<TokenRefreshService> _logger;
-    private static readonly SemaphoreSlim _semaphore = new(1, 1);
+    private static readonly ConcurrentDictionary<string, SemaphoreSlim> _semaphores = new();
 
     public TokenRefreshService(
         HttpClient httpClient,
@@ -34,7 +35,8 @@ public class TokenRefreshService : ITokenRefreshService
         var refreshToken = session.GetString(SessionConstants.RefreshTokenKey);
         if (string.IsNullOrEmpty(refreshToken)) return false;
 
-        if (!await _semaphore.WaitAsync(TimeSpan.FromSeconds(5)))
+        var semaphore = _semaphores.GetOrAdd(session.Id, _ => new SemaphoreSlim(1, 1));
+        if (!await semaphore.WaitAsync(TimeSpan.FromSeconds(5)))
             return false;
 
         try
@@ -68,7 +70,7 @@ public class TokenRefreshService : ITokenRefreshService
         }
         finally
         {
-            _semaphore.Release();
+            semaphore.Release();
         }
     }
 }

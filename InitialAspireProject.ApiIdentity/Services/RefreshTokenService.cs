@@ -15,11 +15,14 @@ public class RefreshTokenService : IRefreshTokenService
         _configuration = configuration;
     }
 
+    private const int MaxDeviceInfoLength = 512;
+
     public async Task<string> GenerateAsync(string userId, string? deviceInfo)
     {
         var rawToken = GenerateRawToken();
         var tokenHash = HashToken(rawToken);
         var expiryDays = int.Parse(_configuration["RefreshToken:ExpiryDays"] ?? "7");
+        var truncatedDeviceInfo = TruncateDeviceInfo(deviceInfo);
 
         var refreshToken = new RefreshToken
         {
@@ -29,7 +32,7 @@ public class RefreshTokenService : IRefreshTokenService
             CreatedAtUtc = DateTime.UtcNow,
             ExpiresAtUtc = DateTime.UtcNow.AddDays(expiryDays),
             Family = Guid.NewGuid().ToString(),
-            DeviceInfo = deviceInfo
+            DeviceInfo = truncatedDeviceInfo
         };
 
         _context.RefreshTokens.Add(refreshToken);
@@ -71,7 +74,7 @@ public class RefreshTokenService : IRefreshTokenService
             CreatedAtUtc = DateTime.UtcNow,
             ExpiresAtUtc = DateTime.UtcNow.AddDays(expiryDays),
             Family = stored.Family,
-            DeviceInfo = deviceInfo
+            DeviceInfo = TruncateDeviceInfo(deviceInfo)
         };
 
         _context.RefreshTokens.Add(newToken);
@@ -134,4 +137,7 @@ public class RefreshTokenService : IRefreshTokenService
         var hash = SHA256.HashData(bytes);
         return Convert.ToHexStringLower(hash);
     }
+
+    private static string? TruncateDeviceInfo(string? deviceInfo)
+        => deviceInfo?.Length > MaxDeviceInfoLength ? deviceInfo[..MaxDeviceInfoLength] : deviceInfo;
 }

@@ -117,6 +117,15 @@ public abstract class AuthenticatedHttpService(HttpClient httpClient, IHttpConte
 
     protected async Task<HttpResponseMessage> SendWithAutoRefreshAsync(HttpRequestMessage request, CancellationToken cancellationToken = default)
     {
+        // Buffer content before first send so it can be re-sent on retry
+        byte[]? contentBytes = null;
+        string? contentType = null;
+        if (request.Content is not null)
+        {
+            contentBytes = await request.Content.ReadAsByteArrayAsync(cancellationToken);
+            contentType = request.Content.Headers.ContentType?.ToString();
+        }
+
         var response = await HttpClient.SendAsync(request, cancellationToken);
 
         if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized && tokenRefreshService is not null)
@@ -128,8 +137,15 @@ public abstract class AuthenticatedHttpService(HttpClient httpClient, IHttpConte
                 if (!string.IsNullOrEmpty(newToken))
                     retryRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", newToken);
 
-                if (request.Content is JsonContent)
-                    retryRequest.Content = request.Content;
+                if (contentBytes is not null)
+                {
+                    retryRequest.Content = new ByteArrayContent(contentBytes);
+                    if (contentType is not null)
+                    {
+                        retryRequest.Content.Headers.Remove("Content-Type");
+                        retryRequest.Content.Headers.TryAddWithoutValidation("Content-Type", contentType);
+                    }
+                }
 
                 response = await HttpClient.SendAsync(retryRequest, cancellationToken);
             }

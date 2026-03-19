@@ -2,6 +2,7 @@ using Bunit;
 using Bunit.TestDoubles;
 using InitialAspireProject.Web.Components.Pages;
 using InitialAspireProject.Web.Resources;
+using InitialAspireProject.Shared;
 using InitialAspireProject.Shared.Models;
 using InitialAspireProject.Web.Services;
 using Microsoft.AspNetCore.Http;
@@ -28,7 +29,7 @@ public class WeatherPageTests : Bunit.TestContext
 
     private void RegisterWeatherService(WeatherForecastDto[] forecasts)
     {
-        var json = JsonSerializer.Serialize(forecasts);
+        var json = JsonSerializer.Serialize(forecasts, JsonDefaults.Options);
         var handler = new TestHttpMessageHandler(new HttpResponseMessage
         {
             StatusCode = HttpStatusCode.OK,

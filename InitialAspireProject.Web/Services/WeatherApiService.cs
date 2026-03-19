@@ -35,6 +35,11 @@ public class WeatherApiService(HttpClient httpClient, IHttpContextAccessor httpC
             logger.LogError(ex, "Error calling weather API: {Message}", ex.Message);
             return [];
         }
+        catch (JsonException ex)
+        {
+            logger.LogError(ex, "Error deserializing weather API response: {Message}", ex.Message);
+            return [];
+        }
 
         return forecasts.ToArray();
     }

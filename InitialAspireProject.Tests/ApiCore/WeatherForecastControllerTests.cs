@@ -46,7 +46,7 @@ public class WeatherForecastControllerTests
     }
 
     [Fact]
-    public async Task Get_ReturnsDomainObjects()
+    public async Task Get_MapsToWeatherForecastDto()
     {
         var (context, controller) = CreateController();
         await using var _ = context;

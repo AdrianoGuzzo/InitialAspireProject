@@ -4,5 +4,12 @@ namespace InitialAspireProject.Shared;
 
 public static class JsonDefaults
 {
-    public static readonly JsonSerializerOptions Options = new(JsonSerializerDefaults.Web);
+    public static readonly JsonSerializerOptions Options = CreateOptions();
+
+    private static JsonSerializerOptions CreateOptions()
+    {
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        options.MakeReadOnly(populateMissingResolver: true);
+        return options;
+    }
 }

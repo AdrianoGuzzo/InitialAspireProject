@@ -1,4 +1,5 @@
 @page "/weather"
+@using InitialAspireProject.Shared.Models
 @using InitialAspireProject.Web.Services
 @attribute [StreamRendering(true)]
 @attribute [OutputCache(Duration = 5)]
@@ -209,7 +210,7 @@
 </div>
 
 @code {
-    private WeatherForecast[]? forecasts;
+    private WeatherForecastDto[]? forecasts;
 
     protected override async Task OnInitializedAsync()
     {

@@ -192,4 +192,16 @@
   <data name="PasswordChanged" xml:space="preserve">
     <value>Senha alterada com sucesso.</value>
   </data>
+  <data name="InvalidRefreshToken" xml:space="preserve">
+    <value>Token de atualização inválido.</value>
+  </data>
+  <data name="RefreshTokenExpired" xml:space="preserve">
+    <value>Token de atualização expirado. Faça login novamente.</value>
+  </data>
+  <data name="RefreshTokenReplayDetected" xml:space="preserve">
+    <value>Reutilização de token detectada. Todas as sessões foram encerradas por segurança.</value>
+  </data>
+  <data name="TokenRevoked" xml:space="preserve">
+    <value>Token revogado com sucesso.</value>
+  </data>
 </root>

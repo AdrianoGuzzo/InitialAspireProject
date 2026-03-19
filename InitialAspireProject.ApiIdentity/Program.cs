@@ -40,6 +40,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<IEmailService, SmtpEmailService>();
+builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 
 // Autenticação com JWT
 builder.Services.AddAuthentication(options =>

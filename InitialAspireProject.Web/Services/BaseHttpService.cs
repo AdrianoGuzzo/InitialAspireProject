@@ -98,7 +98,7 @@ public abstract class BaseHttpService(HttpClient httpClient, ILogger logger)
     }
 }
 
-public abstract class AuthenticatedHttpService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor, ILogger logger)
+public abstract class AuthenticatedHttpService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor, ILogger logger, ITokenRefreshService? tokenRefreshService = null)
     : BaseHttpService(httpClient, logger)
 {
     protected string? GetToken()
@@ -113,5 +113,44 @@ public abstract class AuthenticatedHttpService(HttpClient httpClient, IHttpConte
         if (!string.IsNullOrEmpty(token))
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         return request;
+    }
+
+    protected async Task<HttpResponseMessage> SendWithAutoRefreshAsync(HttpRequestMessage request, CancellationToken cancellationToken = default)
+    {
+        // Buffer content before first send so it can be re-sent on retry
+        byte[]? contentBytes = null;
+        string? contentType = null;
+        if (request.Content is not null)
+        {
+            contentBytes = await request.Content.ReadAsByteArrayAsync(cancellationToken);
+            contentType = request.Content.Headers.ContentType?.ToString();
+        }
+
+        var response = await HttpClient.SendAsync(request, cancellationToken);
+
+        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized && tokenRefreshService is not null)
+        {
+            if (await tokenRefreshService.TryRefreshAsync())
+            {
+                using var retryRequest = new HttpRequestMessage(request.Method, request.RequestUri);
+                var newToken = GetToken();
+                if (!string.IsNullOrEmpty(newToken))
+                    retryRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", newToken);
+
+                if (contentBytes is not null)
+                {
+                    retryRequest.Content = new ByteArrayContent(contentBytes);
+                    if (contentType is not null)
+                    {
+                        retryRequest.Content.Headers.Remove("Content-Type");
+                        retryRequest.Content.Headers.TryAddWithoutValidation("Content-Type", contentType);
+                    }
+                }
+
+                response = await HttpClient.SendAsync(retryRequest, cancellationToken);
+            }
+        }
+
+        return response;
     }
 }

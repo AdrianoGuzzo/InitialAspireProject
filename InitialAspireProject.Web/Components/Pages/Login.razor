@@ -182,7 +182,7 @@
         }
 
         var authProvider = (JwtAuthStateProvider)AuthStateProvider;
-        await authProvider.MarkUserAsAuthenticated(result.Token!.Token);
+        await authProvider.MarkUserAsAuthenticated(result.Token!.Token, result.Token.RefreshToken);
 
         var destination = UrlHelper.IsLocalUrl(returnUrl) ? returnUrl : "/";
         NavigationManager.NavigateTo(destination);

@@ -35,11 +35,12 @@ namespace InitialAspireProject.ApiIdentity
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key is not configured")));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
+            var minutes = int.Parse(_config["Jwt:AccessTokenExpiryMinutes"] ?? "15");
             var token = new JwtSecurityToken(
                 issuer: _config["Jwt:Issuer"],
                 audience: _config["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(1),
+                expires: DateTime.UtcNow.AddMinutes(minutes),
                 signingCredentials: creds
             );
 

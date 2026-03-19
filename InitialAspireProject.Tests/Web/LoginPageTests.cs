@@ -52,7 +52,7 @@ public class LoginPageTests : Bunit.TestContext
         var mockAccessor = new Mock<IHttpContextAccessor>();
         mockAccessor.Setup(x => x.HttpContext).Returns(httpContext);
 
-        var authProvider = new JwtAuthStateProvider(mockAccessor.Object, Mock.Of<ILogger<JwtAuthStateProvider>>());
+        var authProvider = new JwtAuthStateProvider(mockAccessor.Object, Mock.Of<ILogger<JwtAuthStateProvider>>(), serviceProvider);
         Services.AddSingleton<AuthenticationStateProvider>(authProvider);
         Services.AddSingleton(authProvider);
 

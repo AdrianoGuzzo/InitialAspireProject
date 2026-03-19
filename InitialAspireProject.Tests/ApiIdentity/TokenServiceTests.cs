@@ -140,7 +140,7 @@ public class TokenServiceTests
     }
 
     [Fact]
-    public void CreateToken_ExpiresInApproximatelyOneHour()
+    public void CreateToken_ExpiresInApproximatelyFifteenMinutes()
     {
         var service = CreateService();
         var user = new ApplicationUserBuilder().Build();
@@ -148,7 +148,7 @@ public class TokenServiceTests
         var token = service.CreateToken(user, []);
 
         var jwt = new JwtSecurityTokenHandler().ReadJwtToken(token);
-        var expectedExpiry = DateTime.UtcNow.AddHours(1);
+        var expectedExpiry = DateTime.UtcNow.AddMinutes(15);
         Assert.InRange(jwt.ValidTo, expectedExpiry.AddMinutes(-1), expectedExpiry.AddMinutes(1));
     }
 

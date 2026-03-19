@@ -13,7 +13,7 @@ public class WeatherApiServiceTests
     private static WeatherApiService CreateService(HttpMessageHandler handler, IHttpContextAccessor accessor)
     {
         var client = new HttpClient(handler) { BaseAddress = new Uri("http://localhost") };
-        return new WeatherApiService(client, accessor, NullLogger<WeatherApiService>.Instance);
+        return new WeatherApiService(client, accessor, NullLogger<WeatherApiService>.Instance, Mock.Of<ITokenRefreshService>());
     }
 
     private static (Mock<IHttpContextAccessor> Accessor, Mock<ISession> Session) SetupSession(string? token)

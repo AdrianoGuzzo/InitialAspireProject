@@ -297,4 +297,5 @@
   <data name="PermissionCategory_Users" xml:space="preserve"><value>Users</value></data>
   <data name="PermissionCategory_Reports" xml:space="preserve"><value>Reports</value></data>
   <data name="PermissionCategory_Security" xml:space="preserve"><value>Security</value></data>
+  <data name="SessionExpiredPleaseLogin" xml:space="preserve"><value>Your session has expired. Please log in again.</value></data>
 </root>

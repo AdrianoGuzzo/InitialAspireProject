@@ -40,7 +40,7 @@ public class WeatherPageTests : Bunit.TestContext
         mockAccessor.Setup(x => x.HttpContext).Returns(new DefaultHttpContext());
         mockAccessor.Setup(x => x.HttpContext!.Session).Returns(mockSession.Object);
 
-        var service = new WeatherApiService(httpClient, mockAccessor.Object, Mock.Of<ILogger<WeatherApiService>>());
+        var service = new WeatherApiService(httpClient, mockAccessor.Object, Mock.Of<ILogger<WeatherApiService>>(), Mock.Of<ITokenRefreshService>());
         Services.AddSingleton(service);
     }
 

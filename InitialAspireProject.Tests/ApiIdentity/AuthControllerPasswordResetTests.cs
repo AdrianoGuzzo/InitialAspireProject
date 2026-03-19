@@ -58,9 +58,12 @@ public class AuthControllerPasswordResetTests
             roleManagerMock.Object,
             tokenService,
             emailMock.Object,
+            Mock.Of<IRefreshTokenService>(s => s.GenerateAsync(It.IsAny<string>(), It.IsAny<string?>()) == Task.FromResult("test-refresh-token")),
             config,
             NullLogger<AuthController>.Instance,
             localizer.Object);
+
+        controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() };
 
         return (userManagerMock, signInManagerMock, emailMock, controller);
     }

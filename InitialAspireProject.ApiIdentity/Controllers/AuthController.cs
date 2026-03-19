@@ -22,6 +22,7 @@ namespace InitialAspireProject.ApiIdentity.Controllers
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly TokenService _tokenService;
         private readonly IEmailService _emailService;
+        private readonly IRefreshTokenService _refreshTokenService;
         private readonly IConfiguration _configuration;
         private readonly ILogger<AuthController> _logger;
         private readonly IStringLocalizer<AuthMessages> _localizer;
@@ -31,6 +32,7 @@ namespace InitialAspireProject.ApiIdentity.Controllers
                               RoleManager<IdentityRole> roleManager,
                               TokenService tokenService,
                               IEmailService emailService,
+                              IRefreshTokenService refreshTokenService,
                               IConfiguration configuration,
                               ILogger<AuthController> logger,
                               IStringLocalizer<AuthMessages> localizer)
@@ -40,6 +42,7 @@ namespace InitialAspireProject.ApiIdentity.Controllers
             _roleManager = roleManager;
             _tokenService = tokenService;
             _emailService = emailService;
+            _refreshTokenService = refreshTokenService;
             _configuration = configuration;
             _logger = logger;
             _localizer = localizer;
@@ -86,8 +89,9 @@ namespace InitialAspireProject.ApiIdentity.Controllers
             var roles = await _userManager.GetRolesAsync(user);
             var permissionClaims = await GetPermissionClaimsForRolesAsync(roles);
             var token = _tokenService.CreateToken(user, roles, permissionClaims);
+            var refreshToken = await _refreshTokenService.GenerateAsync(user.Id, Request.Headers.UserAgent.ToString());
 
-            return Ok(new LoginResponse { Token = token });
+            return Ok(new LoginResponse { Token = token, RefreshToken = refreshToken });
         }
 
         [Authorize]
@@ -124,6 +128,8 @@ namespace InitialAspireProject.ApiIdentity.Controllers
             var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
             if (!result.Succeeded)
                 return BadRequest(result.Errors);
+
+            await _refreshTokenService.RevokeAllForUserAsync(user.Id);
 
             return Ok(_localizer["PasswordChanged"].Value);
         }
@@ -240,7 +246,44 @@ namespace InitialAspireProject.ApiIdentity.Controllers
             var roles = await _userManager.GetRolesAsync(user);
             var permissionClaims = await GetPermissionClaimsForRolesAsync(roles);
             var token = _tokenService.CreateToken(user, roles, permissionClaims);
-            return Ok(new LoginResponse { Token = token });
+            var refreshToken = await _refreshTokenService.GenerateAsync(user.Id, Request.Headers.UserAgent.ToString());
+            return Ok(new LoginResponse { Token = token, RefreshToken = refreshToken });
+        }
+
+        [EnableRateLimiting("auth")]
+        [HttpPost("refresh")]
+        public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest model)
+        {
+            var result = await _refreshTokenService.ValidateAndRotateAsync(model.RefreshToken, Request.Headers.UserAgent.ToString());
+
+            if (!result.Success)
+            {
+                var message = result.ErrorCode switch
+                {
+                    "ReplayDetected" => _localizer["RefreshTokenReplayDetected"].Value,
+                    "Expired" => _localizer["RefreshTokenExpired"].Value,
+                    _ => _localizer["InvalidRefreshToken"].Value
+                };
+                return Unauthorized(new LoginErrorResponse { Code = result.ErrorCode!, Message = message });
+            }
+
+            var user = await _userManager.FindByIdAsync(result.UserId!);
+            if (user is null)
+                return Unauthorized(new LoginErrorResponse { Code = "NotFound", Message = _localizer["InvalidRefreshToken"].Value });
+
+            var roles = await _userManager.GetRolesAsync(user);
+            var permissionClaims = await GetPermissionClaimsForRolesAsync(roles);
+            var token = _tokenService.CreateToken(user, roles, permissionClaims);
+
+            return Ok(new LoginResponse { Token = token, RefreshToken = result.NewRefreshToken });
+        }
+
+        [Authorize]
+        [HttpPost("revoke")]
+        public async Task<IActionResult> Revoke([FromBody] RevokeTokenRequest model)
+        {
+            await _refreshTokenService.RevokeAsync(model.RefreshToken);
+            return Ok(_localizer["TokenRevoked"].Value);
         }
 
         private async Task<List<Claim>> GetPermissionClaimsForRolesAsync(IList<string> roles)

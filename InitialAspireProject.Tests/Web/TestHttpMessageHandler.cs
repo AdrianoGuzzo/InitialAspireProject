@@ -12,9 +12,17 @@ internal class TestHttpMessageHandler : HttpMessageHandler
     {
     }
 
+    private readonly Exception? _exception;
+
     public TestHttpMessageHandler(Func<HttpRequestMessage, HttpResponseMessage> handler)
     {
         _handler = handler;
+    }
+
+    public TestHttpMessageHandler(Exception exception)
+        : this(_ => throw exception)
+    {
+        _exception = exception;
     }
 
     protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)

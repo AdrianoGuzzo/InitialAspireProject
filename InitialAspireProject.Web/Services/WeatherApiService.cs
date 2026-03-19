@@ -2,8 +2,8 @@ using System.Text.Json;
 
 namespace InitialAspireProject.Web.Services;
 
-public class WeatherApiService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor, ILogger<WeatherApiService> logger)
-    : AuthenticatedHttpService(httpClient, httpContextAccessor, logger)
+public class WeatherApiService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor, ILogger<WeatherApiService> logger, ITokenRefreshService tokenRefreshService)
+    : AuthenticatedHttpService(httpClient, httpContextAccessor, logger, tokenRefreshService)
 {
     public async Task<WeatherForecast[]> GetWeatherAsync(int maxItems = 10, CancellationToken cancellationToken = default)
     {
@@ -12,7 +12,7 @@ public class WeatherApiService(HttpClient httpClient, IHttpContextAccessor httpC
         try
         {
             using var request = CreateAuthenticatedRequest(HttpMethod.Get, "/WeatherForecast");
-            using var response = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            using var response = await SendWithAutoRefreshAsync(request, cancellationToken);
             response.EnsureSuccessStatusCode();
 
             using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);

@@ -4,6 +4,7 @@ using InitialAspireProject.Shared.Constants;
 using InitialAspireProject.Web;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
@@ -12,7 +13,7 @@ namespace InitialAspireProject.Tests.Web;
 public class JwtAuthStateProviderTests
 {
     private static JwtAuthStateProvider CreateProvider(IHttpContextAccessor accessor)
-        => new(accessor, NullLogger<JwtAuthStateProvider>.Instance);
+        => new(accessor, NullLogger<JwtAuthStateProvider>.Instance, new ServiceCollection().BuildServiceProvider());
 
     private static (Mock<IHttpContextAccessor> Accessor, Mock<ISession> Session) SetupSession(string? storedToken)
     {

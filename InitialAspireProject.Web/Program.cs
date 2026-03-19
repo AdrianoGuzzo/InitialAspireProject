@@ -1,5 +1,8 @@
+using System.Net.Http.Json;
+using System.Security.Claims;
 using Blazored.LocalStorage;
 using InitialAspireProject.Shared.Constants;
+using InitialAspireProject.Shared.Models;
 using InitialAspireProject.Web;
 using InitialAspireProject.Web.Components;
 using InitialAspireProject.Web.Services;
@@ -7,7 +10,6 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Localization;
-using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -72,6 +74,8 @@ builder.Services.AddHttpClient<IProfileService, ProfileService>(client => client
 builder.Services.AddHttpClient<IPermissionService, PermissionService>(client => client.BaseAddress = new(apiIdentityUrl));
 builder.Services.AddHttpClient<WeatherApiService>(client => client.BaseAddress = new("https+http://apicore"));
 builder.Services.AddHttpClient<IGoogleLoginService, GoogleLoginService>(client => client.BaseAddress = new(apiIdentityUrl));
+builder.Services.AddHttpClient<ITokenRefreshService, TokenRefreshService>(client => client.BaseAddress = new(apiIdentityUrl));
+builder.Services.AddHttpClient("apiidentity-revoke", client => client.BaseAddress = new Uri(apiIdentityUrl));
 
 var app = builder.Build();
 
@@ -102,10 +106,23 @@ app.MapRazorComponents<App>()
 
 app.MapDefaultEndpoints();
 
-app.MapGet("/logout", async (HttpContext ctx) =>
+app.MapGet("/logout", async (HttpContext ctx, ITokenRefreshService tokenRefreshService) =>
 {
+    var refreshToken = ctx.Session.GetString(SessionConstants.RefreshTokenKey);
     ctx.Session.Clear();
     await ctx.SignOutAsync("Cookies");
+
+    if (!string.IsNullOrEmpty(refreshToken))
+    {
+        try
+        {
+            var httpClientFactory = ctx.RequestServices.GetRequiredService<IHttpClientFactory>();
+            var httpClient = httpClientFactory.CreateClient("apiidentity-revoke");
+            await httpClient.PostAsJsonAsync("/auth/revoke", new RevokeTokenRequest { RefreshToken = refreshToken });
+        }
+        catch { /* Best-effort revocation */ }
+    }
+
     return Results.LocalRedirect("/login");
 }).AllowAnonymous();
 
@@ -147,6 +164,8 @@ app.MapGet("/google-callback", async (HttpContext ctx, IGoogleLoginService googl
 
     await ctx.Session.LoadAsync();
     ctx.Session.SetString(SessionConstants.TokenKey, tokenResponse.Token);
+    if (!string.IsNullOrEmpty(tokenResponse.RefreshToken))
+        ctx.Session.SetString(SessionConstants.RefreshTokenKey, tokenResponse.RefreshToken);
 
     await ctx.SignOutAsync("ExternalCookie");
     var claims = new[] { new Claim(ClaimTypes.Email, email), new Claim(ClaimTypes.Name, name ?? email) };

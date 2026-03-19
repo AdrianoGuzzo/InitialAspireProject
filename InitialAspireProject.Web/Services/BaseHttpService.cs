@@ -98,7 +98,7 @@ public abstract class BaseHttpService(HttpClient httpClient, ILogger logger)
     }
 }
 
-public abstract class AuthenticatedHttpService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor, ILogger logger)
+public abstract class AuthenticatedHttpService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor, ILogger logger, ITokenRefreshService? tokenRefreshService = null)
     : BaseHttpService(httpClient, logger)
 {
     protected string? GetToken()
@@ -113,5 +113,28 @@ public abstract class AuthenticatedHttpService(HttpClient httpClient, IHttpConte
         if (!string.IsNullOrEmpty(token))
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         return request;
+    }
+
+    protected async Task<HttpResponseMessage> SendWithAutoRefreshAsync(HttpRequestMessage request, CancellationToken cancellationToken = default)
+    {
+        var response = await HttpClient.SendAsync(request, cancellationToken);
+
+        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized && tokenRefreshService is not null)
+        {
+            if (await tokenRefreshService.TryRefreshAsync())
+            {
+                using var retryRequest = new HttpRequestMessage(request.Method, request.RequestUri);
+                var newToken = GetToken();
+                if (!string.IsNullOrEmpty(newToken))
+                    retryRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", newToken);
+
+                if (request.Content is JsonContent)
+                    retryRequest.Content = request.Content;
+
+                response = await HttpClient.SendAsync(retryRequest, cancellationToken);
+            }
+        }
+
+        return response;
     }
 }

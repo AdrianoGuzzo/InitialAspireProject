@@ -192,4 +192,16 @@
   <data name="PasswordChanged" xml:space="preserve">
     <value>Contraseña cambiada con éxito.</value>
   </data>
+  <data name="InvalidRefreshToken" xml:space="preserve">
+    <value>Token de actualización no válido.</value>
+  </data>
+  <data name="RefreshTokenExpired" xml:space="preserve">
+    <value>Token de actualización expirado. Inicie sesión nuevamente.</value>
+  </data>
+  <data name="RefreshTokenReplayDetected" xml:space="preserve">
+    <value>Reutilización de token detectada. Todas las sesiones han sido cerradas por seguridad.</value>
+  </data>
+  <data name="TokenRevoked" xml:space="preserve">
+    <value>Token revocado con éxito.</value>
+  </data>
 </root>

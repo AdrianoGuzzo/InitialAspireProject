@@ -1,4 +1,5 @@
 using InitialAspireProject.Shared.Constants;
+using InitialAspireProject.Web.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
@@ -10,18 +11,22 @@ namespace InitialAspireProject.Web
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<JwtAuthStateProvider> _logger;
+        private readonly IServiceProvider _serviceProvider;
         private const string AuthScheme = "jwt";
         private ClaimsPrincipal? _cachedUser;
 
-        public JwtAuthStateProvider(IHttpContextAccessor httpContextAccessor, ILogger<JwtAuthStateProvider> logger)
+        public JwtAuthStateProvider(IHttpContextAccessor httpContextAccessor, ILogger<JwtAuthStateProvider> logger, IServiceProvider serviceProvider)
         {
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
+            _serviceProvider = serviceProvider;
         }
 
-        public async Task MarkUserAsAuthenticated(string token)
+        public async Task MarkUserAsAuthenticated(string token, string? refreshToken = null)
         {
             _httpContextAccessor.HttpContext?.Session.SetString(SessionConstants.TokenKey, token);
+            if (!string.IsNullOrEmpty(refreshToken))
+                _httpContextAccessor.HttpContext?.Session.SetString(SessionConstants.RefreshTokenKey, refreshToken);
 
             var claims = ParseClaimsFromJwt(token);
             var identity = new ClaimsIdentity(claims, AuthScheme);
@@ -53,6 +58,34 @@ namespace InitialAspireProject.Web
                 _cachedUser = new ClaimsPrincipal(identity);
                 return new AuthenticationState(_cachedUser);
             }
+            catch (FormatException ex) when (ex.Message == "JWT token has expired")
+            {
+                _logger.LogInformation("JWT token expired, attempting silent refresh");
+                try
+                {
+                    var refreshService = _serviceProvider.GetService<ITokenRefreshService>();
+                    if (refreshService is not null && await refreshService.TryRefreshAsync())
+                    {
+                        var newToken = _httpContextAccessor.HttpContext.Session.GetString(SessionConstants.TokenKey);
+                        if (!string.IsNullOrEmpty(newToken))
+                        {
+                            var newClaims = ParseClaimsFromJwt(newToken);
+                            var newIdentity = new ClaimsIdentity(newClaims, AuthScheme);
+                            _cachedUser = new ClaimsPrincipal(newIdentity);
+                            return new AuthenticationState(_cachedUser);
+                        }
+                    }
+                }
+                catch (Exception refreshEx)
+                {
+                    _logger.LogWarning(refreshEx, "Silent token refresh failed");
+                }
+
+                _httpContextAccessor.HttpContext.Session.Remove(SessionConstants.TokenKey);
+                _httpContextAccessor.HttpContext.Session.Remove(SessionConstants.RefreshTokenKey);
+                _cachedUser = null;
+                return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+            }
             catch (Exception ex) when (ex is FormatException || ex is JsonException || ex is IndexOutOfRangeException)
             {
                 _logger.LogWarning(ex, "Invalid JWT token found in session; removing it");
@@ -69,9 +102,11 @@ namespace InitialAspireProject.Web
             }
         }
 
-        public void NotifyUserAuthentication(string token)
+        public void NotifyUserAuthentication(string token, string? refreshToken = null)
         {
             _httpContextAccessor.HttpContext?.Session.SetString(SessionConstants.TokenKey, token);
+            if (!string.IsNullOrEmpty(refreshToken))
+                _httpContextAccessor.HttpContext?.Session.SetString(SessionConstants.RefreshTokenKey, refreshToken);
 
             var claims = ParseClaimsFromJwt(token);
             var identity = new ClaimsIdentity(claims, AuthScheme);
@@ -83,6 +118,7 @@ namespace InitialAspireProject.Web
         {
             _cachedUser = null;
             _httpContextAccessor.HttpContext?.Session.Remove(SessionConstants.TokenKey);
+            _httpContextAccessor.HttpContext?.Session.Remove(SessionConstants.RefreshTokenKey);
             if (_httpContextAccessor.HttpContext is not null)
                 await _httpContextAccessor.HttpContext.SignOutAsync("Cookies");
 
@@ -93,6 +129,11 @@ namespace InitialAspireProject.Web
         public string? GetStoredToken()
         {
             return _httpContextAccessor.HttpContext?.Session.GetString(SessionConstants.TokenKey);
+        }
+
+        public string? GetStoredRefreshToken()
+        {
+            return _httpContextAccessor.HttpContext?.Session.GetString(SessionConstants.RefreshTokenKey);
         }
 
         private IEnumerable<Claim> ParseClaimsFromJwt(string jwt)

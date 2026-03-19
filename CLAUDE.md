@@ -32,29 +32,32 @@ dotnet restore
 This is a **.NET 9 Aspire** microservices solution with 7 projects (Aspire 13.1.2):
 
 - **AppHost** — Aspire orchestrator. Defines all services, infrastructure (PostgreSQL, Redis), and their dependencies. Start here to understand the system topology.
-- **Shared** — Class library with communication DTOs (`InitialAspireProject.Shared.Models`) and constants (`InitialAspireProject.Shared.Constants`) shared between ApiIdentity, ApiCore, Web, and Tests. Contains: `LoginModel`, `RegisterModel`, `ForgotPasswordModel`, `ResetPasswordModel`, `ConfirmEmailModel`, `LoginResponse`, `LoginErrorResponse`, `ErrorValidation`, `RolePermissionsDto`, `AssignPermissionModel`, `PermissionConstants`.
-- **ApiIdentity** — Auth service with ASP.NET Core Identity + JWT. Manages users, roles, permissions, and token issuance. Endpoints: `POST /auth/register`, `POST /auth/login`, `GET /auth/profile`, `GET /auth/admin-only`, `POST /auth/forgot-password`, `POST /auth/reset-password`, `POST /auth/confirm-email`, `POST /auth/resend-activation`, `GET /permissions`, `GET /permissions/roles`, `GET /permissions/roles/{roleName}`, `POST /permissions/roles/{roleName}`, `DELETE /permissions/roles/{roleName}/{permission}`.
+- **Shared** — Class library with communication DTOs (`InitialAspireProject.Shared.Models`) and constants (`InitialAspireProject.Shared.Constants`) shared between ApiIdentity, ApiCore, Web, and Tests. Contains: `LoginModel`, `RegisterModel`, `ForgotPasswordModel`, `ResetPasswordModel`, `ConfirmEmailModel`, `LoginResponse`, `LoginErrorResponse`, `ErrorValidation`, `RolePermissionsDto`, `AssignPermissionModel`, `PermissionConstants`, `RefreshTokenRequest`, `RevokeTokenRequest`, `UpdateProfileModel`, `ChangePasswordModel`, `ProfileResponse`, `SessionConstants`.
+- **ApiIdentity** — Auth service with ASP.NET Core Identity + JWT + refresh tokens. Manages users, roles, permissions, and token issuance. Endpoints: `POST /auth/register`, `POST /auth/login`, `GET /auth/profile`, `PUT /auth/profile`, `POST /auth/change-password`, `GET /auth/admin-only`, `POST /auth/forgot-password`, `POST /auth/reset-password`, `POST /auth/confirm-email`, `POST /auth/resend-activation`, `POST /auth/refresh`, `POST /auth/revoke`, `GET /permissions`, `GET /permissions/roles`, `GET /permissions/roles/{roleName}`, `POST /permissions/roles/{roleName}`, `DELETE /permissions/roles/{roleName}/{permission}`.
 - **ApiCore** — Business API (currently WeatherForecast). Protected by JWT. Uses its own `coredb` PostgreSQL database. Swagger/OpenAPI via Swashbuckle.
 - **Web** — Blazor Server frontend. Authenticates via ASP.NET cookie session server-side; JWT is stored in `ISession` via `JwtAuthStateProvider`. Calls both APIs through typed HTTP clients.
 - **ServiceDefaults** — Shared extension methods applied to all services: OpenTelemetry, service discovery, HTTP resilience, and localization (`AddLocalizationDefaults`, `UseLocalizationDefaults`).
 - **Tests** — Unit + integration tests. Uses xunit.v3, bUnit, Moq, Bogus. CI excludes `WebTests` (Aspire integration tests).
 
 ### Authentication Flow
-1. User POSTs credentials to `ApiIdentity /auth/login` → receives a JWT (1-hour expiry)
-2. Web stores JWT in **ASP.NET Session** (`IHttpContextAccessor.HttpContext.Session`) via `JwtAuthStateProvider`
+1. User POSTs credentials to `ApiIdentity /auth/login` → receives a JWT (15-min expiry) + refresh token (7-day expiry)
+2. Web stores both tokens in **ASP.NET Session** (`SessionConstants.TokenKey`, `SessionConstants.RefreshTokenKey`) via `JwtAuthStateProvider`
 3. `JwtAuthStateProvider` parses JWT claims, enforces expiry client-side, and provides `AuthenticationState` to Blazor
-4. `WeatherApiService` reads the token from session and attaches it as a Bearer header when calling `ApiCore`
+4. When JWT expires, `JwtAuthStateProvider` automatically calls `TokenRefreshService.TryRefreshAsync()` to obtain a new JWT + rotated refresh token via `POST /auth/refresh`
+5. Authenticated Web services extend `AuthenticatedHttpService`, which attaches the Bearer token per-request and retries on 401 after auto-refresh
+6. On logout, Web revokes the refresh token via `POST /auth/revoke` (best-effort) before clearing the session
 
 ### Service Communication
 - Services use Aspire **service discovery** — URLs like `https+http://apiidentity` resolve at runtime
 - `ServiceDefaults` configures `Microsoft.Extensions.Http.Resilience` for HTTP clients, and provides `AddPermissionPolicies()` for registering permission-based authorization policies
-- Web registers six typed HTTP clients: `LoginService`, `RegisterService`, `ForgotPasswordService`, `ResetPasswordService`, `ConfirmEmailService`, `PermissionService` (all → `apiidentity`), and `WeatherApiService` (→ `apicore`)
+- Web registers typed HTTP clients: `LoginService`, `RegisterService`, `ForgotPasswordService`, `ResetPasswordService`, `ConfirmEmailService`, `PermissionService`, `ProfileService`, `TokenRefreshService` (all → `apiidentity`), and `WeatherApiService` (→ `apicore`)
 - All HTTP request/response DTOs live in `InitialAspireProject.Shared.Models` — Web services use these typed models (not anonymous objects) when calling APIs
 - Web-only result types (`RegisterResult`, `ForgotPasswordResult`, `ResetPasswordResult`, `ConfirmEmailResult`) live in `Web/Services/ServiceModels.cs`
-- `LoginResult` (with `Token`, `ErrorCode`, `Success`, `IsEmailNotConfirmed`) is defined in `Web/Services/LoginService.cs`
+- `LoginResult` (with `Token`, `RefreshToken`, `ErrorCode`, `Success`, `IsEmailNotConfirmed`) is defined in `Web/Services/LoginService.cs`
+- Web services use `BaseHttpService` (error handling, validation parsing) and `AuthenticatedHttpService` (auto Bearer token attachment, 401 retry with token refresh)
 
 ### Databases
-- **identitydb** — PostgreSQL, used by `ApiIdentity` (ASP.NET Core Identity tables)
+- **identitydb** — PostgreSQL, used by `ApiIdentity` (ASP.NET Core Identity tables + `RefreshTokens` table)
 - **coredb** — PostgreSQL, used by `ApiCore` (business entities)
 - Both databases run EF Core migrations automatically on startup
 
@@ -73,10 +76,10 @@ This is a **.NET 9 Aspire** microservices solution with 7 projects (Aspire 13.1.
 - Posts coverage summary as a PR comment
 
 ### Test structure
-- `Tests/ApiIdentity/` — AuthControllerTests, AuthControllerPasswordResetTests, SmtpEmailServiceTests, TokenServiceTests, SeederTests, ApplicationDbContextTests, PermissionControllerTests
+- `Tests/ApiIdentity/` — AuthControllerTests, AuthControllerPasswordResetTests, SmtpEmailServiceTests, TokenServiceTests, SeederTests, ApplicationDbContextTests, PermissionControllerTests, RefreshTokenServiceTests
 - `Tests/ApiCore/` — WeatherForecastControllerTests, WeatherForecastServiceTests, WeatherForecastDomainTests
 - `Tests/Shared/` — PermissionConstantsTests
-- `Tests/Web/` — Service tests: JwtAuthStateProviderTests, WeatherApiServiceTests, LoginServiceTests, RegisterServiceTests, ForgotPasswordServiceTests, ResetPasswordServiceTests, ConfirmEmailServiceTests, PermissionServiceTests, ThemeServiceTests, WebMessagesTests. Page tests (bUnit): CounterTests, LoginPageTests, RegisterPageTests, ForgotPasswordPageTests, ResetPasswordPageTests, HomePageTests, WeatherPageTests, LogoutPageTests, SettingsPageTests, AdminPermissionsPageTests. Integration: WebTests
+- `Tests/Web/` — Service tests: JwtAuthStateProviderTests, WeatherApiServiceTests, LoginServiceTests, RegisterServiceTests, ForgotPasswordServiceTests, ResetPasswordServiceTests, ConfirmEmailServiceTests, PermissionServiceTests, ProfileServiceTests, TokenRefreshServiceTests, ThemeServiceTests, WebMessagesTests. Page tests (bUnit): CounterTests, LoginPageTests, RegisterPageTests, ForgotPasswordPageTests, ResetPasswordPageTests, HomePageTests, WeatherPageTests, LogoutPageTests, SettingsPageTests, AdminPermissionsPageTests, ProfilePageTests. Integration: WebTests
 - `Tests/Builders/` — Test data builders using Bogus (ApplicationUser, LoginModel, RegisterModel, ForgotPasswordModel, ResetPasswordModel, WeatherForecast)
 
 ### Password Reset Flow
@@ -100,6 +103,23 @@ This is a **.NET 9 Aspire** microservices solution with 7 projects (Aspire 13.1.
 - Seeded admin user has `EmailConfirmed = true` (unaffected)
 - In development, activation emails are captured by Mailpit
 
+### Refresh Token System
+- `RefreshTokenService` generates cryptographically random 32-byte tokens, stores SHA256 hashes in `RefreshTokens` table (raw token never persisted)
+- Each token belongs to a **family** (rotation chain); on use, the old token is revoked and a new one issued in the same family
+- **Replay detection**: if a revoked token is reused, the entire token family is revoked (all sessions compromised by that chain)
+- `RefreshToken` entity: `Id`, `TokenHash` (unique indexed), `UserId` (FK), `CreatedAtUtc`, `ExpiresAtUtc`, `RevokedAtUtc`, `ReplacedByTokenHash`, `Family`, `DeviceInfo` (max 512 chars from User-Agent)
+- Configuration: `RefreshToken:ExpiryDays` (default 7), `Jwt:AccessTokenExpiryMinutes` (default 15)
+- Password change (`POST /auth/change-password`) and password reset (`POST /auth/reset-password`) revoke all user refresh tokens
+- `POST /auth/refresh` error codes: `Expired`, `NotFound`, `ReplayDetected`
+- `TokenRefreshService` (Web): calls `/auth/refresh`, updates session tokens; uses per-session semaphore to prevent concurrent refresh races
+
+### Profile Management
+- `GET /auth/profile` — returns `ProfileResponse` (Email, FullName, Roles)
+- `PUT /auth/profile` — updates FullName via `UpdateProfileModel`
+- `POST /auth/change-password` — validates current password, updates to new password, revokes all refresh tokens via `ChangePasswordModel`
+- `ProfileService` (Web): typed HTTP client extending `AuthenticatedHttpService`
+- `/profile` page (`Profile.razor`): edit name + change password forms with localized validation
+
 ### Claims/Permissions Authorization
 - Permissions are stored as role claims in the existing `AspNetRoleClaims` table (no migration needed)
 - `PermissionConstants` (`Shared/Constants/PermissionConstants.cs`): `CanViewSettings`, `CanManageUsers`, `CanViewReports`, `CanManagePermissions` with `ClaimType = "Permission"`
@@ -110,9 +130,9 @@ This is a **.NET 9 Aspire** microservices solution with 7 projects (Aspire 13.1.
 - `ServiceDefaults.AddPermissionPolicies()`: registers `RequireClaim("Permission", permissionName)` policies for each permission — used by ApiIdentity, ApiCore, and Web
 - `JwtAuthStateProvider.ParseClaimsFromJwt`: handles JSON array claims (multiple permissions serialized as a JSON array in JWT payload)
 - Frontend: `NavMenu.razor` and `MainLayout.razor` use `<AuthorizeView Policy="CanViewSettings">` / `<AuthorizeView Policy="CanManagePermissions">` to show/hide Settings and Manage Permissions links
-- Pages: `/settings` (`[Authorize(Policy = "CanViewSettings")]`), `/admin/permissions` (`[Authorize(Policy = "CanManagePermissions")]`)
+- Pages: `/settings` (`[Authorize(Policy = "CanViewSettings")]`), `/admin/permissions` (`[Authorize(Policy = "CanManagePermissions")]`), `/profile` (`[Authorize]`)
 - `PermissionService` (Web): typed HTTP client for permission CRUD operations
-- Token staleness: after admin changes permissions, users keep old JWT until it expires (1hr)
+- Token staleness: after admin changes permissions, users keep old JWT until it expires (15min) or is refreshed
 
 ### Seeded test credentials
 - Email: `admin@localhost`

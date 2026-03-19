@@ -1,5 +1,5 @@
-using InitialAspireProject.ApiCore.Domain;
 using InitialAspireProject.ApiCore.Service;
+using InitialAspireProject.Shared.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,6 +11,9 @@ namespace InitialAspireProject.ApiCore.Controllers;
 public class WeatherForecastController(WeatherForecastService weatherForecastService) : ControllerBase
 {
     [HttpGet(Name = "GetWeatherForecast")]
-    public async Task<IEnumerable<WeatherForecast>> Get()
-        => await weatherForecastService.GetListAsync();
+    public async Task<IEnumerable<WeatherForecastDto>> Get()
+    {
+        var forecasts = await weatherForecastService.GetListAsync();
+        return forecasts.Select(f => new WeatherForecastDto(f.Date, f.TemperatureC, f.Summary));
+    }
 }

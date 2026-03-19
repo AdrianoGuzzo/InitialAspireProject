@@ -1,13 +1,15 @@
 using System.Text.Json;
+using InitialAspireProject.Shared;
+using InitialAspireProject.Shared.Models;
 
 namespace InitialAspireProject.Web.Services;
 
 public class WeatherApiService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor, ILogger<WeatherApiService> logger, ITokenRefreshService tokenRefreshService)
     : AuthenticatedHttpService(httpClient, httpContextAccessor, logger, tokenRefreshService)
 {
-    public async Task<WeatherForecast[]> GetWeatherAsync(int maxItems = 10, CancellationToken cancellationToken = default)
+    public async Task<WeatherForecastDto[]> GetWeatherAsync(int maxItems = 10, CancellationToken cancellationToken = default)
     {
-        List<WeatherForecast>? forecasts = null;
+        var forecasts = new List<WeatherForecastDto>();
 
         try
         {
@@ -16,15 +18,14 @@ public class WeatherApiService(HttpClient httpClient, IHttpContextAccessor httpC
             response.EnsureSuccessStatusCode();
 
             using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-            await foreach (var forecast in JsonSerializer.DeserializeAsyncEnumerable<WeatherForecast>(stream, cancellationToken: cancellationToken))
+            await foreach (var forecast in JsonSerializer.DeserializeAsyncEnumerable<WeatherForecastDto>(stream, JsonDefaults.Options, cancellationToken: cancellationToken))
             {
-                if (forecasts?.Count >= maxItems)
+                if (forecasts.Count >= maxItems)
                 {
                     break;
                 }
                 if (forecast is not null)
                 {
-                    forecasts ??= [];
                     forecasts.Add(forecast);
                 }
             }
@@ -34,12 +35,12 @@ public class WeatherApiService(HttpClient httpClient, IHttpContextAccessor httpC
             logger.LogError(ex, "Error calling weather API: {Message}", ex.Message);
             return [];
         }
+        catch (JsonException ex)
+        {
+            logger.LogError(ex, "Error deserializing weather API response: {Message}", ex.Message);
+            return [];
+        }
 
-        return forecasts?.ToArray() ?? [];
+        return forecasts.ToArray();
     }
-}
-
-public record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }

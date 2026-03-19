@@ -1,7 +1,7 @@
 using InitialAspireProject.ApiCore;
 using InitialAspireProject.ApiCore.Controllers;
-using InitialAspireProject.ApiCore.Domain;
 using InitialAspireProject.ApiCore.Service;
+using InitialAspireProject.Shared.Models;
 using InitialAspireProject.Tests.Builders;
 using Microsoft.EntityFrameworkCore;
 
@@ -46,7 +46,7 @@ public class WeatherForecastControllerTests
     }
 
     [Fact]
-    public async Task Get_ReturnsDomainObjects()
+    public async Task Get_MapsToWeatherForecastDto()
     {
         var (context, controller) = CreateController();
         await using var _ = context;
@@ -57,7 +57,7 @@ public class WeatherForecastControllerTests
 
         var result = (await controller.Get()).Single();
 
-        Assert.IsType<WeatherForecast>(result);
+        Assert.IsType<WeatherForecastDto>(result);
         Assert.Equal(30, result.TemperatureC);
         Assert.Equal("Hot", result.Summary);
     }

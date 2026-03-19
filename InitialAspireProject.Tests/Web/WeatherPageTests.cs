@@ -2,6 +2,8 @@ using Bunit;
 using Bunit.TestDoubles;
 using InitialAspireProject.Web.Components.Pages;
 using InitialAspireProject.Web.Resources;
+using InitialAspireProject.Shared;
+using InitialAspireProject.Shared.Models;
 using InitialAspireProject.Web.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Localization;
@@ -25,9 +27,9 @@ public class WeatherPageTests : Bunit.TestContext
         authContext.SetAuthorized("testuser");
     }
 
-    private void RegisterWeatherService(WeatherForecast[] forecasts)
+    private void RegisterWeatherService(WeatherForecastDto[] forecasts)
     {
-        var json = JsonSerializer.Serialize(forecasts);
+        var json = JsonSerializer.Serialize(forecasts, JsonDefaults.Options);
         var handler = new TestHttpMessageHandler(new HttpResponseMessage
         {
             StatusCode = HttpStatusCode.OK,
@@ -49,9 +51,9 @@ public class WeatherPageTests : Bunit.TestContext
     {
         var forecasts = new[]
         {
-            new WeatherForecast(DateOnly.FromDateTime(DateTime.Now), 25, "Sunny"),
-            new WeatherForecast(DateOnly.FromDateTime(DateTime.Now.AddDays(1)), 10, "Rainy"),
-            new WeatherForecast(DateOnly.FromDateTime(DateTime.Now.AddDays(2)), -5, "Snowy"),
+            new WeatherForecastDto(DateOnly.FromDateTime(DateTime.Now), 25, "Sunny"),
+            new WeatherForecastDto(DateOnly.FromDateTime(DateTime.Now.AddDays(1)), 10, "Rainy"),
+            new WeatherForecastDto(DateOnly.FromDateTime(DateTime.Now.AddDays(2)), -5, "Snowy"),
         };
         RegisterWeatherService(forecasts);
 
@@ -64,7 +66,7 @@ public class WeatherPageTests : Bunit.TestContext
     [Fact]
     public void Weather_SunnyForecast_ShowsSunIcon()
     {
-        RegisterWeatherService([new WeatherForecast(DateOnly.FromDateTime(DateTime.Now), 30, "Sunny day")]);
+        RegisterWeatherService([new WeatherForecastDto(DateOnly.FromDateTime(DateTime.Now), 30, "Sunny day")]);
 
         var cut = RenderComponent<Weather>();
         cut.WaitForState(() => cut.FindAll(".bi-sun-fill").Count > 0);
@@ -75,7 +77,7 @@ public class WeatherPageTests : Bunit.TestContext
     [Fact]
     public void Weather_RainyForecast_ShowsRainIcon()
     {
-        RegisterWeatherService([new WeatherForecast(DateOnly.FromDateTime(DateTime.Now), 15, "Rainy")]);
+        RegisterWeatherService([new WeatherForecastDto(DateOnly.FromDateTime(DateTime.Now), 15, "Rainy")]);
 
         var cut = RenderComponent<Weather>();
         cut.WaitForState(() => cut.FindAll(".bi-cloud-rain-fill").Count > 0);
@@ -86,7 +88,7 @@ public class WeatherPageTests : Bunit.TestContext
     [Fact]
     public void Weather_CloudyForecast_ShowsCloudIcon()
     {
-        RegisterWeatherService([new WeatherForecast(DateOnly.FromDateTime(DateTime.Now), 20, "Cloudy")]);
+        RegisterWeatherService([new WeatherForecastDto(DateOnly.FromDateTime(DateTime.Now), 20, "Cloudy")]);
 
         var cut = RenderComponent<Weather>();
         cut.WaitForState(() => cut.FindAll(".bi-cloud-fill").Count > 0);
@@ -97,7 +99,7 @@ public class WeatherPageTests : Bunit.TestContext
     [Fact]
     public void Weather_SnowyForecast_ShowsSnowIcon()
     {
-        RegisterWeatherService([new WeatherForecast(DateOnly.FromDateTime(DateTime.Now), -2, "Snowy")]);
+        RegisterWeatherService([new WeatherForecastDto(DateOnly.FromDateTime(DateTime.Now), -2, "Snowy")]);
 
         var cut = RenderComponent<Weather>();
         cut.WaitForState(() => cut.FindAll(".bi-snow").Count > 0);
@@ -108,7 +110,7 @@ public class WeatherPageTests : Bunit.TestContext
     [Fact]
     public void Weather_StormForecast_ShowsLightningIcon()
     {
-        RegisterWeatherService([new WeatherForecast(DateOnly.FromDateTime(DateTime.Now), 22, "Stormy weather")]);
+        RegisterWeatherService([new WeatherForecastDto(DateOnly.FromDateTime(DateTime.Now), 22, "Stormy weather")]);
 
         var cut = RenderComponent<Weather>();
         cut.WaitForState(() => cut.FindAll(".bi-cloud-lightning-fill").Count > 0);
@@ -119,7 +121,7 @@ public class WeatherPageTests : Bunit.TestContext
     [Fact]
     public void Weather_UnknownSummary_ShowsDefaultIcon()
     {
-        RegisterWeatherService([new WeatherForecast(DateOnly.FromDateTime(DateTime.Now), 18, "Mild")]);
+        RegisterWeatherService([new WeatherForecastDto(DateOnly.FromDateTime(DateTime.Now), 18, "Mild")]);
 
         var cut = RenderComponent<Weather>();
         cut.WaitForState(() => cut.FindAll(".bi-cloud-sun-fill").Count > 0);
@@ -130,7 +132,7 @@ public class WeatherPageTests : Bunit.TestContext
     [Fact]
     public void Weather_HighTemp_ShowsDangerBadge()
     {
-        RegisterWeatherService([new WeatherForecast(DateOnly.FromDateTime(DateTime.Now), 35, "Sunny")]);
+        RegisterWeatherService([new WeatherForecastDto(DateOnly.FromDateTime(DateTime.Now), 35, "Sunny")]);
 
         var cut = RenderComponent<Weather>();
         cut.WaitForState(() => cut.FindAll(".bg-danger").Count > 0);
@@ -141,7 +143,7 @@ public class WeatherPageTests : Bunit.TestContext
     [Fact]
     public void Weather_MediumTemp_ShowsWarningBadge()
     {
-        RegisterWeatherService([new WeatherForecast(DateOnly.FromDateTime(DateTime.Now), 22, "Mild")]);
+        RegisterWeatherService([new WeatherForecastDto(DateOnly.FromDateTime(DateTime.Now), 22, "Mild")]);
 
         var cut = RenderComponent<Weather>();
         cut.WaitForState(() => cut.FindAll(".bg-warning").Count > 0);
@@ -152,7 +154,7 @@ public class WeatherPageTests : Bunit.TestContext
     [Fact]
     public void Weather_CoolTemp_ShowsSuccessBadge()
     {
-        RegisterWeatherService([new WeatherForecast(DateOnly.FromDateTime(DateTime.Now), 15, "Cool")]);
+        RegisterWeatherService([new WeatherForecastDto(DateOnly.FromDateTime(DateTime.Now), 15, "Cool")]);
 
         var cut = RenderComponent<Weather>();
         cut.WaitForState(() => cut.FindAll(".bg-success").Count > 0);
@@ -163,7 +165,7 @@ public class WeatherPageTests : Bunit.TestContext
     [Fact]
     public void Weather_ColdTemp_ShowsInfoBadge()
     {
-        RegisterWeatherService([new WeatherForecast(DateOnly.FromDateTime(DateTime.Now), 3, "Cold")]);
+        RegisterWeatherService([new WeatherForecastDto(DateOnly.FromDateTime(DateTime.Now), 3, "Cold")]);
 
         var cut = RenderComponent<Weather>();
         cut.WaitForState(() => cut.FindAll(".bg-info").Count > 0);
@@ -174,7 +176,7 @@ public class WeatherPageTests : Bunit.TestContext
     [Fact]
     public void Weather_FreezingTemp_ShowsPrimaryBadge()
     {
-        RegisterWeatherService([new WeatherForecast(DateOnly.FromDateTime(DateTime.Now), -10, "Freezing")]);
+        RegisterWeatherService([new WeatherForecastDto(DateOnly.FromDateTime(DateTime.Now), -10, "Freezing")]);
 
         var cut = RenderComponent<Weather>();
         cut.WaitForState(() => cut.FindAll(".bg-primary").Count > 0);
@@ -187,8 +189,8 @@ public class WeatherPageTests : Bunit.TestContext
     {
         var forecasts = new[]
         {
-            new WeatherForecast(DateOnly.FromDateTime(DateTime.Now), 10, "Cool"),
-            new WeatherForecast(DateOnly.FromDateTime(DateTime.Now.AddDays(1)), 30, "Hot"),
+            new WeatherForecastDto(DateOnly.FromDateTime(DateTime.Now), 10, "Cool"),
+            new WeatherForecastDto(DateOnly.FromDateTime(DateTime.Now.AddDays(1)), 30, "Hot"),
         };
         RegisterWeatherService(forecasts);
 
@@ -202,7 +204,7 @@ public class WeatherPageTests : Bunit.TestContext
     [Fact]
     public void Weather_NullSummary_ShowsDefaultIcon()
     {
-        RegisterWeatherService([new WeatherForecast(DateOnly.FromDateTime(DateTime.Now), 20, null)]);
+        RegisterWeatherService([new WeatherForecastDto(DateOnly.FromDateTime(DateTime.Now), 20, null)]);
 
         var cut = RenderComponent<Weather>();
         cut.WaitForState(() => cut.FindAll(".bi-cloud-sun-fill").Count > 0);

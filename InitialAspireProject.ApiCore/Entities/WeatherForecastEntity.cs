@@ -29,6 +29,7 @@ namespace InitialAspireProject.ApiCore.Entities
         public WeatherForecast ToDomain()
             => new WeatherForecast
             {
+                Id = Id,
                 Date = Date,
                 Summary = Summary,
                 TemperatureC = TemperatureC

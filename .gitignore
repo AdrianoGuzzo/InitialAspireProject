@@ -40,6 +40,8 @@ packages/
 .env
 docker-compose.override.yml
 **/data/
+!InitialAspireProject.Mobile/**/data/
+!InitialAspireProject.Mobile/**/data/**
 
 # OS
 .DS_Store

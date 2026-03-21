@@ -54,6 +54,18 @@ var apiIdentity = builder.AddProject<Projects.InitialAspireProject_ApiIdentity>(
     .WaitFor(mailpit)
     .WithEnvironment("App__BaseUrl", web.GetEndpoint("https"));
 
+var bff = builder.AddProject<Projects.InitialAspireProject_Bff>("bff")
+    .PublishAsDockerComposeService((resource, service) =>
+    {
+        service.Name = "bff";
+    })
+    .WithExternalHttpEndpoints()
+    .WithHttpHealthCheck("/health")
+    .WithReference(apiIdentity)
+    .WaitFor(apiIdentity)
+    .WithReference(apiCore)
+    .WaitFor(apiCore);
+
 web.WithReference(apiIdentity)
     .WaitFor(apiIdentity)
     .WithReference(apiCore)

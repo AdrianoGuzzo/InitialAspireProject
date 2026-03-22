@@ -80,7 +80,8 @@ This is a **.NET 9 Aspire** microservices solution with 8 projects (Aspire 13.1.
 - **PostgreSQL** container with two databases; PgAdmin available in development; host port 5432 in dev
 - **Redis** container used for output caching in the Web project
 - **Mailpit** container (`AddMailPit`) for local SMTP capture in development; web UI auto-opened by Aspire
-- **BFF** project registered with external HTTP endpoints, service discovery references to both ApiIdentity and ApiCore, `WaitFor` dependencies
+- **BFF** project registered with external HTTP endpoints (pinned to HTTPS port 7040), service discovery references to both ApiIdentity and ApiCore, `WaitFor` dependencies
+- **Mobile** (dev only, port 5280) — Flutter web app registered via `AddExecutable("mobile", "flutter", ..., "run", "-d", "chrome")` with `WaitFor(bff)`. Requires Flutter SDK on PATH. Hot-reload keys (`r`/`R`) are unavailable (no stdin); for hot-reload, run `flutter run` separately. First run requires: `flutter pub get && dart run build_runner build --delete-conflicting-outputs`
 - Docker Compose environment configured via `AddDockerComposeEnvironment("compose")`
 - All services expose `/health` HTTP health checks
 

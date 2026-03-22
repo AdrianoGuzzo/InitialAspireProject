@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
 var builder = DistributedApplication.CreateBuilder(args);
@@ -65,6 +66,23 @@ var bff = builder.AddProject<Projects.InitialAspireProject_Bff>("bff")
     .WaitFor(apiIdentity)
     .WithReference(apiCore)
     .WaitFor(apiCore);
+
+if (builder.Environment.IsDevelopment())
+{
+    var mobilePort = builder.Configuration.GetValue<int>("Mobile:Port", 5280);
+
+    builder.AddExecutable("mobile", "flutter", "../InitialAspireProject.Mobile", "run", "-d", "chrome")
+        .WithHttpEndpoint(port: mobilePort, name: "http", isProxied: false)
+        .WithArgs(context =>
+        {
+            context.Args.Add("--web-port");
+            context.Args.Add(mobilePort.ToString());
+            context.Args.Add("--dart-define");
+            context.Args.Add(ReferenceExpression.Create($"BASE_URL={bff.GetEndpoint("https")}"));
+        })
+        .ExcludeFromManifest()
+        .WaitFor(bff);
+}
 
 web.WithReference(apiIdentity)
     .WaitFor(apiIdentity)

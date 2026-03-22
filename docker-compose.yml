@@ -133,6 +133,37 @@ services:
       - app
     restart: unless-stopped
 
+  bff:
+    build:
+      context: .
+      dockerfile: InitialAspireProject.Bff/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+      HTTP_PORTS: "8080"
+      Jwt__Key: ${JWT_KEY}
+      Jwt__Issuer: ${JWT_ISSUER}
+      Jwt__Audience: ${JWT_AUDIENCE}
+      services__apiidentity__http__0: "http://apiidentity:8080"
+      services__apicore__http__0: "http://apicore:8080"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://dashboard:18889"
+      OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+      OTEL_SERVICE_NAME: "bff"
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES: "true"
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES: "true"
+      Cors__AllowedOrigins: ${CORS_ALLOWED_ORIGINS}
+    ports:
+      - "${BFF_PORT:-7040}:8080"
+    volumes:
+      - bff-keys:/app/dataprotection-keys
+    depends_on:
+      - dashboard
+      - apiidentity
+      - apicore
+    networks:
+      - app
+    restart: unless-stopped
+
 networks:
   app:
     driver: bridge
@@ -145,4 +176,6 @@ volumes:
   apiidentity-keys:
     driver: local
   apicore-keys:
+    driver: local
+  bff-keys:
     driver: local

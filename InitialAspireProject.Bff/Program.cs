@@ -68,14 +68,23 @@ internal class Program
 
         builder.Services.AddAuthorization(options => options.AddPermissionPolicies());
 
-        if (builder.Environment.IsDevelopment())
+        builder.Services.AddCors(options =>
         {
-            builder.Services.AddCors(options =>
+            options.AddDefaultPolicy(policy =>
             {
-                options.AddDefaultPolicy(policy =>
-                    policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+                if (builder.Environment.IsDevelopment())
+                {
+                    policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                }
+                else
+                {
+                    var origins = builder.Configuration["Cors:AllowedOrigins"]?
+                        .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                        ?? [];
+                    policy.WithOrigins(origins).AllowAnyMethod().AllowAnyHeader();
+                }
             });
-        }
+        });
 
         builder.Services.AddHttpClient<IIdentityProxyService, IdentityProxyService>(
             client => client.BaseAddress = new Uri("https+http://apiidentity"));
@@ -91,8 +100,9 @@ internal class Program
             app.UseSwagger();
             app.UseSwaggerUI();
             app.UseHttpsRedirection();
-            app.UseCors();
         }
+
+        app.UseCors();
 
         app.UseLocalizationDefaults();
         app.UseAuthentication();

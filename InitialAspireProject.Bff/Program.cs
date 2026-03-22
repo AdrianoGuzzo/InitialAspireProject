@@ -81,6 +81,8 @@ internal class Program
                     var origins = builder.Configuration["Cors:AllowedOrigins"]?
                         .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                         ?? [];
+                    if (origins.Length == 0)
+                        throw new InvalidOperationException("Cors:AllowedOrigins must be configured in production.");
                     policy.WithOrigins(origins).AllowAnyMethod().AllowAnyHeader();
                 }
             });

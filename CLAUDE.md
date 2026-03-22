@@ -27,17 +27,29 @@ dotnet test --filter "FullyQualifiedName~TestName"
 dotnet restore
 ```
 
+### Mobile (Flutter)
+```bash
+cd InitialAspireProject.Mobile
+flutter pub get
+dart run build_runner build --delete-conflicting-outputs  # code generation (freezed, json_serializable)
+flutter analyze --no-fatal-infos
+flutter test
+flutter test --coverage  # generates coverage/lcov.info
+```
+
 ## Architecture
 
-This is a **.NET 9 Aspire** microservices solution with 7 projects (Aspire 13.1.2):
+This is a **.NET 9 Aspire** microservices solution with 8 projects (Aspire 13.1.2) plus a Flutter mobile app:
 
 - **AppHost** — Aspire orchestrator. Defines all services, infrastructure (PostgreSQL, Redis), and their dependencies. Start here to understand the system topology.
 - **Shared** — Class library with communication DTOs (`InitialAspireProject.Shared.Models`) and constants (`InitialAspireProject.Shared.Constants`) shared between ApiIdentity, ApiCore, Web, and Tests. Contains: `LoginModel`, `RegisterModel`, `ForgotPasswordModel`, `ResetPasswordModel`, `ConfirmEmailModel`, `LoginResponse`, `LoginErrorResponse`, `ErrorValidation`, `RolePermissionsDto`, `AssignPermissionModel`, `PermissionConstants`, `RefreshTokenRequest`, `RevokeTokenRequest`, `UpdateProfileModel`, `ChangePasswordModel`, `ProfileResponse`, `SessionConstants`.
 - **ApiIdentity** — Auth service with ASP.NET Core Identity + JWT + refresh tokens. Manages users, roles, permissions, and token issuance. Endpoints: `POST /auth/register`, `POST /auth/login`, `GET /auth/profile`, `PUT /auth/profile`, `POST /auth/change-password`, `GET /auth/admin-only`, `POST /auth/forgot-password`, `POST /auth/reset-password`, `POST /auth/confirm-email`, `POST /auth/resend-activation`, `POST /auth/refresh`, `POST /auth/revoke`, `GET /permissions`, `GET /permissions/roles`, `GET /permissions/roles/{roleName}`, `POST /permissions/roles/{roleName}`, `DELETE /permissions/roles/{roleName}/{permission}`.
 - **ApiCore** — Business API (currently WeatherForecast). Protected by JWT. Uses its own `coredb` PostgreSQL database. Swagger/OpenAPI via Swashbuckle.
+- **Bff** — Backend-for-Frontend API gateway (`InitialAspireProject.Bff`). Proxies requests from the mobile app to ApiIdentity and ApiCore. Swagger UI with JWT auth, CORS for mobile, `Accept-Language` forwarding for localization. Controllers extend `BffControllerBase` (shared token extraction and response forwarding). Proxy services extend `BackendProxyService` (error handling, timeout → 504, connection failure → 503). BFF endpoints mirror the backend under `/api/auth/*`, `/api/profile/*`, `/api/weather`.
 - **Web** — Blazor Server frontend. Authenticates via ASP.NET cookie session server-side; JWT is stored in `ISession` via `JwtAuthStateProvider`. Calls both APIs through typed HTTP clients.
 - **ServiceDefaults** — Shared extension methods applied to all services: OpenTelemetry, service discovery, HTTP resilience, and localization (`AddLocalizationDefaults`, `UseLocalizationDefaults`).
 - **Tests** — Unit + integration tests. Uses xunit.v3, bUnit, Moq, Bogus. CI excludes `WebTests` (Aspire integration tests).
+- **Mobile** — Flutter/Dart cross-platform mobile app (`InitialAspireProject.Mobile`). Clean architecture (domain/data/presentation layers), Riverpod state management, Dio HTTP client with auth interceptor and automatic token refresh, GoRouter navigation with auth guards. Features: login, register, forgot/reset password, email confirmation, profile management, weather forecast. i18n via ARB files (pt-BR default, en, es).
 
 ### Authentication Flow
 1. User POSTs credentials to `ApiIdentity /auth/login` → receives a JWT (15-min expiry) + refresh token (7-day expiry)
@@ -51,7 +63,10 @@ This is a **.NET 9 Aspire** microservices solution with 7 projects (Aspire 13.1.
 - Services use Aspire **service discovery** — URLs like `https+http://apiidentity` resolve at runtime
 - `ServiceDefaults` configures `Microsoft.Extensions.Http.Resilience` for HTTP clients, and provides `AddPermissionPolicies()` for registering permission-based authorization policies
 - Web registers typed HTTP clients: `LoginService`, `RegisterService`, `ForgotPasswordService`, `ResetPasswordService`, `ConfirmEmailService`, `PermissionService`, `ProfileService`, `TokenRefreshService` (all → `apiidentity`), and `WeatherApiService` (→ `apicore`)
-- All HTTP request/response DTOs live in `InitialAspireProject.Shared.Models` — Web services use these typed models (not anonymous objects) when calling APIs
+- BFF registers `IIdentityProxyService` (→ `apiidentity`) and `ICoreProxyService` (→ `apicore`) via typed `HttpClient`; forwards `Accept-Language` and Bearer tokens
+- Mobile → BFF → Backend: Mobile uses Dio HTTP client pointed at the BFF's external endpoint; BFF proxies to the internal services
+- All HTTP request/response DTOs live in `InitialAspireProject.Shared.Models` — Web and BFF use these typed models (not anonymous objects) when calling APIs
+- Mobile DTOs live in `Mobile/lib/features/*/data/models/` — request-only DTOs use `@JsonSerializable(createFactory: false)`, response-only DTOs use `@JsonSerializable(createToJson: false)`
 - Web-only result types (`RegisterResult`, `ForgotPasswordResult`, `ResetPasswordResult`, `ConfirmEmailResult`) live in `Web/Services/ServiceModels.cs`
 - `LoginResult` (with `Token`, `RefreshToken`, `ErrorCode`, `Success`, `IsEmailNotConfirmed`) is defined in `Web/Services/LoginService.cs`
 - Web services use `BaseHttpService` (error handling, validation parsing) and `AuthenticatedHttpService` (auto Bearer token attachment, 401 retry with token refresh)
@@ -65,22 +80,32 @@ This is a **.NET 9 Aspire** microservices solution with 7 projects (Aspire 13.1.
 - **PostgreSQL** container with two databases; PgAdmin available in development; host port 5432 in dev
 - **Redis** container used for output caching in the Web project
 - **Mailpit** container (`AddMailPit`) for local SMTP capture in development; web UI auto-opened by Aspire
+- **BFF** project registered with external HTTP endpoints, service discovery references to both ApiIdentity and ApiCore, `WaitFor` dependencies
 - Docker Compose environment configured via `AddDockerComposeEnvironment("compose")`
 - All services expose `/health` HTTP health checks
 
 ### CI (GitHub Actions)
+**.NET** (`ci.yml`):
 - Runs on push/PR to `main`
 - Builds in Release configuration using `InitialAspireProject.slnx`
 - Runs unit tests with Coverlet (excludes `WebTests` integration tests, AppHost, ServiceDefaults, Program.cs, Migrations)
 - Coverage gate: **fail below 40%**, warn below 80%
 - Posts coverage summary as a PR comment
 
+**Mobile** (`ci-mobile.yml`):
+- Runs on push/PR to `main` (working directory: `InitialAspireProject.Mobile`)
+- Steps: Flutter setup → `pub get` → `build_runner` code generation → `flutter analyze --no-fatal-infos` → `flutter test --coverage`
+- Coverage converted via `lcov_cobertura`, same thresholds (fail below 40%, warn below 80%)
+- Posts mobile coverage summary as a separate PR comment (`mobile-coverage` header)
+
 ### Test structure
 - `Tests/ApiIdentity/` — AuthControllerTests, AuthControllerPasswordResetTests, SmtpEmailServiceTests, TokenServiceTests, SeederTests, ApplicationDbContextTests, PermissionControllerTests, RefreshTokenServiceTests
 - `Tests/ApiCore/` — WeatherForecastControllerTests, WeatherForecastServiceTests, WeatherForecastDomainTests
 - `Tests/Shared/` — PermissionConstantsTests
 - `Tests/Web/` — Service tests: JwtAuthStateProviderTests, WeatherApiServiceTests, LoginServiceTests, RegisterServiceTests, ForgotPasswordServiceTests, ResetPasswordServiceTests, ConfirmEmailServiceTests, PermissionServiceTests, ProfileServiceTests, TokenRefreshServiceTests, ThemeServiceTests, WebMessagesTests. Page tests (bUnit): CounterTests, LoginPageTests, RegisterPageTests, ForgotPasswordPageTests, ResetPasswordPageTests, HomePageTests, WeatherPageTests, LogoutPageTests, SettingsPageTests, AdminPermissionsPageTests, ProfilePageTests. Integration: WebTests
+- `Tests/Bff/` — AuthControllerTests, ProfileControllerTests, WeatherControllerTests, IdentityProxyServiceTests, CoreProxyServiceTests
 - `Tests/Builders/` — Test data builders using Bogus (ApplicationUser, LoginModel, RegisterModel, ForgotPasswordModel, ResetPasswordModel, WeatherForecast)
+- `Mobile/test/` — Flutter tests: `core/error/error_handler_test.dart`, `core/network/auth_interceptor_test.dart`, `core/storage/token_storage_test.dart`, `features/auth/data/repositories/auth_repository_impl_test.dart`, `features/profile/data/repositories/profile_repository_impl_test.dart`, `features/weather/data/repositories/weather_repository_impl_test.dart`. Uses `mocktail` for mocking.
 
 ### Password Reset Flow
 1. User submits email to `POST /auth/forgot-password` — always returns a generic success message (anti-enumeration)
@@ -155,3 +180,28 @@ Supported cultures: **pt-BR** (default), **en**, **es**.
 - Culture stored in a 1-year cookie (`.AspNetCore.Culture`) via `CookieRequestCultureProvider` registered as priority 0 in `Web/Program.cs`
 - `/set-culture?culture=en&redirectUri=/path` minimal API endpoint writes the cookie and redirects; links use `data-enhance-nav="false"` to force a full page load so the new circuit picks up the cookie
 - Language switcher dropdown in `NavMenu.razor` (sidebar footer)
+
+**Mobile (Flutter):**
+- ARB files: `Mobile/lib/l10n/app_pt.arb` (pt-BR default), `app_en.arb`, `app_es.arb`
+- Generated localizations: `Mobile/lib/l10n/app_localizations.dart` (auto-generated by `flutter gen-l10n`)
+- All screens use `AppLocalizations.of(context)!` for localized strings
+- `LanguageInterceptor` in Dio automatically sends device locale as `Accept-Language` header to the BFF
+
+### BFF (Backend-for-Frontend)
+- `BffControllerBase` — abstract base with `GetBearerToken()`, `GetRequiredBearerToken()`, `GetAcceptLanguage()`, `ForwardResponse()`
+- `BackendProxyService` — base proxy with `CreateForwardRequest()` (bearer + accept-language) and `SendAsync()` (error handling: `HttpRequestException` → 503, timeout → 504)
+- `IdentityProxyService` / `CoreProxyService` — typed proxy services forwarding to backend APIs via Aspire service discovery
+- Controllers: `AuthController` (`/api/auth/*`), `ProfileController` (`/api/profile/*`), `WeatherController` (`/api/weather`)
+- `[Authorize]` on ProfileController and WeatherController at class level; Revoke endpoint on AuthController
+- JWT validation uses same `Jwt:Key`, `Jwt:Issuer`, `Jwt:Audience` config as ApiIdentity
+- Swagger UI available at `/swagger` in development with Bearer auth support
+
+### Mobile Architecture
+- **Clean Architecture**: `features/{name}/domain/` (entities, repositories interfaces), `features/{name}/data/` (DTOs, repository implementations), `features/{name}/presentation/` (screens, widgets), `features/{name}/application/providers/` (Riverpod state management)
+- **State Management**: Riverpod — `authStateProvider` (login/logout/token refresh), `weatherStateProvider`, `profileStateProvider`
+- **Networking**: Dio HTTP client configured via `dioProvider` with 3 interceptors: `AuthInterceptor` (Bearer token attachment, 401 auto-refresh with Completer dedup), `LanguageInterceptor` (Accept-Language), `ErrorInterceptor` (logging)
+- **Routing**: GoRouter via `routerProvider` — public routes (`/login`, `/register`, `/forgot-password`, `/reset-password`, `/confirm-email`), authenticated routes under `ShellRoute` with `AppScaffold` (`/weather`, `/profile`). Auth guard redirects unauthenticated users to `/login`
+- **Token Storage**: `flutter_secure_storage` via `TokenStorage` class — stores access and refresh tokens securely
+- **Error Handling**: `ErrorHandler.handle()` maps `DioException` types to sealed `Failure` classes (`NetworkFailure`, `UnauthorizedFailure`, `EmailNotConfirmedFailure`, `ValidationFailure`, `ServerFailure`, `UnknownFailure`). `Result<T>` type wraps success/failure
+- **Code Generation**: `freezed` for immutable models (`.freezed.dart`), `json_serializable` for JSON (`.g.dart`). Run `dart run build_runner build --delete-conflicting-outputs` after changing models
+- **Configuration**: `EnvConfig` reads `ENV` and `BASE_URL` from `--dart-define` compile-time constants. Default dev URL: `https://localhost:7040` (BFF). Staging/prod require `BASE_URL` to be set (assertion enforced)

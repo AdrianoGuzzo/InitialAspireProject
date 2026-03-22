@@ -2,7 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'login_request_dto.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(createFactory: false)
 class LoginRequestDto {
   final String email;
   final String password;

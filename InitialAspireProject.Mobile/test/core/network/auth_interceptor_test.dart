@@ -20,8 +20,6 @@ void main() {
   late AuthInterceptor interceptor;
   late MockRequestInterceptorHandler handler;
 
-  bool forceLogoutCalled = false;
-
   setUpAll(() {
     registerFallbackValue(RequestOptions(path: ''));
   });
@@ -32,12 +30,10 @@ void main() {
     mockRefreshDio = MockDio();
     handler = MockRequestInterceptorHandler();
 
-    forceLogoutCalled = false;
-
     interceptor = AuthInterceptor(
       tokenStorage: tokenStorage,
       refreshDio: mockRefreshDio,
-      onForceLogout: () => forceLogoutCalled = true,
+      onForceLogout: () {},
     );
   });
 

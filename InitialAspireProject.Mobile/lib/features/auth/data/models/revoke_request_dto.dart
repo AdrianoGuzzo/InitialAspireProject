@@ -2,7 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'revoke_request_dto.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(createFactory: false)
 class RevokeRequestDto {
   final String refreshToken;
 

@@ -2,7 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'confirm_email_dto.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(createFactory: false)
 class ConfirmEmailDto {
   final String email;
   final String token;

@@ -2,7 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'forgot_password_dto.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(createFactory: false)
 class ForgotPasswordDto {
   final String email;
 

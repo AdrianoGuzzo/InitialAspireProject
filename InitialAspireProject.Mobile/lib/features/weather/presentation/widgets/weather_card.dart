@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:initial_aspire_project_mobile/l10n/app_localizations.dart';
-
 import '../../domain/entities/weather_forecast.dart';
 
 class WeatherCard extends StatelessWidget {
@@ -11,7 +9,6 @@ class WeatherCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context)!;
     final dateStr = DateFormat.yMMMd().format(forecast.date);
 
     return Card(

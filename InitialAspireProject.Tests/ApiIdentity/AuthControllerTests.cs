@@ -178,7 +178,10 @@ public class AuthControllerTests
 
         var result = await controller.Login(model);
 
-        Assert.IsType<UnauthorizedObjectResult>(result);
+        var unauthorized = Assert.IsType<UnauthorizedObjectResult>(result);
+        var value = unauthorized.Value;
+        var code = value!.GetType().GetProperty("Code")?.GetValue(value) as string;
+        Assert.Equal("InvalidCredentials", code);
     }
 
     [Fact]
@@ -195,7 +198,10 @@ public class AuthControllerTests
 
         var result = await controller.Login(model);
 
-        Assert.IsType<UnauthorizedObjectResult>(result);
+        var unauthorized = Assert.IsType<UnauthorizedObjectResult>(result);
+        var value = unauthorized.Value;
+        var code = value!.GetType().GetProperty("Code")?.GetValue(value) as string;
+        Assert.Equal("InvalidCredentials", code);
     }
 
     [Fact]

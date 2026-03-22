@@ -78,13 +78,13 @@ namespace InitialAspireProject.ApiIdentity.Controllers
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
-            if (user == null) return Unauthorized(new LoginErrorResponse { Code = "Unauthorized", Message = _localizer["InvalidCredentials"].Value });
+            if (user == null) return Unauthorized(new LoginErrorResponse { Code = "InvalidCredentials", Message = _localizer["InvalidCredentials"].Value });
 
             if (!await _userManager.IsEmailConfirmedAsync(user))
                 return Unauthorized(new LoginErrorResponse { Code = "EmailNotConfirmed", Message = _localizer["EmailNotConfirmed"].Value });
 
             var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, lockoutOnFailure: true);
-            if (!result.Succeeded) return Unauthorized(_localizer["InvalidCredentials"].Value);
+            if (!result.Succeeded) return Unauthorized(new LoginErrorResponse { Code = "InvalidCredentials", Message = _localizer["InvalidCredentials"].Value });
 
             var roles = await _userManager.GetRolesAsync(user);
             var permissionClaims = await GetPermissionClaimsForRolesAsync(roles);

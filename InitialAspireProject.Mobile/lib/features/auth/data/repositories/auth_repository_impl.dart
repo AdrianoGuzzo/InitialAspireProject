@@ -34,12 +34,20 @@ class AuthRepositoryImpl implements AuthRepository {
       final dto = LoginResponseDto.fromJson(response.data as Map<String, dynamic>);
       return Result.success(dto.toDomain());
     } on DioException catch (e) {
-      // Check for EmailNotConfirmed before generic handling
+      // Check for specific error codes before generic handling
       final data = e.response?.data;
-      if (data is Map<String, dynamic> && data['code'] == 'EmailNotConfirmed') {
-        return Result.failure(
-          Failure.emailNotConfirmed(message: data['message'] as String?),
-        );
+      if (data is Map<String, dynamic>) {
+        final code = data['code'] as String?;
+        if (code == 'EmailNotConfirmed') {
+          return Result.failure(
+            Failure.emailNotConfirmed(message: data['message'] as String?),
+          );
+        }
+        if (code == 'InvalidCredentials') {
+          return Result.failure(
+            Failure.server(message: data['message'] as String?),
+          );
+        }
       }
       return Result.failure(ErrorHandler.handle(e));
     } catch (e) {

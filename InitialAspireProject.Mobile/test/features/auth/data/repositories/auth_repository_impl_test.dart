@@ -60,6 +60,33 @@ void main() {
       expect(failure, isA<EmailNotConfirmedFailure>());
     });
 
+    test('returns ServerFailure with message on InvalidCredentials code',
+        () async {
+      when(() => mockDio.post(ApiConstants.login, data: any(named: 'data')))
+          .thenThrow(DioException(
+        type: DioExceptionType.badResponse,
+        response: Response(
+          statusCode: 401,
+          data: {
+            'code': 'InvalidCredentials',
+            'message': 'Invalid credentials'
+          },
+          requestOptions: RequestOptions(path: ApiConstants.login),
+        ),
+        requestOptions: RequestOptions(path: ApiConstants.login),
+      ));
+
+      final result = await repository.login(
+        email: 'test@test.com',
+        password: 'wrong',
+      );
+
+      expect(result, isA<ResultFailure<AuthTokens>>());
+      final failure = (result as ResultFailure<AuthTokens>).failure;
+      expect(failure, isA<ServerFailure>());
+      expect((failure as ServerFailure).message, 'Invalid credentials');
+    });
+
     test('returns NetworkFailure on connection error', () async {
       when(() => mockDio.post(ApiConstants.login, data: any(named: 'data')))
           .thenThrow(DioException(

@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
 var builder = DistributedApplication.CreateBuilder(args);
@@ -68,7 +69,7 @@ var bff = builder.AddProject<Projects.InitialAspireProject_Bff>("bff")
 
 if (builder.Environment.IsDevelopment())
 {
-    const int mobilePort = 5280;
+    var mobilePort = builder.Configuration.GetValue<int>("Mobile:Port", 5280);
 
     builder.AddExecutable("mobile", "flutter", "../InitialAspireProject.Mobile", "run", "-d", "chrome")
         .WithHttpEndpoint(port: mobilePort, name: "http", isProxied: false)

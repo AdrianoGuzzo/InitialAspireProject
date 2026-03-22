@@ -24,6 +24,7 @@
   "errorNetwork": "No internet connection.",
   "errorUnauthorized": "Session expired. Please log in again.",
   "errorUnknown": "An unexpected error occurred.",
+  "errorInvalidCredentials": "Incorrect email or password.",
   "errorEmailNotConfirmed": "Email not confirmed. Check your inbox.",
   "loginSuccess": "Logged in successfully!",
   "registerSuccess": "Registered! Check your email to activate your account.",

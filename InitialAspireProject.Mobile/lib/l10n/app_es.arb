@@ -24,6 +24,7 @@
   "errorNetwork": "Sin conexión a internet.",
   "errorUnauthorized": "Sesión expirada. Inicie sesión nuevamente.",
   "errorUnknown": "Ocurrió un error inesperado.",
+  "errorInvalidCredentials": "Correo electrónico o contraseña incorrectos.",
   "errorEmailNotConfirmed": "Correo no confirmado. Revise su bandeja de entrada.",
   "loginSuccess": "¡Inicio de sesión exitoso!",
   "registerSuccess": "¡Registrado! Revise su correo para activar su cuenta.",

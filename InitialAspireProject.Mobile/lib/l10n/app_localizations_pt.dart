@@ -81,6 +81,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get errorUnknown => 'Ocorreu um erro inesperado.';
 
   @override
+  String get errorInvalidCredentials => 'E-mail ou senha incorretos.';
+
+  @override
   String get errorEmailNotConfirmed =>
       'E-mail não confirmado. Verifique sua caixa de entrada.';
 

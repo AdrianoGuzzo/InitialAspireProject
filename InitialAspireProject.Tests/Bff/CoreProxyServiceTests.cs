@@ -51,17 +51,30 @@ public class CoreProxyServiceTests
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 
+    [Fact]
+    public async Task GetWeatherAsync_ForwardsAcceptLanguageHeader()
+    {
+        var (service, handler) = CreateService();
+        await service.GetWeatherAsync("my-jwt", "pt-BR");
+
+        Assert.Equal("pt-BR", handler.CapturedAcceptLanguage);
+    }
+
     internal sealed class CapturingHandler : HttpMessageHandler
     {
         public HttpMethod? CapturedMethod { get; private set; }
         public string? CapturedUrl { get; private set; }
         public string? CapturedAuthorization { get; private set; }
+        public string? CapturedAcceptLanguage { get; private set; }
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
         {
             CapturedMethod = request.Method;
             CapturedUrl = request.RequestUri?.AbsolutePath;
             CapturedAuthorization = request.Headers.Authorization?.ToString();
+            CapturedAcceptLanguage = request.Headers.AcceptLanguage.Count > 0
+                ? request.Headers.AcceptLanguage.ToString()
+                : null;
             return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new StringContent("[]", Encoding.UTF8, "application/json")

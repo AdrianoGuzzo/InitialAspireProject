@@ -29,7 +29,7 @@ class AuthInterceptor extends Interceptor {
     RequestInterceptorHandler handler,
   ) async {
     final path = options.path;
-    final isPublic = ApiConstants.publicPaths.any((p) => path.contains(p));
+    final isPublic = ApiConstants.publicPaths.any((p) => path == p);
 
     if (!isPublic) {
       final token = await _tokenStorage.readAccessToken();

@@ -152,7 +152,7 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await _dio.post(
         ApiConstants.resendActivation,
-        data: {'email': email},
+        data: ForgotPasswordDto(email: email).toJson(),
       );
       return const Result.success(null);
     } catch (e) {

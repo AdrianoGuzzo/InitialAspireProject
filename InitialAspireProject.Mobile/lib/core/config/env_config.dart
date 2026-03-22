@@ -15,16 +15,15 @@ class EnvConfig {
   }
 
   static String get baseUrl {
-    switch (environment) {
-      case Environment.dev:
-        return const String.fromEnvironment(
-          'BASE_URL',
-          defaultValue: 'https://localhost:7040',
-        );
-      case Environment.staging:
-        return const String.fromEnvironment('BASE_URL');
-      case Environment.prod:
-        return const String.fromEnvironment('BASE_URL');
-    }
+    final url = switch (environment) {
+      Environment.dev => const String.fromEnvironment(
+        'BASE_URL',
+        defaultValue: 'https://localhost:7040',
+      ),
+      Environment.staging => const String.fromEnvironment('BASE_URL'),
+      Environment.prod => const String.fromEnvironment('BASE_URL'),
+    };
+    assert(url.isNotEmpty, 'BASE_URL must be set for $environment environment');
+    return url;
   }
 }

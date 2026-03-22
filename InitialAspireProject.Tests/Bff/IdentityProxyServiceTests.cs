@@ -132,18 +132,40 @@ public class IdentityProxyServiceTests
         Assert.Equal("/auth/reset-password", handler.CapturedUrl);
     }
 
+    [Fact]
+    public async Task LoginAsync_ForwardsAcceptLanguageHeader()
+    {
+        var (service, handler) = CreateService();
+        await service.LoginAsync(new LoginModel { Email = "a@b.c", Password = "pass" }, "en");
+
+        Assert.Equal("en", handler.CapturedAcceptLanguage);
+    }
+
+    [Fact]
+    public async Task LoginAsync_WithoutAcceptLanguage_DoesNotSetHeader()
+    {
+        var (service, handler) = CreateService();
+        await service.LoginAsync(new LoginModel { Email = "a@b.c", Password = "pass" });
+
+        Assert.Null(handler.CapturedAcceptLanguage);
+    }
+
     internal sealed class CapturingHandler : HttpMessageHandler
     {
         public HttpMethod? CapturedMethod { get; private set; }
         public string? CapturedUrl { get; private set; }
         public string? CapturedAuthorization { get; private set; }
         public string? CapturedBody { get; private set; }
+        public string? CapturedAcceptLanguage { get; private set; }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
         {
             CapturedMethod = request.Method;
             CapturedUrl = request.RequestUri?.AbsolutePath;
             CapturedAuthorization = request.Headers.Authorization?.ToString();
+            CapturedAcceptLanguage = request.Headers.AcceptLanguage.Count > 0
+                ? request.Headers.AcceptLanguage.ToString()
+                : null;
             if (request.Content is not null)
                 CapturedBody = await request.Content.ReadAsStringAsync(ct);
             return new HttpResponseMessage(HttpStatusCode.OK)

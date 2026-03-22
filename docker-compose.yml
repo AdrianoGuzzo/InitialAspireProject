@@ -151,8 +151,11 @@ services:
       OTEL_SERVICE_NAME: "bff"
       OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES: "true"
       OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES: "true"
+      Cors__AllowedOrigins: ${CORS_ALLOWED_ORIGINS}
     ports:
       - "${BFF_PORT:-7040}:8080"
+    volumes:
+      - bff-keys:/app/dataprotection-keys
     depends_on:
       - dashboard
       - apiidentity
@@ -173,4 +176,6 @@ volumes:
   apiidentity-keys:
     driver: local
   apicore-keys:
+    driver: local
+  bff-keys:
     driver: local

@@ -2,7 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'refresh_request_dto.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(createFactory: false)
 class RefreshRequestDto {
   final String refreshToken;
 

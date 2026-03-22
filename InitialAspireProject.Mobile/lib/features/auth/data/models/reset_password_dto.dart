@@ -2,7 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'reset_password_dto.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(createFactory: false)
 class ResetPasswordDto {
   final String email;
   final String token;

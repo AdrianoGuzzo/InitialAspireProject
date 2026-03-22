@@ -2,7 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'update_profile_dto.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(createFactory: false)
 class UpdateProfileDto {
   final String fullName;
 

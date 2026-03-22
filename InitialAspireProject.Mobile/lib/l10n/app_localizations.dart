@@ -244,12 +244,6 @@ abstract class AppLocalizations {
   /// **'Ocorreu um erro inesperado.'**
   String get errorUnknown;
 
-  /// No description provided for @errorInvalidCredentials.
-  ///
-  /// In pt, this message translates to:
-  /// **'E-mail ou senha incorretos.'**
-  String get errorInvalidCredentials;
-
   /// No description provided for @errorEmailNotConfirmed.
   ///
   /// In pt, this message translates to:

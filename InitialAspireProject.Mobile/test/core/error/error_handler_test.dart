@@ -110,5 +110,79 @@ void main() {
       final result = ErrorHandler.handle(Exception('something'));
       expect(result, isA<UnknownFailure>());
     });
+
+    test('maps sendTimeout to NetworkFailure', () {
+      final error = DioException(
+        type: DioExceptionType.sendTimeout,
+        requestOptions: RequestOptions(path: '/test'),
+      );
+
+      final result = ErrorHandler.handle(error);
+      expect(result, isA<NetworkFailure>());
+    });
+
+    test('maps receiveTimeout to NetworkFailure', () {
+      final error = DioException(
+        type: DioExceptionType.receiveTimeout,
+        requestOptions: RequestOptions(path: '/test'),
+      );
+
+      final result = ErrorHandler.handle(error);
+      expect(result, isA<NetworkFailure>());
+    });
+
+    test('maps cancel to UnknownFailure with Request cancelled', () {
+      final error = DioException(
+        type: DioExceptionType.cancel,
+        requestOptions: RequestOptions(path: '/test'),
+      );
+
+      final result = ErrorHandler.handle(error);
+      expect(result, isA<UnknownFailure>());
+      expect((result as UnknownFailure).message, 'Request cancelled');
+    });
+
+    test('maps badResponse with null response to UnknownFailure', () {
+      final error = DioException(
+        type: DioExceptionType.badResponse,
+        requestOptions: RequestOptions(path: '/test'),
+      );
+
+      final result = ErrorHandler.handle(error);
+      expect(result, isA<UnknownFailure>());
+    });
+
+    test('maps badResponse with title field to ServerFailure', () {
+      final error = DioException(
+        type: DioExceptionType.badResponse,
+        response: Response(
+          statusCode: 404,
+          data: {'title': 'Not Found'},
+          requestOptions: RequestOptions(path: '/test'),
+        ),
+        requestOptions: RequestOptions(path: '/test'),
+      );
+
+      final result = ErrorHandler.handle(error);
+      expect(result, isA<ServerFailure>());
+      expect((result as ServerFailure).message, 'Not Found');
+    });
+
+    test('maps badResponse with empty data map to ServerFailure with HTTP code',
+        () {
+      final error = DioException(
+        type: DioExceptionType.badResponse,
+        response: Response(
+          statusCode: 403,
+          data: <String, dynamic>{},
+          requestOptions: RequestOptions(path: '/test'),
+        ),
+        requestOptions: RequestOptions(path: '/test'),
+      );
+
+      final result = ErrorHandler.handle(error);
+      expect(result, isA<ServerFailure>());
+      expect((result as ServerFailure).message, 'HTTP 403');
+    });
   });
 }

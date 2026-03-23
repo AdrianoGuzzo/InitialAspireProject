@@ -47,6 +47,9 @@ void main() {
       final container = createContainer();
       container.read(weatherStateProvider);
 
+      // Immediately after read, isLoading should be true
+      expect(container.read(weatherStateProvider).isLoading, isTrue);
+
       await Future.delayed(const Duration(milliseconds: 50));
 
       final state = container.read(weatherStateProvider);

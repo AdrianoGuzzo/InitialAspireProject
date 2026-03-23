@@ -38,6 +38,9 @@ void main() {
       final container = createContainer();
       container.read(profileStateProvider);
 
+      // Immediately after read, isLoading should be true
+      expect(container.read(profileStateProvider).isLoading, isTrue);
+
       await Future.delayed(const Duration(milliseconds: 50));
 
       final state = container.read(profileStateProvider);

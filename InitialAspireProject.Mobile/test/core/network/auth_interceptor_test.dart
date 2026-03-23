@@ -403,6 +403,10 @@ void main() {
       // Refresh API should be called exactly once
       verify(() => mockRefreshDio.post(ApiConstants.refresh,
           data: any(named: 'data'))).called(1);
+
+      // Both handlers should have their requests resolved (retried successfully)
+      verify(() => errorHandler1.resolve(any())).called(1);
+      verify(() => errorHandler2.resolve(any())).called(1);
     });
 
     test('null onForceLogout does not crash', () async {

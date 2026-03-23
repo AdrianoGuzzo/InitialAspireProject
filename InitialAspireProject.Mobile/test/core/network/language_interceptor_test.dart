@@ -32,6 +32,9 @@ void main() {
       expect(captured, isNotNull);
       expect(captured!.headers['Accept-Language'], isNotNull);
       expect(captured!.headers['Accept-Language'], isNotEmpty);
+      // Verify it looks like a BCP-47 locale (e.g., "en", "pt-BR", "es_ES")
+      expect(captured!.headers['Accept-Language'],
+          matches(RegExp(r'^[a-z]{2}')));
     });
 
     test('calls handler.next with the options', () {

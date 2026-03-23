@@ -195,6 +195,26 @@ void main() {
       final failure = (result as ResultFailure<AuthTokens>).failure;
       expect(failure, isA<NetworkFailure>());
     });
+
+    test('returns UnauthorizedFailure on 401 (expired/replayed token)',
+        () async {
+      when(() => mockDio.post(ApiConstants.refresh, data: any(named: 'data')))
+          .thenThrow(DioException(
+        type: DioExceptionType.badResponse,
+        response: Response(
+          statusCode: 401,
+          data: {'code': 'Expired', 'message': 'Refresh token expired'},
+          requestOptions: RequestOptions(path: ApiConstants.refresh),
+        ),
+        requestOptions: RequestOptions(path: ApiConstants.refresh),
+      ));
+
+      final result = await repository.refresh(refreshToken: 'expired-rt');
+
+      expect(result, isA<ResultFailure<AuthTokens>>());
+      final failure = (result as ResultFailure<AuthTokens>).failure;
+      expect(failure, isA<UnauthorizedFailure>());
+    });
   });
 
   group('revoke', () {

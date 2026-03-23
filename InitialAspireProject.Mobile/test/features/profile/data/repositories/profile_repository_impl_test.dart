@@ -73,6 +73,43 @@ void main() {
 
       expect(result, isA<Success<void>>());
     });
+
+    test('returns ValidationFailure on 400 with errors', () async {
+      when(() => mockDio.put(ApiConstants.profile, data: any(named: 'data')))
+          .thenThrow(DioException(
+        type: DioExceptionType.badResponse,
+        response: Response(
+          statusCode: 400,
+          data: {
+            'errors': {
+              'FullName': ['Name is required'],
+            },
+          },
+          requestOptions: RequestOptions(path: ApiConstants.profile),
+        ),
+        requestOptions: RequestOptions(path: ApiConstants.profile),
+      ));
+
+      final result = await repository.updateProfile(fullName: '');
+
+      expect(result, isA<ResultFailure<void>>());
+      final failure = (result as ResultFailure<void>).failure;
+      expect(failure, isA<ValidationFailure>());
+    });
+
+    test('returns NetworkFailure on connection error', () async {
+      when(() => mockDio.put(ApiConstants.profile, data: any(named: 'data')))
+          .thenThrow(DioException(
+        type: DioExceptionType.connectionError,
+        requestOptions: RequestOptions(path: ApiConstants.profile),
+      ));
+
+      final result = await repository.updateProfile(fullName: 'Name');
+
+      expect(result, isA<ResultFailure<void>>());
+      final failure = (result as ResultFailure<void>).failure;
+      expect(failure, isA<NetworkFailure>());
+    });
   });
 
   group('changePassword', () {
@@ -91,6 +128,52 @@ void main() {
       );
 
       expect(result, isA<Success<void>>());
+    });
+
+    test('returns ValidationFailure on 400', () async {
+      when(() => mockDio.post(ApiConstants.changePassword,
+              data: any(named: 'data')))
+          .thenThrow(DioException(
+        type: DioExceptionType.badResponse,
+        response: Response(
+          statusCode: 400,
+          data: {
+            'errors': {
+              'CurrentPassword': ['Incorrect password'],
+            },
+          },
+          requestOptions:
+              RequestOptions(path: ApiConstants.changePassword),
+        ),
+        requestOptions: RequestOptions(path: ApiConstants.changePassword),
+      ));
+
+      final result = await repository.changePassword(
+        currentPassword: 'wrong',
+        newPassword: 'new',
+      );
+
+      expect(result, isA<ResultFailure<void>>());
+      final failure = (result as ResultFailure<void>).failure;
+      expect(failure, isA<ValidationFailure>());
+    });
+
+    test('returns NetworkFailure on connection error', () async {
+      when(() => mockDio.post(ApiConstants.changePassword,
+              data: any(named: 'data')))
+          .thenThrow(DioException(
+        type: DioExceptionType.connectionError,
+        requestOptions: RequestOptions(path: ApiConstants.changePassword),
+      ));
+
+      final result = await repository.changePassword(
+        currentPassword: 'old',
+        newPassword: 'new',
+      );
+
+      expect(result, isA<ResultFailure<void>>());
+      final failure = (result as ResultFailure<void>).failure;
+      expect(failure, isA<NetworkFailure>());
     });
   });
 }

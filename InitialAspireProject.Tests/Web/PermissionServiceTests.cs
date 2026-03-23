@@ -42,7 +42,7 @@ public class PermissionServiceTests
         };
         var (service, _) = CreateService(response);
 
-        var result = await service.GetAllPermissionsAsync();
+        var result = await service.GetAllPermissionsAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(expected.Length, result.Length);
     }
@@ -53,7 +53,7 @@ public class PermissionServiceTests
         var response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
         var (service, _) = CreateService(response);
 
-        var result = await service.GetAllPermissionsAsync();
+        var result = await service.GetAllPermissionsAsync(TestContext.Current.CancellationToken);
 
         Assert.Empty(result);
     }
@@ -71,7 +71,7 @@ public class PermissionServiceTests
         };
         var (service, _) = CreateService(response);
 
-        var result = await service.GetAllRolePermissionsAsync();
+        var result = await service.GetAllRolePermissionsAsync(TestContext.Current.CancellationToken);
 
         Assert.Single(result);
         Assert.Equal("Admin", result[0].RoleName);
@@ -83,7 +83,7 @@ public class PermissionServiceTests
         var response = new HttpResponseMessage(HttpStatusCode.OK);
         var (service, _) = CreateService(response);
 
-        var result = await service.AssignPermissionAsync("Admin", PermissionConstants.CanViewSettings);
+        var result = await service.AssignPermissionAsync("Admin", PermissionConstants.CanViewSettings, TestContext.Current.CancellationToken);
 
         Assert.True(result);
     }
@@ -94,7 +94,7 @@ public class PermissionServiceTests
         var response = new HttpResponseMessage(HttpStatusCode.BadRequest);
         var (service, _) = CreateService(response);
 
-        var result = await service.AssignPermissionAsync("Admin", "Invalid");
+        var result = await service.AssignPermissionAsync("Admin", "Invalid", TestContext.Current.CancellationToken);
 
         Assert.False(result);
     }
@@ -105,7 +105,7 @@ public class PermissionServiceTests
         var response = new HttpResponseMessage(HttpStatusCode.OK);
         var (service, _) = CreateService(response);
 
-        var result = await service.RemovePermissionAsync("Admin", PermissionConstants.CanViewSettings);
+        var result = await service.RemovePermissionAsync("Admin", PermissionConstants.CanViewSettings, TestContext.Current.CancellationToken);
 
         Assert.True(result);
     }
@@ -116,7 +116,7 @@ public class PermissionServiceTests
         var response = new HttpResponseMessage(HttpStatusCode.NotFound);
         var (service, _) = CreateService(response);
 
-        var result = await service.RemovePermissionAsync("Admin", PermissionConstants.CanViewSettings);
+        var result = await service.RemovePermissionAsync("Admin", PermissionConstants.CanViewSettings, TestContext.Current.CancellationToken);
 
         Assert.False(result);
     }

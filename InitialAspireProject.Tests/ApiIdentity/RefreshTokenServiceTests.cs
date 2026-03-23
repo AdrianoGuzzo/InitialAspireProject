@@ -38,7 +38,7 @@ public class RefreshTokenServiceTests
         var (service, context) = CreateService();
         var token = await service.GenerateAsync("user1", "TestAgent");
 
-        var stored = await context.RefreshTokens.SingleAsync();
+        var stored = await context.RefreshTokens.SingleAsync(TestContext.Current.CancellationToken);
         Assert.Equal("user1", stored.UserId);
         Assert.Equal("TestAgent", stored.DeviceInfo);
         Assert.NotEqual(token, stored.TokenHash); // stored is hash, not raw
@@ -53,7 +53,7 @@ public class RefreshTokenServiceTests
         var (service, context) = CreateService("3");
         await service.GenerateAsync("user1", null);
 
-        var stored = await context.RefreshTokens.SingleAsync();
+        var stored = await context.RefreshTokens.SingleAsync(TestContext.Current.CancellationToken);
         var expected = DateTime.UtcNow.AddDays(3);
         Assert.InRange(stored.ExpiresAtUtc, expected.AddMinutes(-1), expected.AddMinutes(1));
     }
@@ -65,7 +65,7 @@ public class RefreshTokenServiceTests
         await service.GenerateAsync("user1", null);
         await service.GenerateAsync("user1", null);
 
-        var tokens = await context.RefreshTokens.ToListAsync();
+        var tokens = await context.RefreshTokens.ToListAsync(TestContext.Current.CancellationToken);
         Assert.NotEqual(tokens[0].Family, tokens[1].Family);
     }
 
@@ -83,7 +83,7 @@ public class RefreshTokenServiceTests
         Assert.NotEqual(rawToken, result.NewRefreshToken);
 
         // Old token should be revoked, new one active
-        var tokens = await context.RefreshTokens.ToListAsync();
+        var tokens = await context.RefreshTokens.ToListAsync(TestContext.Current.CancellationToken);
         Assert.Equal(2, tokens.Count);
         var old = tokens.First(t => t.TokenHash == RefreshTokenService.HashToken(rawToken));
         var newStored = tokens.First(t => t.TokenHash == RefreshTokenService.HashToken(result.NewRefreshToken!));
@@ -109,9 +109,9 @@ public class RefreshTokenServiceTests
         var rawToken = await service.GenerateAsync("user1", null);
 
         // Force the token to be expired
-        var stored = await context.RefreshTokens.SingleAsync();
+        var stored = await context.RefreshTokens.SingleAsync(TestContext.Current.CancellationToken);
         stored.ExpiresAtUtc = DateTime.UtcNow.AddDays(-1);
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var result = await service.ValidateAndRotateAsync(rawToken, null);
 
@@ -136,7 +136,7 @@ public class RefreshTokenServiceTests
         Assert.Equal("ReplayDetected", replayResult.ErrorCode);
 
         // All tokens in the family should be revoked
-        var allTokens = await context.RefreshTokens.ToListAsync();
+        var allTokens = await context.RefreshTokens.ToListAsync(TestContext.Current.CancellationToken);
         Assert.All(allTokens, t => Assert.True(t.IsRevoked));
     }
 
@@ -148,7 +148,7 @@ public class RefreshTokenServiceTests
 
         await service.RevokeAsync(rawToken);
 
-        var stored = await context.RefreshTokens.SingleAsync();
+        var stored = await context.RefreshTokens.SingleAsync(TestContext.Current.CancellationToken);
         Assert.True(stored.IsRevoked);
     }
 
@@ -170,10 +170,10 @@ public class RefreshTokenServiceTests
 
         await service.RevokeAllForUserAsync("user1");
 
-        var user1Tokens = await context.RefreshTokens.Where(t => t.UserId == "user1").ToListAsync();
+        var user1Tokens = await context.RefreshTokens.Where(t => t.UserId == "user1").ToListAsync(TestContext.Current.CancellationToken);
         Assert.All(user1Tokens, t => Assert.True(t.IsRevoked));
 
-        var user2Token = await context.RefreshTokens.SingleAsync(t => t.UserId == "user2");
+        var user2Token = await context.RefreshTokens.SingleAsync(t => t.UserId == "user2", TestContext.Current.CancellationToken);
         Assert.False(user2Token.IsRevoked);
     }
 
@@ -190,12 +190,12 @@ public class RefreshTokenServiceTests
     {
         var (service, context) = CreateService();
         var rawToken = await service.GenerateAsync("user1", null);
-        var firstFamily = (await context.RefreshTokens.SingleAsync()).Family;
+        var firstFamily = (await context.RefreshTokens.SingleAsync(TestContext.Current.CancellationToken)).Family;
 
         var result1 = await service.ValidateAndRotateAsync(rawToken, null);
         var result2 = await service.ValidateAndRotateAsync(result1.NewRefreshToken!, null);
 
-        var allTokens = await context.RefreshTokens.ToListAsync();
+        var allTokens = await context.RefreshTokens.ToListAsync(TestContext.Current.CancellationToken);
         Assert.Equal(3, allTokens.Count);
         Assert.All(allTokens, t => Assert.Equal(firstFamily, t.Family));
     }

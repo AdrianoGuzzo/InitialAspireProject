@@ -2,6 +2,7 @@ using InitialAspireProject.Bff.Services;
 using InitialAspireProject.Shared.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace InitialAspireProject.Bff.Controllers;
 
@@ -9,6 +10,7 @@ namespace InitialAspireProject.Bff.Controllers;
 [Route("api/auth")]
 public class AuthController(IIdentityProxyService identityProxy) : BffControllerBase
 {
+    [EnableRateLimiting("bff-auth-strict")]
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginModel model)
     {
@@ -16,6 +18,7 @@ public class AuthController(IIdentityProxyService identityProxy) : BffController
         return await ForwardResponse(response);
     }
 
+    [EnableRateLimiting("bff-auth-strict")]
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterModel model)
     {
@@ -23,6 +26,7 @@ public class AuthController(IIdentityProxyService identityProxy) : BffController
         return await ForwardResponse(response);
     }
 
+    [EnableRateLimiting("bff-auth-standard")]
     [HttpPost("refresh")]
     public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest model)
     {
@@ -38,6 +42,7 @@ public class AuthController(IIdentityProxyService identityProxy) : BffController
         return await ForwardResponse(response);
     }
 
+    [EnableRateLimiting("bff-auth-strict")]
     [HttpPost("forgot-password")]
     public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordModel model)
     {
@@ -45,6 +50,7 @@ public class AuthController(IIdentityProxyService identityProxy) : BffController
         return await ForwardResponse(response);
     }
 
+    [EnableRateLimiting("bff-auth-strict")]
     [HttpPost("reset-password")]
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordModel model)
     {
@@ -52,6 +58,7 @@ public class AuthController(IIdentityProxyService identityProxy) : BffController
         return await ForwardResponse(response);
     }
 
+    [EnableRateLimiting("bff-auth-standard")]
     [HttpPost("confirm-email")]
     public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailModel model)
     {
@@ -59,6 +66,7 @@ public class AuthController(IIdentityProxyService identityProxy) : BffController
         return await ForwardResponse(response);
     }
 
+    [EnableRateLimiting("bff-auth-standard")]
     [HttpPost("resend-activation")]
     public async Task<IActionResult> ResendActivation([FromBody] ForgotPasswordModel model)
     {

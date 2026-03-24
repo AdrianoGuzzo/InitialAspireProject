@@ -175,6 +175,12 @@
             return;
         }
 
+        if (result.ErrorCode == "TooManyRequests")
+        {
+            message = L["TooManyRequestsMsg"].Value;
+            return;
+        }
+
         if (!result.Success)
         {
             message = L["InvalidCredentialsMsg"].Value;

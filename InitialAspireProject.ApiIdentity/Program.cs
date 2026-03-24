@@ -67,14 +67,31 @@ builder.Services.AddAuthorization(options => options.AddPermissionPolicies());
 
 builder.Services.AddRateLimiter(options =>
 {
-    options.AddFixedWindowLimiter("auth", limiter =>
+    options.AddSlidingWindowLimiter("auth-strict", limiter =>
     {
         limiter.Window = TimeSpan.FromMinutes(1);
-        limiter.PermitLimit = 10;
+        limiter.SegmentsPerWindow = 4;
+        limiter.PermitLimit = 5;
+        limiter.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        limiter.QueueLimit = 0;
+    });
+    options.AddSlidingWindowLimiter("auth-standard", limiter =>
+    {
+        limiter.Window = TimeSpan.FromMinutes(1);
+        limiter.SegmentsPerWindow = 4;
+        limiter.PermitLimit = 15;
         limiter.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
         limiter.QueueLimit = 0;
     });
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
+        {
+            context.HttpContext.Response.Headers.RetryAfter = ((int)retryAfter.TotalSeconds).ToString();
+        }
+        await ValueTask.CompletedTask;
+    };
 });
 
 builder.Services.AddControllers();

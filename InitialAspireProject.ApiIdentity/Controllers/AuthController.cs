@@ -48,7 +48,7 @@ namespace InitialAspireProject.ApiIdentity.Controllers
             _localizer = localizer;
         }
 
-        [EnableRateLimiting("auth")]
+        [EnableRateLimiting("auth-strict")]
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
@@ -73,7 +73,7 @@ namespace InitialAspireProject.ApiIdentity.Controllers
             return Ok(_localizer["UserRegisteredCheckEmail"].Value);
         }
 
-        [EnableRateLimiting("auth")]
+        [EnableRateLimiting("auth-strict")]
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
@@ -141,7 +141,7 @@ namespace InitialAspireProject.ApiIdentity.Controllers
             return Ok(_localizer["AdminOnly"].Value);
         }
 
-        [EnableRateLimiting("auth")]
+        [EnableRateLimiting("auth-standard")]
         [HttpPost("resend-activation")]
         public async Task<IActionResult> ResendActivation([FromBody] ForgotPasswordModel model)
         {
@@ -166,7 +166,7 @@ namespace InitialAspireProject.ApiIdentity.Controllers
             return Ok(genericMessage);
         }
 
-        [EnableRateLimiting("auth")]
+        [EnableRateLimiting("auth-standard")]
         [HttpPost("confirm-email")]
         public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailModel model)
         {
@@ -181,7 +181,7 @@ namespace InitialAspireProject.ApiIdentity.Controllers
             return Ok(_localizer["EmailConfirmedSuccess"].Value);
         }
 
-        [EnableRateLimiting("auth")]
+        [EnableRateLimiting("auth-strict")]
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordModel model)
         {
@@ -206,7 +206,7 @@ namespace InitialAspireProject.ApiIdentity.Controllers
             return Ok(genericMessage);
         }
 
-        [EnableRateLimiting("auth")]
+        [EnableRateLimiting("auth-strict")]
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordModel model)
         {
@@ -252,7 +252,7 @@ namespace InitialAspireProject.ApiIdentity.Controllers
             return Ok(new LoginResponse { Token = token, RefreshToken = refreshToken });
         }
 
-        [EnableRateLimiting("auth")]
+        [EnableRateLimiting("auth-standard")]
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest model)
         {

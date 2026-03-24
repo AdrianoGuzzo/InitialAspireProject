@@ -22,9 +22,17 @@ public abstract class BffControllerBase : ControllerBase
         return Request.Headers.AcceptLanguage.ToString() is { Length: > 0 } lang ? lang : null;
     }
 
-    protected static async Task<IActionResult> ForwardResponse(HttpResponseMessage response)
+    protected async Task<IActionResult> ForwardResponse(HttpResponseMessage response)
     {
         var content = await response.Content.ReadAsStringAsync();
+
+        if (response.Headers.RetryAfter is not null)
+        {
+            Response.Headers.RetryAfter = response.Headers.RetryAfter.Delta.HasValue
+                ? ((int)response.Headers.RetryAfter.Delta.Value.TotalSeconds).ToString()
+                : response.Headers.RetryAfter.Date?.ToString("R");
+        }
+
         return new ContentResult
         {
             StatusCode = (int)response.StatusCode,

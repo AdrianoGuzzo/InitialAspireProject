@@ -223,6 +223,7 @@ namespace InitialAspireProject.ApiIdentity.Controllers
             return Ok(_localizer["PasswordResetSuccess"].Value);
         }
 
+        [EnableRateLimiting("auth-strict")]
         [HttpPost("google-login")]
         public async Task<IActionResult> GoogleLogin(
             [FromBody] GoogleLoginModel model,

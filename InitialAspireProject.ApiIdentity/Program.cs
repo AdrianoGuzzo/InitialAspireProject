@@ -84,13 +84,13 @@ builder.Services.AddRateLimiter(options =>
         limiter.QueueLimit = 0;
     });
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-    options.OnRejected = async (context, cancellationToken) =>
+    options.OnRejected = (context, _) =>
     {
         if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
         {
             context.HttpContext.Response.Headers.RetryAfter = ((int)retryAfter.TotalSeconds).ToString();
         }
-        await ValueTask.CompletedTask;
+        return ValueTask.CompletedTask;
     };
 });
 

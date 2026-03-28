@@ -1,8 +1,10 @@
 using InitialAspireProject.Bff.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using System.Threading.RateLimiting;
 
 internal class Program
 {
@@ -88,6 +90,41 @@ internal class Program
             });
         });
 
+        builder.Services.AddRateLimiter(options =>
+        {
+            options.AddPolicy("bff-auth-strict", httpContext =>
+                RateLimitPartition.GetSlidingWindowLimiter(
+                    partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                    factory: _ => new SlidingWindowRateLimiterOptions
+                    {
+                        Window = TimeSpan.FromMinutes(1),
+                        SegmentsPerWindow = 4,
+                        PermitLimit = 5,
+                        QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                        QueueLimit = 0
+                    }));
+            options.AddPolicy("bff-auth-standard", httpContext =>
+                RateLimitPartition.GetSlidingWindowLimiter(
+                    partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                    factory: _ => new SlidingWindowRateLimiterOptions
+                    {
+                        Window = TimeSpan.FromMinutes(1),
+                        SegmentsPerWindow = 4,
+                        PermitLimit = 15,
+                        QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                        QueueLimit = 0
+                    }));
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+            options.OnRejected = (context, _) =>
+            {
+                if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
+                {
+                    context.HttpContext.Response.Headers.RetryAfter = ((int)retryAfter.TotalSeconds).ToString();
+                }
+                return ValueTask.CompletedTask;
+            };
+        });
+
         builder.Services.AddHttpClient<IIdentityProxyService, IdentityProxyService>(
             client => client.BaseAddress = new Uri("https+http://apiidentity"));
         builder.Services.AddHttpClient<ICoreProxyService, CoreProxyService>(
@@ -105,6 +142,8 @@ internal class Program
         }
 
         app.UseCors();
+        app.UseForwardedHeaders();
+        app.UseRateLimiter();
 
         app.UseLocalizationDefaults();
         app.UseAuthentication();

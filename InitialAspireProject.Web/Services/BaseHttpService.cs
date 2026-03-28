@@ -8,6 +8,7 @@ namespace InitialAspireProject.Web.Services;
 
 public abstract class BaseHttpService(HttpClient httpClient, ILogger logger)
 {
+    protected const string TooManyRequestsMessage = "TooManyRequests";
     protected HttpClient HttpClient { get; } = httpClient;
 
     protected Task<ServiceResult> PostWithValidationAsync<T>(string url, T payload, CancellationToken cancellationToken = default)
@@ -19,7 +20,12 @@ public abstract class BaseHttpService(HttpClient httpClient, ILogger logger)
     {
         try
         {
-            await HttpClient.PostAsJsonAsync(url, payload, cancellationToken);
+            var response = await HttpClient.PostAsJsonAsync(url, payload, cancellationToken);
+            if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+            {
+                logger.LogWarning("Rate limited on {Url}", url);
+                return ServiceResult.Fail(TooManyRequestsMessage);
+            }
             return ServiceResult.Ok();
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
@@ -37,6 +43,11 @@ public abstract class BaseHttpService(HttpClient httpClient, ILogger logger)
 
             if (!response.IsSuccessStatusCode)
             {
+                if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+                {
+                    logger.LogWarning("Rate limited on {Url}", url);
+                    return ServiceResult.Fail(TooManyRequestsMessage);
+                }
                 var body = await response.Content.ReadAsStringAsync(cancellationToken);
                 logger.LogError("Request to {Url} failed: {Response}", url, body);
                 return ServiceResult.Fail(body);
@@ -66,6 +77,12 @@ public abstract class BaseHttpService(HttpClient httpClient, ILogger logger)
 
             if (!response.IsSuccessStatusCode)
             {
+                if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+                {
+                    logger.LogWarning("Rate limited on {Url}", url);
+                    return ServiceResult.Fail(TooManyRequestsMessage);
+                }
+
                 string? message;
                 try
                 {

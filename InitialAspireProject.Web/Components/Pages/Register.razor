@@ -205,6 +205,12 @@
 				registerModel.Email,
 				registerModel.Password);
 
+			if (result.Message == "TooManyRequests")
+			{
+				message = L["TooManyRequestsMsg"].Value;
+				return;
+			}
+
 			success = result.Success;
 			message = result.Success
 				? L["RegisterSuccessCheckEmail"].Value

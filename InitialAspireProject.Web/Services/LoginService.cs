@@ -19,6 +19,9 @@ namespace InitialAspireProject.Web.Services
 
             if (!response.IsSuccessStatusCode)
             {
+                if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+                    return new LoginResult { ErrorCode = "TooManyRequests" };
+
                 var errorBody = await response.Content.ReadFromJsonAsync<LoginErrorResponse>(cancellationToken: cancellationToken);
                 return new LoginResult { ErrorCode = errorBody?.Code };
             }

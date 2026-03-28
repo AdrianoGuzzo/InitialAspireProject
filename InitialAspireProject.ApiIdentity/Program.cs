@@ -67,14 +67,37 @@ builder.Services.AddAuthorization(options => options.AddPermissionPolicies());
 
 builder.Services.AddRateLimiter(options =>
 {
-    options.AddFixedWindowLimiter("auth", limiter =>
-    {
-        limiter.Window = TimeSpan.FromMinutes(1);
-        limiter.PermitLimit = 10;
-        limiter.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-        limiter.QueueLimit = 0;
-    });
+    options.AddPolicy("auth-strict", httpContext =>
+        RateLimitPartition.GetSlidingWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new SlidingWindowRateLimiterOptions
+            {
+                Window = TimeSpan.FromMinutes(1),
+                SegmentsPerWindow = 4,
+                PermitLimit = 5,
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = 0
+            }));
+    options.AddPolicy("auth-standard", httpContext =>
+        RateLimitPartition.GetSlidingWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new SlidingWindowRateLimiterOptions
+            {
+                Window = TimeSpan.FromMinutes(1),
+                SegmentsPerWindow = 4,
+                PermitLimit = 15,
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = 0
+            }));
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.OnRejected = (context, _) =>
+    {
+        if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
+        {
+            context.HttpContext.Response.Headers.RetryAfter = ((int)retryAfter.TotalSeconds).ToString();
+        }
+        return ValueTask.CompletedTask;
+    };
 });
 
 builder.Services.AddControllers();
@@ -135,6 +158,7 @@ else
 }
 
 app.UseRouting();
+app.UseForwardedHeaders();
 app.UseRateLimiter();
 app.UseLocalizationDefaults();
 app.UseAuthentication();

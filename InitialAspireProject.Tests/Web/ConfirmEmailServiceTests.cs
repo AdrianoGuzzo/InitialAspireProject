@@ -71,6 +71,30 @@ public class ConfirmEmailServiceTests
         Assert.Contains("Erro de conexão", result.Message);
     }
 
+    [Fact]
+    public async Task ConfirmEmailAsync_Returns429_ReturnsFailWithTooManyRequests()
+    {
+        var handler = new StubHttpHandler(HttpStatusCode.TooManyRequests, "");
+        var service = CreateService(handler);
+
+        var result = await service.ConfirmEmailAsync("user@test.com", "token", TestContext.Current.CancellationToken);
+
+        Assert.False(result.Success);
+        Assert.Equal("TooManyRequests", result.Message);
+    }
+
+    [Fact]
+    public async Task ResendActivationAsync_Returns429_ReturnsFailWithTooManyRequests()
+    {
+        var handler = new StubHttpHandler(HttpStatusCode.TooManyRequests, "");
+        var service = CreateService(handler);
+
+        var result = await service.ResendActivationAsync("user@test.com", TestContext.Current.CancellationToken);
+
+        Assert.False(result.Success);
+        Assert.Equal("TooManyRequests", result.Message);
+    }
+
     private sealed class StubHttpHandler(HttpStatusCode statusCode, string body) : HttpMessageHandler
     {
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)

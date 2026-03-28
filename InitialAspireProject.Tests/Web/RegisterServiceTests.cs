@@ -71,6 +71,18 @@ public class RegisterServiceTests
         Assert.Equal("Erro de conexão. Tente novamente mais tarde.", result.Message);
     }
 
+    [Fact]
+    public async Task RegisterAsync_Returns429_ReturnsFailWithTooManyRequests()
+    {
+        var handler = new StubHttpHandler(HttpStatusCode.TooManyRequests, "");
+        var service = CreateService(handler);
+
+        var result = await service.RegisterAsync("john@example.com", "Password123$", TestContext.Current.CancellationToken);
+
+        Assert.False(result.Success);
+        Assert.Equal("TooManyRequests", result.Message);
+    }
+
     private sealed class StubHttpHandler(HttpStatusCode statusCode, string body) : HttpMessageHandler
     {
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)

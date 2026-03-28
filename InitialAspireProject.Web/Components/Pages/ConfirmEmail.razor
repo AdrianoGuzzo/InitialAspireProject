@@ -123,6 +123,12 @@
 		}
 
 		var result = await ConfirmEmailService.ConfirmEmailAsync(email, token);
+		if (result.Message == "TooManyRequests")
+		{
+			errorMessage = L["TooManyRequestsMsg"].Value;
+			isLoading = false;
+			return;
+		}
 		if (result.Success)
 			success = true;
 		else

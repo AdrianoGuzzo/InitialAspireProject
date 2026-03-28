@@ -92,22 +92,28 @@ internal class Program
 
         builder.Services.AddRateLimiter(options =>
         {
-            options.AddSlidingWindowLimiter("bff-auth-strict", limiter =>
-            {
-                limiter.Window = TimeSpan.FromMinutes(1);
-                limiter.SegmentsPerWindow = 4;
-                limiter.PermitLimit = 5;
-                limiter.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-                limiter.QueueLimit = 0;
-            });
-            options.AddSlidingWindowLimiter("bff-auth-standard", limiter =>
-            {
-                limiter.Window = TimeSpan.FromMinutes(1);
-                limiter.SegmentsPerWindow = 4;
-                limiter.PermitLimit = 15;
-                limiter.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-                limiter.QueueLimit = 0;
-            });
+            options.AddPolicy("bff-auth-strict", httpContext =>
+                RateLimitPartition.GetSlidingWindowLimiter(
+                    partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                    factory: _ => new SlidingWindowRateLimiterOptions
+                    {
+                        Window = TimeSpan.FromMinutes(1),
+                        SegmentsPerWindow = 4,
+                        PermitLimit = 5,
+                        QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                        QueueLimit = 0
+                    }));
+            options.AddPolicy("bff-auth-standard", httpContext =>
+                RateLimitPartition.GetSlidingWindowLimiter(
+                    partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                    factory: _ => new SlidingWindowRateLimiterOptions
+                    {
+                        Window = TimeSpan.FromMinutes(1),
+                        SegmentsPerWindow = 4,
+                        PermitLimit = 15,
+                        QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                        QueueLimit = 0
+                    }));
             options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
             options.OnRejected = (context, _) =>
             {
@@ -136,6 +142,7 @@ internal class Program
         }
 
         app.UseCors();
+        app.UseForwardedHeaders();
         app.UseRateLimiter();
 
         app.UseLocalizationDefaults();
